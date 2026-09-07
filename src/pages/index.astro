@@ -1,0 +1,52 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import NavDrawer from "../components/NavDrawer.tsx";
+import ContactForm from "../components/ContactForm.tsx";
+---
+
+<BaseLayout title="Home">
+  <header>
+    <nav>
+      <a href="/" aria-label="House of Guards home">House of Guards</a>
+      <NavDrawer client:load />
+    </nav>
+  </header>
+
+  <main>
+    <section data-reveal>
+      <h1>Discreet, professional security. Nationwide.</h1>
+      <p>
+        House of Guards provides manned guarding, event security, close
+        protection, and mobile patrols for corporate and high-net-worth
+        clients across the UK.
+      </p>
+    </section>
+
+    <section data-reveal>
+      <h2>Services</h2>
+      <ul>
+        <li>Manned guarding</li>
+        <li>Event security</li>
+        <li>Close protection</li>
+        <li>Mobile patrols</li>
+      </ul>
+    </section>
+
+    <section id="contact" data-reveal>
+      <h2>Enquire</h2>
+      <ContactForm client:visible />
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; {new Date().getFullYear()} House of Guards. All rights reserved.</p>
+  </footer>
+
+  <script>
+    import { initScrollReveal } from "../lib/scrollReveal";
+
+    document.addEventListener("astro:page-load", () => {
+      initScrollReveal();
+    });
+  </script>
+</BaseLayout>

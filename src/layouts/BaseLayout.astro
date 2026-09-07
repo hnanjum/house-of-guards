@@ -1,0 +1,37 @@
+---
+import { ClientRouter } from "astro:transitions";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = "House of Guards — professional manned guarding, event security, close protection, and mobile patrols for corporate and high-net-worth clients across the UK.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content={description} />
+    <title>{title} | House of Guards</title>
+    <ClientRouter />
+  </head>
+  <body>
+    <slot />
+    <script>
+      import { initSmoothScroll } from "../lib/smoothScroll";
+
+      // Re-run on every hard load and every View Transitions navigation.
+      document.addEventListener("astro:page-load", () => {
+        initSmoothScroll();
+      });
+    </script>
+  </body>
+</html>

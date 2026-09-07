@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/*
+ * All of Tailwind's default color palette is removed below (`--color-*: initial`).
+ * This is intentional: no default Tailwind color (slate, blue, red, etc.) should be
+ * usable anywhere in this project. A custom token system for House of Guards
+ * (brand colors, spacing, type scale, etc.) will be added here as CSS variables
+ * inside this same `@theme` block. Until then, no color utility classes
+ * (bg-*, text-*, border-*, etc.) will resolve to anything.
+ */
+@theme {
+  --color-*: initial;
+}
