@@ -20,11 +20,13 @@ import ClosingCta from "../components/home/ClosingCta.astro";
     import { initHeroMuster } from "../lib/heroMuster";
     import { initScrollReveal } from "../lib/scrollReveal";
     import { initServicesGridReveal } from "../lib/servicesGridReveal";
+    import { initMissionReveal } from "../lib/missionReveal";
 
     document.addEventListener("astro:page-load", () => {
       initHeroMuster();
       initScrollReveal();
       initServicesGridReveal();
+      initMissionReveal();
     });
   </script>
 </BaseLayout>

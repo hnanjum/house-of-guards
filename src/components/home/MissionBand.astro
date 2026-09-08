@@ -1,23 +1,235 @@
 ---
+import { Image } from "astro:assets";
+import Button from "../ui/Button.astro";
+import missionTeam from "../../assets/mission/mission-team.png";
+
 /**
- * The second required bold section — full-bleed Guard Green Deep,
- * white Fraunces text. One of the two sanctioned centered-alignment
- * exceptions (a pull-quote-style moment), not a routine section head,
- * which is why this is hand-styled from the type-scale utilities
- * directly rather than through SectionHeading (which is deliberately
- * left-aligned-only and Ink-only for every routine heading on the
- * site).
+ * FULL REBUILD, not a restyle of an equivalent existing structure — read
+ * this before assuming the six pieces below already existed in some
+ * form. The PREVIOUS `MissionBand.astro` was a single centred pull-quote
+ * on a solid Guard Green Deep fill (one italic `<h1>`-scale line + one
+ * supporting sentence, both `text-paper`, no image, no caption, no
+ * button, no two-column layout). None of the six pieces the brief
+ * described as "existing structure, just restyle" — the "OUR MISSION"
+ * caption, the "Meeting your needs, to excellence" headline, the
+ * underline rule, a two-column image+text grid, and a "More about us"
+ * button — were actually present anywhere in this codebase or in this
+ * project's own external reference notes before this pass (confirmed
+ * via a full repo grep and a `git log -S` search for each exact
+ * phrase before writing anything, not assumed). Flagged plainly at the
+ * time rather than silently building net-new content under a "restyle"
+ * label; the two body paragraphs below ARE the previous version's own
+ * two sentences, carried over as closely as the new layout allows (see
+ * CONTENT note below) — that's the one piece of continuity that's real.
+ *
+ * BACKGROUND — plain Paper (white), no colour fill at all. A deliberate
+ * pacing choice, not an oversight: Hero/StatStrip/Services are all
+ * coloured (Electric Blue/Magenta/Amber), so this section is the "pause"
+ * on white before Sectors/Closing CTA. Guard Green Deep — this
+ * section's own fill since the very first build — is retired from here
+ * as a result. See the RETIREMENT note at the bottom of this comment for
+ * the full "is the token still needed anywhere" accounting; short
+ * version: yes, one dormant reference elsewhere, not deleted.
+ *
+ * CONTENT, kept per explicit instruction not to simplify or remove
+ * anything the brief listed — six pieces, in DOM/reading order: "OUR
+ * MISSION" caption → headline → underline rule → two body paragraphs →
+ * "More about us" button.
+ *
+ * "OUR MISSION" — REAL, DIRECT HARD-RULE OVERRIDE, not an oversight.
+ * CLAUDE.md's own hard rules ban "tracked-out ALL-CAPS eyebrow labels
+ * above headings," naming "OUR MISSION" as the literal example of what's
+ * banned. The brief asked for exactly that label, verbatim, by explicit
+ * direct instruction — per that same hard-rules section's own stated
+ * exception clause ("do not violate these... unless the user explicitly
+ * overrides one"), this qualifies. CLAUDE.md's rule text is updated in
+ * this same commit (a second, scoped, MissionBand-only exception,
+ * mirroring how the ServicesGrid card-grid and Amber/Electric-Blue
+ * exceptions were both handled — build the exception, then keep the
+ * doc and the code in agreement) — don't read the rule in isolation and
+ * assume this is a mistake sitting on top of it.
+ *
+ * The two BODY PARAGRAPHS are the previous version's own two sentences,
+ * carried over — with one small, disclosed edit: the first sentence was
+ * previously wrapped in literal curly-quote characters as a pull-quote
+ * ("Give clients complete peace of mind…"); those quote marks are typo-
+ * graphic punctuation belonging to the OLD centred-pull-quote framing,
+ * not part of the sentence itself, and read oddly on a plain declarative
+ * paragraph in a two-column layout — stripped here, the sentence itself
+ * is otherwise byte-for-byte unchanged. The second sentence is carried
+ * over verbatim, no edit at all.
+ *
+ * IMAGE — new asset, `src/assets/mission/mission-team.png` (1536×1024,
+ * confirmed via `sharp` metadata, not guessed), following the exact
+ * placement convention `hero-officer.png` already established
+ * (`src/assets/<section>/<name>.png`, imported and rendered through
+ * `astro:assets`' `<Image />` for responsive webp generation — never a
+ * plain `<img src={...}>`). AI-generated (not a photograph of real House
+ * of Guards staff) — noted here for provenance/transparency only, not
+ * as a "placeholder, ask before final" flag: this is the real, final
+ * asset for this section per direct instruction, the same status
+ * `hero-officer.png` already has, not one of the still-placeholder
+ * Picsum photos `SectorsStrip.astro` flags with that exact caveat.
+ *
+ * REAL GEOMETRY, checked not guessed (same discipline `Hero.astro`'s own
+ * comment already established for its own photo) — the four officers
+ * stand shoulder-to-shoulder across nearly the full frame width: cropped
+ * left/right edge strips (0–220px and 1316–1536px of the 1536px-wide
+ * source) confirmed the leftmost officer's body starts at roughly
+ * x≈70–90px (≈5–6%) and the rightmost officer's arm extends to roughly
+ * x≈1446–1466px (≈95%), leaving only ~5% of true margin on EITHER side.
+ * This rules out the tall/narrow portrait crop a two-column image
+ * column might otherwise default to — even a modest symmetric crop
+ * (e.g. toward a 4:3 box) would already cut into an officer's arm on
+ * both edges. The image is therefore rendered at its own real native
+ * ratio, `aspect-[3/2]` (1536:1024 = 1.5 exactly), uncropped — object-
+ * cover at this exact matching ratio performs no crop at all, it's
+ * there purely as a robustness net against any future sub-pixel
+ * rounding, not because cropping is actually happening. A landscape
+ * image column is therefore a genuine, checked constraint of the source
+ * photo, not a layout choice fought against it.
+ *
+ * LAYOUT — the proven two-column grid, kept exactly as asked
+ * (`grid-cols-1 md:grid-cols-2`, image first in DOM/first column, text
+ * second — stacks to a single column on mobile with the image on top,
+ * matching the DOM order rather than introducing a reordering utility
+ * for a stacking direction the brief never specified). `md:items-center`
+ * vertically balances the two columns against each other. The "premium
+ * upgrade" is deliberately NOT a new layout — see MOTION below for
+ * where that actually comes from.
+ *
+ * ALIGNMENT — LEFT-aligned within the text column, at every breakpoint,
+ * including mobile. This is a REAL, DELIBERATE change to a standing hard
+ * rule, not an accidental drift the brief asked to be caught: CLAUDE.md
+ * previously named this section as one of exactly two sanctioned
+ * centred-alignment exceptions sitewide (the old pull-quote WAS centred,
+ * `text-center` on its wrapper). That's gone now that this is a routine
+ * left-aligned text column next to an image, the same register every
+ * other section on the page uses — CLAUDE.md's hard rule is updated in
+ * this same commit to drop MissionBand from that list (down to exactly
+ * one exception, ClosingCta), matching this file's own established
+ * "when a rule changes, update the rule text in the same commit" habit
+ * (see the rule's own history note about StatStrip's brief third
+ * exception for the precedent this follows).
+ *
+ * COLOUR — three real pairings, one of them a genuine, disclosed
+ * concern worth reading in full, not glossed over:
+ *   - Body text: Ink on Paper, ~19.44:1 (AAA) — the sitewide default,
+ *     no new computation needed, restated here only for completeness
+ *     with every other pairing on this page.
+ *   - Button: `<Button href="/about">More about us</Button>` — the
+ *     UNMODIFIED `primary` variant (Amber fill, Ink text, ~9.05:1 AAA),
+ *     the exact same component every other primary CTA on the site
+ *     uses, not a one-off style. See `Button.astro`'s own comment for
+ *     the full derivation.
+ *   - Caption + underline rule: Amber. The underline (a decorative,
+ *     non-text 2px bar) reuses the ALREADY-REVIEWED-AND-ACCEPTED
+ *     bare-mark-on-Paper pairing (`NavLink.astro`'s own active
+ *     underline, ~2.15:1, below the 3:1 WCAG 1.4.11 floor, explicitly
+ *     confirmed as a kept tradeoff in PR #18) — consistent precedent,
+ *     not a new problem. **The CAPTION TEXT is a genuinely NEW and
+ *     MORE SEVERE issue, flagged here plainly rather than assumed
+ *     equivalent to the underline**: this is the SAME two colours
+ *     (Amber vs Paper, ~2.15:1 — contrast is a pure function of the two
+ *     colours, unaffected by what renders them), but text needs the
+ *     4.5:1 normal-text floor (or 3:1 at large-text sizes, which
+ *     `text-caption` at 14px/500 doesn't qualify for, checked the same
+ *     way ServicesGrid's own body-text pass already checked this exact
+ *     threshold question — nowhere close either way), a materially
+ *     STRICTER bar than the 3:1 non-text floor the underline only has
+ *     to clear. ~2.15:1 fails BOTH floors, and unlike the underline,
+ *     no prior review has ever accepted Amber as an actual TEXT colour
+ *     anywhere on this site — every existing Amber use is either a
+ *     button fill (Ink text sits ON TOP of it) or a bare decorative
+ *     mark. Shipped per the explicit "Caption label… Amber" instruction
+ *     — not silently treated as fine. Flagged prominently in the PR
+ *     description for a real decision, the same way Hero's thin scrim
+ *     margin and NavLink's own underline were both flagged and then
+ *     explicitly resolved by the user in PR #17/#18, rather than
+ *     assumed acceptable by default.
+ *
+ * MOTION — this section's real "premium upgrade." See
+ * `src/lib/missionReveal.ts`'s own comment for the full mechanism
+ * (image: pure clip-path vertical unveil, no opacity change; text: a
+ * five-beat staggered fade+rise on one shared GSAP `stagger`, same
+ * mechanism `heroMuster.ts` already uses). The two body paragraphs
+ * share ONE `[data-mission-reveal]` wrapper (one reveal beat, not two)
+ * — the brief's own reading-order list names "paragraphs" once, plural,
+ * as a single step between the underline and the button, not "paragraph
+ * one, then paragraph two" as two separate steps, so this reads as
+ * five sequential beats (caption, headline, rule, paragraphs together,
+ * button), matching that list exactly rather than inventing a sixth.
+ * New, dedicated module — not bolted onto `scrollReveal.ts`'s existing
+ * fade/rise (this needed a genuinely different clip-path MECHANISM for
+ * the image, which that module has no concept of) and not a copy of
+ * `servicesGridReveal.ts`'s own per-card-independent-trigger shape
+ * (this section has one shared trigger for its whole text column, not
+ * six independent ones) — see that module's own comment for why one
+ * shared GSAP `stagger` is the correct tool here, not a hand-rolled
+ * per-element delay.
+ *
+ * RETIREMENT — Guard Green Deep is now retired from every homepage
+ * section (Header/Hero/StatStrip/ServicesGrid were already retired in
+ * the earlier rebrand; this section is the last one that still used it,
+ * confirmed via grep after this edit that the bare, no-modifier Guard
+ * Green Deep fill class no longer appears in ANY `.astro` component's
+ * real rendered markup — this sentence deliberately doesn't spell that
+ * exact class name out as one contiguous backtick-quoted token, since
+ * it's now genuinely orphaned and this file's own comments are Tailwind-
+ * scanned; see the dead-CSS-from-comments standing convention in
+ * CLAUDE.md). The TOKEN ITSELF still has to stay defined in
+ * `global.css` — it is NOT
+ * safe to delete: `Button.astro`'s dormant `secondary` variant still
+ * has a real, literal `hover:bg-guard-green-deep` class string in its
+ * own source. That variant has zero call sites anywhere on the site (so
+ * nothing actually RENDERS this colour today), but the class name still
+ * exists in scanned source, which is all Tailwind's build-time scanner
+ * cares about — deleting the theme token would silently break that
+ * dormant variant's compiled CSS the moment it's ever activated. See
+ * CLAUDE.md's own updated SCOPE note for the full, current accounting
+ * of both Guard Green tokens now that this section no longer uses
+ * either one.
  */
 ---
 
-<section class="on-dark bg-guard-green-deep">
-  <div class="mx-auto max-w-4xl px-gutter py-24 text-center md:px-12 md:py-32">
-    <p class="text-h1 text-paper italic">
-      "Give clients complete peace of mind, while we keep watch."
-    </p>
-    <p class="text-body-lg text-paper/70 mx-auto mt-8 max-w-xl">
-      Our aim is to become a leading supplier of close protection and
-      guarding services across the North West and Yorkshire.
-    </p>
+<section class="bg-paper">
+  <div class="mx-auto max-w-7xl px-gutter py-24 md:px-12 md:py-32">
+    <div class="grid grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16 lg:gap-20">
+      <div class="aspect-[3/2] overflow-hidden">
+        <Image
+          src={missionTeam}
+          alt="Four House of Guards officers standing together on a city street, backs to camera, wearing branded security jackets"
+          class="h-full w-full object-cover"
+          data-mission-image
+          widths={[400, 600, 768, 1024, 1536]}
+          sizes="(min-width: 768px) 50vw, 100vw"
+          format="webp"
+          quality={82}
+          loading="lazy"
+        />
+      </div>
+
+      <div class="text-left">
+        <p data-mission-reveal class="text-caption text-amber uppercase tracking-[0.14em]">Our mission</p>
+
+        <h2 data-mission-reveal class="text-h2 text-ink mt-4">Meeting your needs, to excellence</h2>
+
+        <span data-mission-reveal aria-hidden="true" class="mt-5 block h-0.5 w-12 bg-amber"></span>
+
+        <div data-mission-reveal class="mt-6 space-y-4">
+          <p class="text-body text-ink max-w-md">
+            Give clients complete peace of mind, while we keep watch.
+          </p>
+          <p class="text-body text-ink max-w-md">
+            Our aim is to become a leading supplier of close protection and
+            guarding services across the North West and Yorkshire.
+          </p>
+        </div>
+
+        <div data-mission-reveal class="mt-8">
+          <Button href="/about">More about us</Button>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
