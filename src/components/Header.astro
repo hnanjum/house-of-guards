@@ -1,30 +1,45 @@
 ---
 import NavLink from "./ui/NavLink.astro";
 import Button from "./ui/Button.astro";
-import Divider from "./ui/Divider.astro";
 import Phone from "../icons/Phone.astro";
 import Location from "../icons/Location.astro";
 import NavDrawer from "./NavDrawer.tsx";
 
 /**
- * Site header. Two bars, both Paper/white — this is a deliberate
- * departure from the old solid Guard Green fill (see the design-system
- * note in global.css on why Guard Olive can't carry that role: white
- * text on it is only ~3.11:1, well under AA).
+ * Site header. Two bars: a solid Guard Olive Bright info bar, then a
+ * Paper/white sticky main nav — a deliberate departure from the old
+ * single solid Guard Green fill (see the design-system note in
+ * global.css on why the shared Guard Olive token can't carry that
+ * role on its own: white text on it is only ~3.11:1, well under AA).
  *
- * 1. Info bar — Stone (muted grey) text, not Ink and not Guard Olive.
- *    Olive was considered and rejected: at this text's size (12–14px)
- *    Olive-on-Paper is only ~3.11:1, under the 4.5:1 AA floor for
- *    running text (see the house rule in global.css — Olive never
- *    carries text on Paper). Stone is the token this codebase already
- *    defines for exactly this role ("secondary text... captions, meta,
- *    credential lines") and measures ~4.6:1, a real if modest AA pass;
- *    darkens to Ink on hover for a bit of extra presence on the one
- *    interactive item (the phone link). Phone + address, small line
- *    icons matching the existing icon set's stroke weight. Not sticky
+ * 1. Info bar — solid Guard Olive Bright fill, Ink text/icons (~8.21:1,
+ *    AAA — see the token's own comment in global.css for why this is a
+ *    genuinely different, lighter shade from the shared Guard Olive
+ *    token used everywhere else, not the same colour restated).
+ *    Superseded, kept only as history: an earlier pass here used a
+ *    Paper background with Stone text (~4.6:1, AA) — that reasoning
+ *    doesn't apply any more now the fill itself is Olive Bright, not
+ *    Paper.
+ *    Always a single row (`flex`, never stacks) — phone + address sit
+ *    on one line at every width, centered on mobile (`justify-center`,
+ *    where there's no wordmark/nav alongside it to align against) and
+ *    left-aligned from `sm:` up (`sm:justify-start`, matching the nav
+ *    bar's own left edge below it). Real per-glyph width measurements
+ *    against the actual Montserrat font file (not eyeballed) confirmed
+ *    both strings already fit on one line at 375/390px at the existing
+ *    icon/text sizes with real margin to spare (~28–43px slack even at
+ *    a comfortable `gap-4` between them) — no further shrink needed;
+ *    text/icon sizing is unchanged from before. Small line icons
+ *    matching the existing icon set's stroke weight. Not sticky
  *    (scrolls away with the page) — a persistent presence here would
  *    eat vertical space on every scroll position for content that only
  *    matters at the top of the page.
+ *    No divider below it any more (was a plain hairline `<hr>`) — with
+ *    a solid Olive-Bright fill giving way to the Paper nav bar below,
+ *    the colour change itself is the boundary, same reasoning the
+ *    sticky nav bar's own `border-b` comment below already establishes
+ *    for the opposite case (no colour change = a line is needed; a
+ *    real colour change = it isn't).
  * 2. Main nav bar — wordmark left, a single (links + CTA) cluster
  *    right, sticky at the top on scroll. The links and the CTA are
  *    grouped into one flex block rather than being 3 separate
@@ -41,6 +56,27 @@ import NavDrawer from "./NavDrawer.tsx";
  *    page below is gone now that both are Paper — without a line, a
  *    pinned sticky bar would visually vanish into whatever scrolls
  *    underneath it.
+ *    Row vertical padding is `py-2.5`, not the more generous `py-4` an
+ *    earlier pass used — diagnosed via the actual box model (Tailwind's
+ *    spacing scale is deterministic, no live render needed to compute
+ *    it) before touching anything, not guessed: text-caption's own
+ *    line-height (1.5) gives NavLink a ~25px box (21px line + the
+ *    link's own 2px underline-gap padding + 2px border), while the
+ *    Button — same 21px text line-height, but its own `py-2.5` padding
+ *    — is ~41px tall. `items-center` centers everything in the row on
+ *    the TALLEST item, which is the Button (or, below `lg`, the 44px
+ *    hamburger trigger) — so the row's own `py-*` is the ONLY visible
+ *    gap around it either way. At the old `py-4` (16px/side) that was
+ *    ~39% of the Button's own height per side, and — the actual
+ *    reported symptom — visibly obvious specifically around the
+ *    Button's own hard-edged fill, where a plain NavLink has no
+ *    rendered box edge for the same padding to read against at all.
+ *    `py-2.5` (10px/side, ~24% of the Button's height) keeps real
+ *    breathing room without the "floating in a frame" look. This was a
+ *    padding-amount problem, not a misalignment one — `items-center`
+ *    itself was already correct, and growing the Button back up would
+ *    have undone the earlier "make it smaller" pass, so neither of
+ *    those was the fix.
  *
  * Neither bar carries `on-dark` any more — Paper backgrounds use the
  * default Ink focus ring, which is already the safe choice here.
@@ -61,28 +97,26 @@ import NavDrawer from "./NavDrawer.tsx";
 ---
 
 <header>
-  <div class="bg-paper">
+  <div class="bg-guard-olive-bright">
     <div
-      class="mx-auto flex flex-col gap-1.5 px-gutter py-2 sm:flex-row sm:items-center sm:gap-8 sm:py-2.5 md:px-12"
+      class="mx-auto flex items-center justify-center gap-4 px-gutter py-2 sm:justify-start sm:gap-8 sm:py-2.5 md:px-12"
     >
       <a
         href="tel:+441274000000"
-        class="text-micro text-stone hover:text-ink flex items-center gap-2 transition-colors duration-200 ease-out sm:text-caption"
+        class="text-micro text-ink hover:text-ink/70 flex items-center gap-2 transition-colors duration-200 ease-out sm:text-caption"
       >
         <Phone class="size-3.5 shrink-0 sm:size-4" />
         01274 000 000
       </a>
-      <p class="text-micro text-stone flex items-center gap-2 sm:text-caption">
+      <p class="text-micro text-ink flex items-center gap-2 sm:text-caption">
         <Location class="size-3.5 shrink-0 sm:size-4" />
         Bradford, West Yorkshire
       </p>
     </div>
   </div>
 
-  <Divider class="w-full" />
-
   <div class="border-hairline sticky top-0 z-30 border-b bg-paper">
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-gutter py-4 md:px-12">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-gutter py-2.5 md:px-12">
       <a href="/" class="text-wordmark text-ink shrink-0">House of Guards</a>
 
       <div class="hidden items-center gap-6 lg:flex">

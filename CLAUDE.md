@@ -30,26 +30,33 @@ every component reaches for a named token class (`bg-ink`, `text-stone`,
 
 | Token | Hex | Role |
 |---|---|---|
-| `ink` | `#0D0D0D` | Near-black text, `secondary` button fill, icon strokes |
+| `ink` | `#0D0D0D` | Near-black text, `secondary` button fill, icon strokes, the default focus ring |
 | `paper` | `#FFFFFF` | The default background everywhere; also the text colour on every dark fill below |
-| `guard-green` | `#0F3D2E` | **The bold accent** — header fill, `primary` button fill, the stat-strip band. Not restrained: used deliberately as a bold surface colour, not just a hairline detail |
-| `guard-green-deep` | `#081F18` | A darker shade of the same accent (never a second colour) — the mission-band fill, and the hover state for both `primary`/`secondary` buttons |
+| `guard-olive` | `#8A9A2E` | **The accent** — `primary` button fill, header active-nav-link underline, icon/border accents. Ink text on it: ~6.24:1 (AA). Never used as running text on Paper (~3.11:1, fails AA) — see the full house rule in `global.css`'s own token comment |
+| `guard-olive-bright` | `#A7AF4A` | A distinct, lighter olive used only for the header info bar's full-bar background. Ink on it: ~8.21:1 (AAA). Do not use for anything but that one background fill — Paper/white text or icon on it fails even the 3:1 non-text floor (~2.37:1), and Ink-on-it-as-a-Paper-background-accent also fails (~2.37:1, same math, wrong direction) |
+| `guard-green-deep` | `#081F18` | An independent dark, near-black-green surface — the fallback wherever Guard Olive's lighter fills can't carry white text (the mission-band pull-quote, `primary`/`secondary` button hover) |
 | `stone` | `#6E6E6E` | Secondary text on Paper only (captions, meta, credential lines). ~4.6:1 on white — 14px and above only |
 | `hairline` | `#E4E4E4` | Borders/rules/seams on Paper. Perfectly neutral (R=G=B) — never a warm greige |
 | `footer-grey` | `#2A2A2A` | The footer's own dark neutral. Distinct from `ink` and both greens on purpose, so the footer reads as its own zone rather than a third green band or a slide into black |
 
 All colour-on-background pairings above have been checked against WCAG
-AA by actual relative-luminance calculation (not eyeballed) and clear it
-with margin — white text on `guard-green`/`guard-green-deep`/
-`footer-grey` all land at 12–17:1. If a new pairing is ever introduced,
+AA by actual relative-luminance calculation (not eyeballed) — white
+text on `guard-green-deep`/`footer-grey` lands at 17–14:1 (AAA); Ink on
+`guard-olive`/`guard-olive-bright` lands at 6.24:1/8.21:1 (AA/AAA). If
+a new pairing is ever introduced,
 verify it the same way before shipping it, don't assume.
 
-**A real trap already hit once**: a Guard Green focus ring is invisible
-against a Guard Green background. Any section with a bold/dark fill
-(header, footer, the stat strip, the mission band) carries an `.on-dark`
-class, which swaps the keyboard-focus ring to white for itself and every
-descendant (see `global.css`). Apply `.on-dark` to any *new* bold-fill
-section too — it won't happen automatically.
+**A real trap already hit once, and the fix it led to**: the original
+default focus ring colour was the accent itself (then Guard Green) —
+invisible against a same-coloured fill. The default `:focus-visible`
+ring is now **Ink** instead (safe against Paper and against Guard
+Olive, ~19:1 and ~6.24:1 respectively — no swap needed for either).
+`.on-dark` (swaps the ring to white) is reserved for genuinely *dark*
+fills only — currently just the Footer, plus Guard Green Deep if a
+future section uses it as a background. Do **not** add `.on-dark` to a
+Guard-Olive-filled section (StatStrip, the info bar) — an Ink ring
+already clears the 3:1 floor there on its own, and a white ring would
+actually be a *thinner* margin (~3.11:1) than Ink's own default.
 
 **Type** — two typefaces, both self-hosted via `@fontsource`/
 `@fontsource-variable`, **never** the Google Fonts CDN:
