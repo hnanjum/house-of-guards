@@ -1,0 +1,28 @@
+---
+import Button from "../ui/Button.astro";
+import SectionHeading from "../ui/SectionHeading.astro";
+
+/**
+ * The closing CTA, right before the footer — kept on Paper rather than
+ * a third green band, so the page doesn't turn into a green wash (two
+ * bold sections already satisfies the brief). Distinctness comes from
+ * layout, not colour: this is the second of the two sanctioned
+ * centered-alignment exceptions ("the final footer CTA line"),
+ * against a left-aligned page throughout.
+ */
+---
+
+<section class="bg-paper">
+  <div class="mx-auto max-w-2xl px-gutter py-24 text-center md:px-12">
+    <SectionHeading level="h2" align="center">Ready to talk about your requirement?</SectionHeading>
+    <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+      <Button href="/contact">Get a Quote</Button>
+      <a
+        href="tel:+441274000000"
+        class="text-body text-ink underline decoration-transparent underline-offset-4 transition-colors duration-200 ease-out hover:decoration-guard-olive"
+      >
+        01274 000 000
+      </a>
+    </div>
+  </div>
+</section>

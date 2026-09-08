@@ -1,11 +1,15 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHeading from "../components/ui/SectionHeading.astro";
+import Button from "../components/ui/Button.astro";
 ---
 
 <BaseLayout title="Page not found">
-  <main>
-    <h1>404 — Page not found</h1>
-    <p>The page you're looking for doesn't exist.</p>
-    <a href="/">Return home</a>
-  </main>
+  <div class="mx-auto max-w-7xl px-gutter py-24 md:px-12">
+    <SectionHeading level="h1">404 — Page not found</SectionHeading>
+    <p class="text-body-lg text-stone mt-6 max-w-xl">
+      The page you're looking for doesn't exist.
+    </p>
+    <Button href="/" class="mt-8">Return home</Button>
+  </div>
 </BaseLayout>

@@ -1,0 +1,28 @@
+---
+/**
+ * Functional footer icon only — not a brand mark. Deliberately breaks
+ * the service marks' square/miter rule (rounded caps/circles here
+ * instead) because it needs to read instantly as the universal
+ * telephone pictogram; forcing it into the brand's harder geometric
+ * language would cost recognisability for no real benefit here.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg
+  viewBox="0 0 40 40"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.25"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class={className}
+  aria-hidden="true"
+>
+  <circle cx="14" cy="12" r="3" />
+  <circle cx="27" cy="28" r="3" />
+  <path d="M16.5 14.5 Q20 20 24.5 25.5" />
+</svg>

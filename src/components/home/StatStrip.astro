@@ -1,0 +1,43 @@
+---
+import Divider from "../ui/Divider.astro";
+
+/**
+ * One of the two required bold accent sections — now Guard Olive.
+ * Ink text (~6.24:1, AA), not white (~3.11:1, fails AA) — see the
+ * design-token comment in global.css. Translucent Ink dividers between
+ * the three facts, for the same reason: the pale Hairline grey would
+ * nearly disappear against a mid-lightness colour fill, and a
+ * translucent white would look washed-out here the way it read cleanly
+ * against the old dark green.
+ *
+ * No `on-dark`: Guard Olive isn't dark enough to need the white-ring
+ * focus swap — the default Ink ring already measures ~6.24:1 against
+ * it, comfortably clear of the 3:1 floor on its own.
+ */
+const FACTS = [
+  "Every officer SIA-licensed & first-aid trained",
+  "Bespoke shift patterns, not fixed packages",
+  "24/7 phone and on-shift officer support",
+];
+---
+
+<section class="bg-guard-olive">
+  <div class="mx-auto max-w-7xl px-gutter py-10 md:px-12">
+    <div class="flex flex-col gap-6 sm:flex-row sm:items-stretch sm:gap-0">
+      {
+        FACTS.map((fact, i) => (
+          <>
+            {i > 0 && (
+              <div data-stat-divider class="hidden shrink-0 sm:block">
+                <Divider orientation="vertical" tone="ink" class="mx-8" />
+              </div>
+            )}
+            <div data-stat-text class="flex-1">
+              <p class="text-body text-ink">{fact}</p>
+            </div>
+          </>
+        ))
+      }
+    </div>
+  </div>
+</section>

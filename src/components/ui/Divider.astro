@@ -1,0 +1,46 @@
+---
+/**
+ * A single hairline rule — the connective tissue used across the whole
+ * site instead of borders/shadows around boxes.
+ *
+ * `tone="hairline"` (default) — the neutral grey token, for use on
+ * Paper backgrounds.
+ *
+ * `tone="paper"` — a translucent white line, for use on a Guard Green
+ * Deep / Footer Grey background, where the grey Hairline token would
+ * barely register. This is white at reduced opacity, not a new colour
+ * token.
+ *
+ * `tone="ink"` — a translucent Ink line, for use on a Guard Olive
+ * background (StatStrip). Olive sits mid-lightness, so neither the
+ * pale Hairline grey (would nearly disappear) nor a translucent white
+ * (would look washed-out/low-contrast against a light fill) reads well
+ * there — a translucent Ink line does, and matches the same Ink-on-
+ * Olive pairing already used for text in that context.
+ */
+interface Props {
+  orientation?: "horizontal" | "vertical";
+  tone?: "hairline" | "paper" | "ink";
+  class?: string;
+}
+
+const { orientation = "horizontal", tone = "hairline", class: className } = Astro.props;
+
+const colorClass = {
+  hairline: { border: "border-hairline", bg: "bg-hairline" },
+  paper: { border: "border-paper/35", bg: "bg-paper/35" },
+  ink: { border: "border-ink/25", bg: "bg-ink/25" },
+}[tone];
+---
+
+{
+  orientation === "horizontal" ? (
+    <hr class:list={["border-0 border-t", colorClass.border, className]} />
+  ) : (
+    <div
+      class:list={["w-px self-stretch", colorClass.bg, className]}
+      role="separator"
+      aria-orientation="vertical"
+    />
+  )
+}

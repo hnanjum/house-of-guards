@@ -1,5 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
 import "../styles/global.css";
 
 interface Props {
@@ -9,7 +11,7 @@ interface Props {
 
 const {
   title,
-  description = "House of Guards — professional manned guarding, event security, close protection, and mobile patrols for corporate and high-net-worth clients across the UK.",
+  description = "House of Guards — SIA-licensed manned guarding, close protection, CCTV monitoring, and mobile patrols for corporate and high-net-worth clients, based in Bradford, West Yorkshire.",
 } = Astro.props;
 ---
 
@@ -23,8 +25,12 @@ const {
     <title>{title} | House of Guards</title>
     <ClientRouter />
   </head>
-  <body>
-    <slot />
+  <body class="flex min-h-screen flex-col bg-paper text-ink">
+    <Header />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
     <script>
       import { initSmoothScroll } from "../lib/smoothScroll";
 

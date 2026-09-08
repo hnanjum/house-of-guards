@@ -1,52 +1,32 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import NavDrawer from "../components/NavDrawer.tsx";
-import ContactForm from "../components/ContactForm.tsx";
+import Hero from "../components/home/Hero.astro";
+import StatStrip from "../components/home/StatStrip.astro";
+import ServicesIndex from "../components/ServicesIndex.astro";
+import MissionBand from "../components/home/MissionBand.astro";
+import SectorsStrip from "../components/home/SectorsStrip.astro";
+import ClosingCta from "../components/home/ClosingCta.astro";
 ---
 
 <BaseLayout title="Home">
-  <header>
-    <nav>
-      <a href="/" aria-label="House of Guards home">House of Guards</a>
-      <NavDrawer client:load />
-    </nav>
-  </header>
+  <Hero />
+  <StatStrip />
 
-  <main>
-    <section data-reveal>
-      <h1>Discreet, professional security. Nationwide.</h1>
-      <p>
-        House of Guards provides manned guarding, event security, close
-        protection, and mobile patrols for corporate and high-net-worth
-        clients across the UK.
-      </p>
-    </section>
+  <section class="bg-paper">
+    <div class="mx-auto max-w-7xl px-gutter py-24 md:px-12">
+      <ServicesIndex />
+    </div>
+  </section>
 
-    <section data-reveal>
-      <h2>Services</h2>
-      <ul>
-        <li>Manned guarding</li>
-        <li>Event security</li>
-        <li>Close protection</li>
-        <li>Mobile patrols</li>
-      </ul>
-    </section>
-
-    <section id="contact" data-reveal>
-      <h2>Enquire</h2>
-      <ContactForm client:visible />
-    </section>
-  </main>
-
-  <footer>
-    <p>&copy; {new Date().getFullYear()} House of Guards. All rights reserved.</p>
-  </footer>
+  <MissionBand />
+  <SectorsStrip />
+  <ClosingCta />
 
   <script>
-    import { initScrollReveal } from "../lib/scrollReveal";
+    import { initHeroMuster } from "../lib/heroMuster";
 
     document.addEventListener("astro:page-load", () => {
-      initScrollReveal();
+      initHeroMuster();
     });
   </script>
 </BaseLayout>

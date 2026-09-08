@@ -1,0 +1,25 @@
+---
+/**
+ * Functional footer icon only — not a brand mark. Its natural form is
+ * already square-cornered, so — unlike Phone.astro — it needs no
+ * exception to the brand's square/miter stroke language.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg
+  viewBox="0 0 40 40"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.25"
+  stroke-linecap="square"
+  stroke-linejoin="miter"
+  class={className}
+  aria-hidden="true"
+>
+  <rect x="8" y="12" width="24" height="17" />
+  <path d="M8 12 L20 24 L32 12" />
+</svg>

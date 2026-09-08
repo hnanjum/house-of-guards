@@ -1,0 +1,71 @@
+---
+import NavLink from "./ui/NavLink.astro";
+import Divider from "./ui/Divider.astro";
+import Phone from "../icons/Phone.astro";
+import Email from "../icons/Email.astro";
+
+/**
+ * Site footer. Solid dark neutral grey (--color-footer-grey), not
+ * green and not black, so it reads as its own zone rather than a third
+ * green band or a slide into pure ink. Three loose columns (identity /
+ * navigate / contact), no mega-footer link grid.
+ *
+ * `on-dark` swaps the focus ring to white (see global.css).
+ *
+ * NOTE: phone number and email below are clearly-marked placeholders
+ * (repeated zeros / a generic domain pattern), not real contact
+ * details — swap both for the real ones before launch.
+ */
+const year = new Date().getFullYear();
+---
+
+<footer class="on-dark bg-footer-grey">
+  <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12">
+    <div class="grid gap-12 md:grid-cols-3">
+      <div>
+        <a href="/" class="text-wordmark text-paper">House of Guards</a>
+        <p class="text-body text-paper/70 mt-4 max-w-xs">
+          SIA-licensed manned guarding, close protection, CCTV monitoring, and
+          mobile patrols for corporate and high-net-worth clients across
+          Yorkshire and the North West.
+        </p>
+      </div>
+
+      <nav aria-label="Footer">
+        <ul class="space-y-3">
+          <li><NavLink href="/about" tone="paper">About Us</NavLink></li>
+          <li><NavLink href="/services" tone="paper">Services</NavLink></li>
+          <li><NavLink href="/careers" tone="paper">Careers</NavLink></li>
+          <li><NavLink href="/policies" tone="paper">Our Policies</NavLink></li>
+          <li><NavLink href="/gallery" tone="paper">Gallery</NavLink></li>
+          <li><NavLink href="/contact" tone="paper">Get a Quote</NavLink></li>
+        </ul>
+      </nav>
+
+      <div>
+        <p class="text-caption text-paper/70">Bradford, West Yorkshire</p>
+        <a
+          href="tel:+441274000000"
+          class="mt-4 flex items-center gap-2 text-body text-paper transition-colors duration-200 ease-out hover:text-paper/70"
+        >
+          <Phone class="size-5 shrink-0" />
+          01274 000 000
+        </a>
+        <a
+          href="mailto:info@houseofguards.co.uk"
+          class="mt-3 flex items-center gap-2 text-body text-paper transition-colors duration-200 ease-out hover:text-paper/70"
+        >
+          <Email class="size-5 shrink-0" />
+          info@houseofguards.co.uk
+        </a>
+      </div>
+    </div>
+
+    <Divider tone="paper" class="mt-16" />
+
+    <div class="flex flex-col gap-2 pt-8 sm:flex-row sm:items-center sm:justify-between">
+      <p class="text-micro text-paper/70">&copy; {year} House of Guards. All rights reserved.</p>
+      <p class="text-micro text-paper/70">SIA-licensed officers · Est. 2023 · Bradford, West Yorkshire</p>
+    </div>
+  </div>
+</footer>
