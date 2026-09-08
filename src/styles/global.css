@@ -18,7 +18,7 @@
  * ---------------------------------------------------------------------
  */
 @theme {
-  /* Tailwind's entire default colour palette is removed. Only the six
+  /* Tailwind's entire default colour palette is removed. Only the
      tokens below exist as colours anywhere in this project. */
   --color-*: initial;
 
@@ -41,6 +41,38 @@
      icon fill/stroke, active-state underline/border — against Paper,
      where the lenient 3:1 non-text-contrast threshold applies. */
   --color-guard-olive: #8a9a2e;
+
+  /* GUARD OLIVE BRIGHT — a distinct, lighter/more-saturated shade,
+     requested for the header info bar's full-width background fill.
+     NOTE FOR NEXT REVIEW: the value asked for (#A7AF4A) is genuinely
+     different from --color-guard-olive above (#8A9A2E) — not a
+     rounding difference, about 15 points of relative luminance apart
+     — so it's kept as its own token rather than overwriting the
+     shared one every button/underline/icon accent already relies on.
+     If this was meant to just be a restatement of the existing Guard
+     Olive (screen/eyedropper drift is plausible), say so and this can
+     be merged back into one token.
+     Real numbers for THIS value, computed fresh (the earlier ~6.24:1
+     Ink-on-Olive figure is for #8A9A2E, not this one — contrast is
+     colour-specific, re-verify rather than assume a figure carries
+     over to a different hex):
+       - Ink (#0D0D0D) on this fill: ~8.21:1 — clears AAA (7:1), an
+         improvement over the original token's AA-only 6.24:1, since a
+         lighter fill widens the gap to a near-black foreground.
+       - Paper/white text or icon on this fill: ~2.37:1 — fails even
+         the lenient 3:1 non-text floor (worse than the original
+         token's already-failing ~3.11:1). Ink is the only safe
+         foreground for this fill; never use it for anything else
+         (small text, icons, borders) against a Paper background — at
+         that pairing it's ~2.37:1 too, under the 3:1 floor even for
+         non-text.
+     Size-invariant, so "does it still hold as a full-bar background"
+     is really just re-confirming this same fill-colour math applies
+     regardless of how much area it covers — it does, contrast doesn't
+     depend on the shape/extent of the fill, only the actual colour
+     values. */
+  --color-guard-olive-bright: #a7af4a;
+
   --color-guard-green-deep: #081f18; /* NOT "a deeper Guard Olive" — an independent dark, near-black-green surface, deliberately kept as-is. This is the fallback for anywhere Guard Olive's lighter fill can't carry white text: the mission-band pull-quote's own text stays legible some other way (see MissionBand.astro), and it's still the primary/secondary button hover colour. White text on it measures ~17.2:1 (AAA) */
   --color-stone: #6e6e6e; /* secondary text on Paper only: captions, meta, credential lines. ~4.6:1 on paper — 14px+ only */
   --color-hairline: #e4e4e4; /* borders, rules, dividers, seams on Paper. Perfectly neutral (R=G=B) — never a warm greige */
