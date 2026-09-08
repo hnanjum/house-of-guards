@@ -1,13 +1,226 @@
 @import "tailwindcss";
 
+/* Self-hosted variable fonts — see src/styles/global.css §2 in README for
+   why these specific packages/axis files were chosen. */
+@import "@fontsource-variable/fraunces/full.css"; /* wght + opsz + SOFT + WONK axes */
+@import "@fontsource-variable/montserrat"; /* wght axis only — nothing on the body font ever goes italic (the one italic use, MissionBand's pull-quote, is Fraunces/display, not body/sans) */
+
 /*
- * All of Tailwind's default color palette is removed below (`--color-*: initial`).
- * This is intentional: no default Tailwind color (slate, blue, red, etc.) should be
- * usable anywhere in this project. A custom token system for House of Guards
- * (brand colors, spacing, type scale, etc.) will be added here as CSS variables
- * inside this same `@theme` block. Until then, no color utility classes
- * (bg-*, text-*, border-*, etc.) will resolve to anything.
+ * ---------------------------------------------------------------------
+ * DESIGN TOKENS
+ * ---------------------------------------------------------------------
+ * Every colour and font-family used anywhere in this project must come
+ * from this block. Nothing here is provisional — this is the approved
+ * House of Guards palette and type system. No component should ever
+ * reference a literal hex value, an arbitrary Tailwind bracket value
+ * (e.g. `text-[17px]`, `bg-[#0d0d0d]`), or a default Tailwind colour
+ * (slate, blue, red, etc — all removed below).
+ * ---------------------------------------------------------------------
  */
 @theme {
+  /* Tailwind's entire default colour palette is removed. Only the six
+     tokens below exist as colours anywhere in this project. */
   --color-*: initial;
+
+  --color-ink: #0d0d0d; /* near-black text, secondary button fill, icon strokes */
+  --color-paper: #ffffff; /* the default background; also the text colour on every dark fill below */
+
+  /* GUARD OLIVE — full replacement for the old Guard Green (#0F3D2E),
+     2026-XX-XX. This is a genuinely lighter, more saturated accent than
+     the green it replaces, and that changes what it can safely carry:
+     white text on it measures only ~3.11:1 (fails AA normal-text 4.5:1,
+     barely clears AA large-text/non-text 3:1). Ink text on it measures
+     ~6.24:1 (passes AA normal-text, short of AAA's 7:1). Full numbers
+     in the PR/commit description.
+     House rule that falls out of that math, applied consistently
+     everywhere in this codebase: Guard Olive is NEVER used as running
+     text colour on a Paper background (even the couple of spots where
+     a large enough type size would technically clear the 3:1 large-text
+     floor — the margin was too thin, sub-4%, to trust). It is used as
+     (a) a solid fill paired with Ink text, or (b) a non-text accent —
+     icon fill/stroke, active-state underline/border — against Paper,
+     where the lenient 3:1 non-text-contrast threshold applies. */
+  --color-guard-olive: #8a9a2e;
+  --color-guard-green-deep: #081f18; /* NOT "a deeper Guard Olive" — an independent dark, near-black-green surface, deliberately kept as-is. This is the fallback for anywhere Guard Olive's lighter fill can't carry white text: the mission-band pull-quote's own text stays legible some other way (see MissionBand.astro), and it's still the primary/secondary button hover colour. White text on it measures ~17.2:1 (AAA) */
+  --color-stone: #6e6e6e; /* secondary text on Paper only: captions, meta, credential lines. ~4.6:1 on paper — 14px+ only */
+  --color-hairline: #e4e4e4; /* borders, rules, dividers, seams on Paper. Perfectly neutral (R=G=B) — never a warm greige */
+  --color-footer-grey: #2a2a2a; /* the footer's own dark neutral — distinct from Ink and both greens so the footer reads as its own zone, not a third band or a slide into black. White text ~14.4:1 (AAA) */
+
+  /* Font families. Referenced directly by the composed type-scale
+     utilities below, and also usable standalone (e.g. `font-display`
+     on the header wordmark). */
+  --font-display: "Fraunces Variable", ui-serif, Georgia, serif;
+  --font-sans: "Montserrat Variable", ui-sans-serif, system-ui, sans-serif;
+
+  /* Semantic spacing tokens for section-level rhythm, layered on top of
+     Tailwind's default 0.25rem numeric spacing scale (still used
+     directly — p-4, gap-6, etc — for everything below section level). */
+  --spacing-gutter: 1.5rem; /* page-edge horizontal padding, mobile default */
+  --spacing-section: 8rem; /* vertical rhythm between major homepage sections */
+}
+
+/*
+ * ---------------------------------------------------------------------
+ * TYPE SCALE
+ * ---------------------------------------------------------------------
+ * Eight named text styles. Each one bundles family + size + line-height
+ * + weight into a single class, so a component only ever writes
+ * `class="text-h2"` (never assembles size/weight/family by hand, and
+ * never reaches for a stock Tailwind size like `text-2xl`, which isn't
+ * part of this scale). This is the single source of truth for every
+ * numeric size/weight value in the project — nowhere else should a
+ * font-size or font-weight be written as a literal number.
+ *
+ * Fraunces is dialled to low WONK / standard optical size throughout —
+ * quiet and weighted, not the font's own default "wonky" personality.
+ * ---------------------------------------------------------------------
+ */
+@utility text-display {
+  font-family: var(--font-display);
+  font-size: 5.5rem; /* 88px — hero statement only */
+  line-height: 0.98;
+  font-weight: 350;
+  font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 0;
+}
+
+@utility text-h1 {
+  font-family: var(--font-display);
+  font-size: 3.5rem; /* 56px — page titles */
+  line-height: 1.05;
+  font-weight: 450;
+  font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 0;
+}
+
+@utility text-h2 {
+  font-family: var(--font-display);
+  font-size: 2.5rem; /* 40px — section heads */
+  line-height: 1.1;
+  font-weight: 500;
+  font-variation-settings: "opsz" 72, "SOFT" 0, "WONK" 0;
+}
+
+@utility text-h3 {
+  font-family: var(--font-display);
+  font-size: 1.75rem; /* 28px — sub-heads, service names */
+  line-height: 1.2;
+  font-weight: 500;
+  font-variation-settings: "opsz" 40, "SOFT" 0, "WONK" 0;
+}
+
+@utility text-body-lg {
+  font-family: var(--font-sans);
+  font-size: 1.25rem; /* 20px — intro paragraphs, pull-quotes */
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+@utility text-body {
+  font-family: var(--font-sans);
+  font-size: 1.0625rem; /* 17px — running copy */
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+@utility text-caption {
+  font-family: var(--font-sans);
+  font-size: 0.875rem; /* 14px — nav links, meta lines, marginal facts */
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+@utility text-micro {
+  font-family: var(--font-sans);
+  font-size: 0.75rem; /* 12px — legal/footer only */
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* The site wordmark only. This is the SOLE sanctioned use of
+   letter-tracking anywhere in the project — a persistent identity mark
+   in the header, structurally and functionally different from a
+   tracked-caps label repeated above section headings (the specific
+   pattern this whole system exists to avoid). Do not reuse this class
+   for anything else. */
+@utility text-wordmark {
+  font-family: var(--font-display);
+  font-size: 1.125rem; /* 18px */
+  line-height: 1;
+  font-weight: 550;
+  letter-spacing: 0.04em;
+  font-variation-settings: "opsz" 18, "SOFT" 0, "WONK" 0;
+}
+
+/*
+ * ---------------------------------------------------------------------
+ * BASE
+ * ---------------------------------------------------------------------
+ */
+html {
+  background-color: var(--color-paper);
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+/* Sharp corners is a deliberate, sitewide decision — not an accident of
+   not overriding a browser default. Applied explicitly rather than
+   assumed. */
+button,
+input,
+textarea,
+select {
+  border-radius: 0;
+}
+
+/* Visible keyboard focus everywhere. Deliberately Ink, not Guard
+   Olive: Guard Olive on Paper only measures ~3.11:1, a razor-thin pass
+   of the 3:1 non-text-contrast floor for focus indicators (SC 1.4.11 /
+   2.4.11) with essentially no margin. Ink on Paper is ~19.44:1 — an
+   unambiguous, always-safe default regardless of what a future section
+   sits behind the focused element. */
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* An Ink focus ring is invisible against a dark fill (Guard Green
+   Deep, Footer Grey). `.on-dark` swaps the ring to white for itself and
+   everything inside it, for whichever sections are genuinely dark.
+   NOTE: Guard Olive is NOT dark enough to need this — an Ink ring on
+   Guard Olive already measures ~6.24:1, comfortably clear of the 3:1
+   floor on its own, so a section filled with Guard Olive should NOT
+   carry `.on-dark` (applying the white-ring swap there would actually
+   make things worse: white-on-olive is only ~3.11:1, a thinner margin
+   than the Ink default). Currently that's only the Footer. */
+.on-dark :focus-visible,
+.on-dark:focus-visible {
+  outline-color: var(--color-paper);
+}
+
+/*
+ * ---------------------------------------------------------------------
+ * MOTION
+ * ---------------------------------------------------------------------
+ * A blanket, standard reduced-motion reset. This alone is sufficient
+ * for anything driven by CSS transitions/animations (button hovers,
+ * link colour changes). It cannot reach JS-driven motion (GSAP
+ * timelines, Lenis, Framer Motion transforms) — those are handled
+ * explicitly in their own modules/components.
+ * ---------------------------------------------------------------------
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
