@@ -202,13 +202,22 @@ row state; opening a row is what earns it.
   should ever hardcode a colour, font-size, or font-weight — see
   "Design system" above.
 - **`Button.astro`** (`src/components/ui/`) has three variants:
-  `primary` (Guard Green fill, white text — the sitewide default),
-  `secondary` (Ink fill, white text — for a page with more than one
-  action, where only one should read as primary), `outline-light`
-  (white border/text, transparent fill — for a CTA sitting on a Guard
-  Green / Guard Green Deep / Footer Grey background, where Ink or Guard
-  Green text would fail contrast). Sharp corners always (`rounded-none`
-  is explicit, not an accident of unstyled defaults). Never add an arrow.
+  `primary` (Guard Green Secondary fill, white text — the sitewide
+  default, plus a subtle diagonal shine-sweep on hover/focus, with a
+  `motion-reduce` fallback to a plain brightness shift), `secondary`
+  (Ink fill, white text — for a page with more than one action, where
+  only one should read as primary), `outline-light` (white border/text,
+  transparent fill — for a CTA sitting on a Guard Green Secondary /
+  Guard Green Deep / Footer Grey background, where Ink or the accent's
+  own colour as text would fail contrast). Sharp corners always
+  (`rounded-none` is explicit, not an accident of unstyled defaults).
+  Never add an arrow. **Every site that renders the primary CTA must
+  stay in sync** — header, hero, closing CTA, and `NavDrawer.tsx`'s own
+  hand-matched mobile CTA (a React island, so it can't literally import
+  `Button.astro`) have drifted apart once already (see Recent history
+  below) after a colour/style change landed in `Button.astro` but was
+  never propagated to `NavDrawer.tsx`. Check `NavDrawer.tsx` by hand
+  any time `Button.astro`'s `primary` variant changes.
 - **`NavLink.astro`** and **`Divider.astro`** both have a `tone="paper"`
   variant for use on dark/bold backgrounds — `tone="ink"`/`tone
   ="hairline"` (the defaults) assume a Paper background and use Guard
@@ -226,12 +235,114 @@ row state; opening a row is what earns it.
 
 ## Standing conventions
 
-- **Don't `git commit` unless explicitly asked to**, even after a
-  significant chunk of work is done and verified. Leave changes staged/
-  unstaged and say so.
-- Local dev: `astro dev --background`, managed with `astro dev stop` /
-  `astro dev status` / `astro dev logs` (see also the root `README.md`
-  for the Cloudflare Workers Builds deploy flow).
+- **No local dev server for visual verification, deploy-only.** This
+  superseded an earlier "don't commit unless asked" rule — the
+  established workflow now is: make the change, verify with `astro
+  check` (types) and a real `astro build` + direct inspection of the
+  compiled `dist/` output (grep the built CSS/HTML/JS — never assume,
+  always confirm the actual compiled classes/tokens are present and
+  the retired ones are genuinely gone), then ship it through git.
+  `astro dev --background` (`astro dev stop`/`status`/`logs`) still
+  exists for local iteration if genuinely needed, but the user checks
+  the *live deployed URL* themselves — don't rely on a screenshot or a
+  local preview as the final check.
+- **Git/deploy flow, every round**: new branch off `main` → `git add`
+  the specific changed files (never `-A`/`.`) → commit with a detailed
+  message (contrast numbers, what changed and why, verification
+  performed) → push → `gh pr create` → `gh pr merge --merge
+  --delete-branch` → poll the Cloudflare Workers Builds check-run via
+  `gh api repos/hnanjum/house-of-guards/commits/<sha>/check-runs`
+  until `status: completed` → confirm live via `curl` against
+  `https://house-of-guards.onata-1230.workers.dev/`, cross-checking
+  the served HTML and its linked compiled CSS byte-for-byte against
+  the local build (the only expected difference between two separate
+  build invocations is Astro's per-build random island-hydration
+  `uid` attribute — anything else diverging is a real problem, not
+  noise). See the root `README.md` for the underlying Workers Builds
+  setup.
+- **Every colour pairing gets real WCAG contrast math, shown not
+  asserted, every time — never assume a finding from one colour
+  carries over to a different one**, even a colour that looks like a
+  close relative of one already checked (see the Guard Green Secondary
+  token note above for a concrete case: the two accents before it both
+  needed Ink text and both left the default focus ring safe; this one
+  needs the opposite on both counts).
+
+## Recent history
+
+Kept here as a running log so a future session doesn't have to
+reconstruct *why* the current state looks the way it does from `git
+log` alone. Newest first; each PR number is on `origin/main`.
+
+- **PR #5 — Guard Green Secondary promoted, Guard Yellow retired.**
+  Yellow "didn't work out visually." Green Secondary (`#366C00`) had
+  been sitting in `@theme` as a reserved, unapplied token since PR #4
+  — promoted to the sole primary accent everywhere Yellow was (button
+  fill sitewide including `NavDrawer.tsx`'s CTA, header info bar,
+  active-nav underline, stat strip, ServicesIndex accent, Hero/
+  ClosingCta phone-link hover). Contrast pairing **inverted** from
+  Yellow's — white text now, not Ink (Ink fails at ~3.06:1 on this
+  fill; the two accents before it both needed Ink and both fail
+  outright with white). `.on-dark` added to StatStrip + the header
+  info bar for the first time, because the default Ink focus ring is
+  also too thin on this fill (~3.06:1) — neither prior accent needed
+  that either. The bare-mark-on-Paper question (underline/icon/
+  border) was checked as its own real pairing rather than assumed —
+  turned out to be the same ~6.36:1 as the fill pairing (contrast is
+  symmetric between the two colours compared), clearing the full
+  4.5:1 floor, unlike Yellow (~1.76:1) or Olive (~3.11:1) before it.
+- **PR #4 — Guard Yellow, replacing Guard Olive/Olive-Bright.**
+  `#FFB606`, sampled from a reference image. Reverted the short-lived
+  white/bold/20px button-text experiment from PR #3 back to Ink text
+  at the original size/weight (that fix was specific to Olive's own
+  contrast shortfall and didn't apply once the fill changed). Ink on
+  Yellow: ~11.06:1 (AAA). White on Yellow, and Yellow as a bare mark
+  on Paper: ~1.76:1 — fails even the lenient 3:1 non-text floor, a
+  real flagged regression from Olive's own ~3.11:1 on the same
+  question. Added `guard-green-secondary` (`#366C00`) as a second,
+  *reserved* token in the same PR — defined and contrast-checked, but
+  deliberately not applied anywhere yet (that happened in #5). Guard
+  Olive/Olive-Bright removed outright from `@theme` once a repo-wide
+  grep confirmed nothing still referenced them.
+- **PR #3 — real bug fixes found via live/device testing, not
+  assumption.** The phone icon (`Phone.astro`) was originally two
+  circles and a curve and genuinely didn't read as a phone — replaced
+  with Feather Icons' real "phone" handset path verbatim, checked via
+  a `sharp`-rendered PNG at actual deployed size before shipping. The
+  mobile info bar overflowed on a real device (truncated address text)
+  despite font-metric math predicting a comfortable margin — root
+  cause was flexbox's `min-width: auto` default blocking shrink; fixed
+  with real overflow safety nets (`shrink-0` on the phone link,
+  `min-w-0` + `truncate` on the address), not just smaller numbers.
+  The primary button's text was bumped to white + bold + a larger size
+  specifically so it would clear the WCAG AA *large-text* 3:1
+  threshold (≥14pt bold) on Guard Olive, rather than staying at normal
+  text size and needing the stricter 4.5:1 floor. **This button change
+  was fully reverted in PR #4** (see above) — don't resurrect it as
+  the "current" button treatment.
+- **PR #2 — info bar colour, single-line mobile layout, header
+  rhythm.** First real live-diagnosed fix rather than a guess: the
+  header CTA looked like it was "floating in extra padding" — traced
+  to an actual computed height/padding mismatch in the nav row, not a
+  visual illusion, and fixed at the source. Info bar text colour was
+  picked (Ink vs. Stone vs. Olive, on the then-current Guard Olive
+  fill) by running the real contrast numbers for each candidate rather
+  than eyeballing it.
+- **PR #1 — Montserrat replaces Schibsted Grotesk**, self-hosted via
+  `@fontsource-variable/montserrat`, wired through the single
+  `--font-sans` token so nothing had to be touched component-by-
+  component. Same PR tightened the Ink default-focus-ring rationale
+  comment in `global.css` (the origin of the "focus ring must be
+  re-verified per accent colour" discipline that's been followed for
+  every accent swap since).
+- **Initial build** — project scaffolding (Astro static + Tailwind v4
+  token system + GSAP/Lenis + two Framer Motion React islands +
+  Cloudflare Workers native-assets deploy), then the full homepage
+  (two-bar white header + hamburger/`NavDrawer` on mobile, hero with
+  its Muster load-in sequence, stat strip, services index, mission
+  band, sectors strip, closing CTA, footer) against Guard Green
+  (`#0F3D2E`, the very first accent, retired in the first colour swap
+  that followed and not otherwise mentioned above).
 
 ## Current status
 
