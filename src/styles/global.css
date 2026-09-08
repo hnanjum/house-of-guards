@@ -25,55 +25,63 @@
   --color-ink: #0d0d0d; /* near-black text, secondary button fill, icon strokes */
   --color-paper: #ffffff; /* the default background; also the text colour on every dark fill below */
 
-  /* GUARD OLIVE — full replacement for the old Guard Green (#0F3D2E),
-     2026-XX-XX. This is a genuinely lighter, more saturated accent than
-     the green it replaces, and that changes what it can safely carry:
-     white text on it measures only ~3.11:1 (fails AA normal-text 4.5:1,
-     barely clears AA large-text/non-text 3:1). Ink text on it measures
-     ~6.24:1 (passes AA normal-text, short of AAA's 7:1). Full numbers
-     in the PR/commit description.
-     House rule that falls out of that math, applied consistently
-     everywhere in this codebase: Guard Olive is NEVER used as running
-     text colour on a Paper background (even the couple of spots where
-     a large enough type size would technically clear the 3:1 large-text
-     floor — the margin was too thin, sub-4%, to trust). It is used as
-     (a) a solid fill paired with Ink text, or (b) a non-text accent —
-     icon fill/stroke, active-state underline/border — against Paper,
-     where the lenient 3:1 non-text-contrast threshold applies. */
-  --color-guard-olive: #8a9a2e;
+  /* GUARD YELLOW — the current primary accent, replacing Guard Olive
+     AND Guard Olive Bright entirely (both retired — see the removal
+     note below the theme block for what checking-before-deleting
+     looked like). One token now, not two: the old Olive/Olive-Bright
+     split existed because Olive-Bright was measurably lighter than
+     plain Olive; Guard Yellow (#FFB606, sampled exactly from a
+     reference image) is used identically everywhere the old pair was
+     — button fill, header active-nav-link underline, stat strip
+     background, info bar background, icon accents.
+     Real numbers, computed fresh — Yellow's own relative luminance
+     (~0.547) is notably higher than either retired token's (Olive
+     ~0.287, Olive Bright ~0.394), and that changes what it can safely
+     carry more than either predecessor could:
+       - Ink (#0D0D0D) on this fill: ~11.06:1 — clears AAA (7:1) with
+         real margin, well past what either Olive token managed (6.24
+         / 8.21:1). Ink is the only safe foreground for a Yellow fill.
+       - White/Paper on this fill: ~1.76:1 — fails badly. Worse than
+         either retired token's own already-failing white pairing
+         (Olive ~3.11:1, Olive Bright ~2.37:1) — Yellow is brighter
+         still, so white-on-it has even less to work with.
+       - Yellow itself as text/icon/border/underline colour ON Paper
+         (same pair, symmetric: ~1.76:1) also fails — and this is a
+         real, worth-noting regression from Guard Olive specifically:
+         Olive-on-Paper (~3.11:1) used to just clear the lenient 3:1
+         non-text-contrast floor, which is what let it work as a bare
+         icon fill / active-link underline / hover-decoration colour
+         directly on white. Yellow-on-Paper does NOT clear that same
+         floor (1.76 < 3.0) — every site that reused that exact
+         pattern (the header's active-nav-link underline, the
+         ServicesIndex open-state icon + left border, the Hero/
+         ClosingCta phone-link hover underline) is now carrying a
+         real, flagged non-text-contrast gap, not a compliant one.
+         Kept per explicit instruction to replace every current Olive
+         use with Yellow — not silently worked around with a different
+         mechanism — but this is the one thing about the swap that
+         isn't just "the same pattern, a different hex." */
+  --color-guard-yellow: #ffb606;
 
-  /* GUARD OLIVE BRIGHT — a distinct, lighter/more-saturated shade,
-     requested for the header info bar's full-width background fill.
-     NOTE FOR NEXT REVIEW: the value asked for (#A7AF4A) is genuinely
-     different from --color-guard-olive above (#8A9A2E) — not a
-     rounding difference, about 15 points of relative luminance apart
-     — so it's kept as its own token rather than overwriting the
-     shared one every button/underline/icon accent already relies on.
-     If this was meant to just be a restatement of the existing Guard
-     Olive (screen/eyedropper drift is plausible), say so and this can
-     be merged back into one token.
-     Real numbers for THIS value, computed fresh (the earlier ~6.24:1
-     Ink-on-Olive figure is for #8A9A2E, not this one — contrast is
-     colour-specific, re-verify rather than assume a figure carries
-     over to a different hex):
-       - Ink (#0D0D0D) on this fill: ~8.21:1 — clears AAA (7:1), an
-         improvement over the original token's AA-only 6.24:1, since a
-         lighter fill widens the gap to a near-black foreground.
-       - Paper/white text or icon on this fill: ~2.37:1 — fails even
-         the lenient 3:1 non-text floor (worse than the original
-         token's already-failing ~3.11:1). Ink is the only safe
-         foreground for this fill; never use it for anything else
-         (small text, icons, borders) against a Paper background — at
-         that pairing it's ~2.37:1 too, under the 3:1 floor even for
-         non-text.
-     Size-invariant, so "does it still hold as a full-bar background"
-     is really just re-confirming this same fill-colour math applies
-     regardless of how much area it covers — it does, contrast doesn't
-     depend on the shape/extent of the fill, only the actual colour
-     values. */
-  --color-guard-olive-bright: #a7af4a;
+  /* GUARD GREEN SECONDARY — reserved, NOT applied anywhere yet (no
+     component in this codebase references this token as of adding
+     it). A distinct dark, saturated forest-olive green — not a
+     restatement of Guard Green (#0F3D2E, retired) or either retired
+     Olive token. Contrast checked ahead of assignment, per the same
+     standing rule as every other token here (verify before using, not
+     after):
+       - White/Paper on this fill: ~6.36:1 — passes AA (4.5) with real
+         margin, ~9% short of AAA (7:1). Confirms the assumption this
+         token was added on ("dark enough to support white text").
+       - Ink on this fill: ~3.06:1 — fails the 4.5:1 AA floor for
+         normal text outright, and only barely clears the 3:1 non-text
+         floor (a ~2% margin — the same "too thin to trust" shape
+         already flagged elsewhere in this file, e.g. Guard Olive's
+         old large-text case). White is the one safe foreground here;
+         don't reach for Ink on this fill even for a non-text accent. */
+  --color-guard-green-secondary: #366c00;
 
-  --color-guard-green-deep: #081f18; /* NOT "a deeper Guard Olive" — an independent dark, near-black-green surface, deliberately kept as-is. This is the fallback for anywhere Guard Olive's lighter fill can't carry white text: the mission-band pull-quote's own text stays legible some other way (see MissionBand.astro), and it's still the primary/secondary button hover colour. White text on it measures ~17.2:1 (AAA) */
+  --color-guard-green-deep: #081f18; /* an independent dark, near-black-green surface — the fallback for anywhere the current accent (Guard Yellow)'s lighter fill can't carry white text: the mission-band pull-quote's own text stays legible some other way (see MissionBand.astro), and it's still the primary/secondary button hover colour. White text on it measures ~17.2:1 (AAA) */
   --color-stone: #6e6e6e; /* secondary text on Paper only: captions, meta, credential lines. ~4.6:1 on paper — 14px+ only */
   --color-hairline: #e4e4e4; /* borders, rules, dividers, seams on Paper. Perfectly neutral (R=G=B) — never a warm greige */
   --color-footer-grey: #2a2a2a; /* the footer's own dark neutral — distinct from Ink and both greens so the footer reads as its own zone, not a third band or a slide into black. White text ~14.4:1 (AAA) */
@@ -210,12 +218,13 @@ select {
   border-radius: 0;
 }
 
-/* Visible keyboard focus everywhere. Deliberately Ink, not Guard
-   Olive: Guard Olive on Paper only measures ~3.11:1, a razor-thin pass
-   of the 3:1 non-text-contrast floor for focus indicators (SC 1.4.11 /
-   2.4.11) with essentially no margin. Ink on Paper is ~19.44:1 — an
-   unambiguous, always-safe default regardless of what a future section
-   sits behind the focused element. */
+/* Visible keyboard focus everywhere. Deliberately Ink, not the
+   accent: whatever the current accent fill is, Ink on Paper is
+   ~19.44:1 — an unambiguous, always-safe default regardless of what a
+   future section sits behind the focused element (Guard Yellow-on-
+   Paper specifically measures only ~1.76:1, well under even the 3:1
+   non-text floor — using it for a sitewide focus ring would be a real
+   accessibility regression, not just a style choice). */
 :focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 2px;
@@ -224,12 +233,12 @@ select {
 /* An Ink focus ring is invisible against a dark fill (Guard Green
    Deep, Footer Grey). `.on-dark` swaps the ring to white for itself and
    everything inside it, for whichever sections are genuinely dark.
-   NOTE: Guard Olive is NOT dark enough to need this — an Ink ring on
-   Guard Olive already measures ~6.24:1, comfortably clear of the 3:1
-   floor on its own, so a section filled with Guard Olive should NOT
+   NOTE: Guard Yellow is NOT dark enough to need this — an Ink ring on
+   Guard Yellow already measures ~11.06:1, comfortably clear of the 3:1
+   floor on its own, so a section filled with Guard Yellow should NOT
    carry `.on-dark` (applying the white-ring swap there would actually
-   make things worse: white-on-olive is only ~3.11:1, a thinner margin
-   than the Ink default). Currently that's only the Footer. */
+   make things far worse: white-on-Yellow is only ~1.76:1). Currently
+   that's only the Footer. */
 .on-dark :focus-visible,
 .on-dark:focus-visible {
   outline-color: var(--color-paper);

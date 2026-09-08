@@ -5,12 +5,21 @@
  * arrow.
  *
  * `tone="ink"` (default) — for a link sitting on a Paper background.
- * Text is always Ink (never Guard Olive — at 14px, Olive text on Paper
- * only measures ~3.11:1, well under the 4.5:1 AA floor for normal
- * text). Active/hover state is a 2px Guard Olive underline instead —
- * a non-text accent, where the lenient 3:1 non-text-contrast floor
- * applies and Olive-on-Paper clears it. A transparent underline sits
- * there at rest so nothing shifts layout when it appears.
+ * Text is always Ink (never the accent colour — at 14px, Guard Yellow
+ * text on Paper only measures ~1.76:1, well under the 4.5:1 AA floor
+ * for normal text, and under the 3:1 non-text floor too). Active/hover
+ * state is a 2px Guard Yellow underline instead — a non-text accent.
+ * FLAGGED, not silently compliant: this pattern (a bare accent-
+ * coloured mark directly on Paper) worked for the previous accent,
+ * Guard Olive (~3.11:1, just clearing the 3:1 non-text-contrast
+ * floor) — it does NOT work for Guard Yellow, which measures the same
+ * ~1.76:1 here as everywhere else it touches Paper directly, under
+ * even that lenient floor. Kept anyway per explicit instruction to
+ * replace this exact use with Yellow; `aria-current="page"` below is
+ * still present as an independent, always-correct signal for screen
+ * readers regardless of how the visual mark performs. A transparent
+ * underline sits there at rest so nothing shifts layout when it
+ * appears.
  *
  * `tone="paper"` — for a link sitting on a Footer Grey / Guard Green
  * Deep background, where dark text would be nearly invisible. White
@@ -32,8 +41,8 @@ const isActive = currentPath === linkPath;
 
 const toneClasses = {
   ink: isActive
-    ? "text-ink border-guard-olive"
-    : "text-ink border-transparent hover:border-guard-olive",
+    ? "text-ink border-guard-yellow"
+    : "text-ink border-transparent hover:border-guard-yellow",
   paper: isActive ? "text-paper border-transparent" : "text-paper hover:text-paper/70 border-transparent",
 };
 ---

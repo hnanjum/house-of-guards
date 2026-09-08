@@ -2,17 +2,19 @@
 import Divider from "../ui/Divider.astro";
 
 /**
- * One of the two required bold accent sections — now Guard Olive.
- * Ink text (~6.24:1, AA), not white (~3.11:1, fails AA) — see the
- * design-token comment in global.css. Translucent Ink dividers between
- * the three facts, for the same reason: the pale Hairline grey would
- * nearly disappear against a mid-lightness colour fill, and a
- * translucent white would look washed-out here the way it read cleanly
- * against the old dark green.
+ * One of the two required bold accent sections — now Guard Yellow.
+ * Ink text (~11.06:1, AAA — an even bigger margin than the previous
+ * accent, Guard Olive, managed at ~6.24:1), not white (~1.76:1, fails
+ * badly) — see the design-token comment in global.css. Translucent Ink
+ * dividers between the three facts: the pale Hairline grey would
+ * nearly disappear against a bright colour fill this light, and a
+ * translucent white would be even less visible here than it already
+ * was against Olive.
  *
- * No `on-dark`: Guard Olive isn't dark enough to need the white-ring
- * focus swap — the default Ink ring already measures ~6.24:1 against
- * it, comfortably clear of the 3:1 floor on its own.
+ * No `on-dark`: Guard Yellow isn't dark enough to need the white-ring
+ * focus swap — the default Ink ring already measures ~11.06:1 against
+ * it, comfortably clear of the 3:1 floor on its own (a white ring here
+ * would actually be far worse, ~1.76:1).
  */
 const FACTS = [
   "Every officer SIA-licensed & first-aid trained",
@@ -21,7 +23,7 @@ const FACTS = [
 ];
 ---
 
-<section class="bg-guard-olive">
+<section class="bg-guard-yellow">
   <div class="mx-auto max-w-7xl px-gutter py-10 md:px-12">
     <div class="flex flex-col gap-6 sm:flex-row sm:items-stretch sm:gap-0">
       {

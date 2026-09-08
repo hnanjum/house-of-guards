@@ -6,20 +6,18 @@ import Location from "../icons/Location.astro";
 import NavDrawer from "./NavDrawer.tsx";
 
 /**
- * Site header. Two bars: a solid Guard Olive Bright info bar, then a
- * Paper/white sticky main nav — a deliberate departure from the old
- * single solid Guard Green fill (see the design-system note in
- * global.css on why the shared Guard Olive token can't carry that
- * role on its own: white text on it is only ~3.11:1, well under AA).
+ * Site header. Two bars: a solid Guard Yellow info bar, then a Paper/
+ * white sticky main nav — a deliberate departure from the old single
+ * solid dark-fill header (see the design-system note in global.css on
+ * why the accent can't carry that role on its own: white text on
+ * Guard Yellow is only ~1.76:1, badly under AA).
  *
- * 1. Info bar — solid Guard Olive Bright fill, Ink text/icons (~8.21:1,
- *    AAA — see the token's own comment in global.css for why this is a
- *    genuinely different, lighter shade from the shared Guard Olive
- *    token used everywhere else, not the same colour restated).
- *    Superseded, kept only as history: an earlier pass here used a
- *    Paper background with Stone text (~4.6:1, AA) — that reasoning
- *    doesn't apply any more now the fill itself is Olive Bright, not
- *    Paper.
+ * 1. Info bar — solid Guard Yellow fill, Ink text/icons (~11.06:1,
+ *    AAA — see the token's own comment in global.css for the full
+ *    number). Superseded, kept only as history: earlier passes here
+ *    used first a Paper background with Stone text (~4.6:1, AA), then
+ *    a since-retired "Guard Olive Bright" token (~8.21:1, AAA) — that
+ *    reasoning doesn't apply any more now the fill is Guard Yellow.
  *    Always a single row (`flex flex-nowrap`, never stacks) — phone +
  *    address sit on one line at every width, centered on mobile
  *    (`justify-center`, where there's no wordmark/nav alongside it to
@@ -54,7 +52,7 @@ import NavDrawer from "./NavDrawer.tsx";
  *    eat vertical space on every scroll position for content that only
  *    matters at the top of the page.
  *    No divider below it any more (was a plain hairline `<hr>`) — with
- *    a solid Olive-Bright fill giving way to the Paper nav bar below,
+ *    a solid Guard Yellow fill giving way to the Paper nav bar below,
  *    the colour change itself is the boundary, same reasoning the
  *    sticky nav bar's own `border-b` comment below already establishes
  *    for the opposite case (no colour change = a line is needed; a
@@ -116,7 +114,7 @@ import NavDrawer from "./NavDrawer.tsx";
 ---
 
 <header>
-  <div class="bg-guard-olive-bright">
+  <div class="bg-guard-yellow">
     <div
       class="mx-auto flex flex-nowrap items-center justify-center gap-3 px-gutter py-2 sm:justify-start sm:gap-8 sm:py-2.5 md:px-12"
     >
