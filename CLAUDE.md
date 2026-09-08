@@ -135,9 +135,14 @@ stylistic preference:
   (a numbered, expandable list) and `SectorsStrip.astro` (an edge-to-edge
   photo strip with hairline seams) for the two sanctioned alternative
   treatments already built.
-- **Left-aligned by default.** Centered alignment exists in exactly two
-  sanctioned places sitewide: a pull-quote-style moment (`MissionBand`)
-  and the closing CTA leading into the footer (`ClosingCta`). Don't
+- **Left-aligned by default.** Centered alignment exists in exactly
+  three sanctioned places sitewide: a pull-quote-style moment
+  (`MissionBand`), the closing CTA leading into the footer
+  (`ClosingCta`), and the icon-badge column layout in `StatStrip`
+  (added by explicit direct instruction — see that component's own
+  doc comment for the full reasoning; it was deliberately LEFT-aligned
+  in an earlier pass specifically to avoid a third exception without
+  being asked, then centered in a later pass once asked). Don't
   center a routine heading or hero — `SectionHeading`'s `align` prop
   defaults to `"left"` for this reason.
 - **No stock photography that isn't genuinely relevant to a UK security

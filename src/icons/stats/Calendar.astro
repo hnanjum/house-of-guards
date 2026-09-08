@@ -10,10 +10,16 @@
  * not a styling inconsistency. Pairs "Bespoke shift patterns, not
  * fixed packages."
  *
- * Same house style as the six service icons and Credential.astro —
- * 40×40 viewBox, `stroke-width="1.25"`, square caps, miter joins.
- * Rasterised and visually inspected at 32px and 200px, individually
- * and alongside the other two icons in this set, before shipping.
+ * Same 40×40 viewBox / square caps / miter joins as the six service
+ * icons and Credential.astro. `stroke-width="2"` (was `1.25`) —
+ * bumped for this icon's current context, a white mark on a solid
+ * Guard Green Secondary circular badge (see StatStrip.astro's own
+ * comment) — the original bare-line weight read thin once tested at
+ * real size, and this icon has no other usage site to keep the
+ * thinner weight for. Rasterised and visually inspected at deployed
+ * size and magnified, individually and alongside the other two icons
+ * in this set, both as bare lines originally and again inside the
+ * badge treatment, before shipping either version.
  */
 interface Props {
   class?: string;
@@ -25,7 +31,7 @@ const { class: className } = Astro.props;
   viewBox="0 0 40 40"
   fill="none"
   stroke="currentColor"
-  stroke-width="1.25"
+  stroke-width="2"
   stroke-linecap="square"
   stroke-linejoin="miter"
   class={className}
