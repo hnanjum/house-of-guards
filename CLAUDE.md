@@ -161,14 +161,21 @@ than assumed from whatever the previous accent needed.
   was a single-point-of-truth swap — no component hardcodes a font
   name directly.
 
-Eight composed type-scale utilities live in `global.css` as `@utility`
+Nine composed type-scale utilities live in `global.css` as `@utility`
 rules (`text-display`, `text-h1`, `text-h2`, `text-h3`, `text-body-lg`,
-`text-body`, `text-caption`, `text-micro`), plus `text-wordmark` for the
-site name only. Each one bundles font-family + size + line-height +
-weight in a single class — never assemble a heading from a raw Tailwind
-size utility (`text-2xl`) or an arbitrary value (`text-[17px]`); if a new
-size is genuinely needed, add it as a ninth named step here, don't
-improvise one inline.
+`text-body`, `text-caption`, `text-micro`, `text-fine`), plus
+`text-wordmark` for the site name only. Each one bundles font-family +
+size + line-height + weight in a single class — never assemble a
+heading from a raw Tailwind size utility (`text-2xl`) or an arbitrary
+value (`text-[17px]`); if a new size is genuinely needed, add it as a
+named step here, don't improvise one inline. `text-fine` (10px, weight
+500) is the most recent example of this rule actually being followed —
+added specifically for `ServicesGrid.astro`'s card body copy when
+`text-caption` (14px) needed to shrink further than the scale's
+previous smallest step, `text-micro` (12px, deliberately scoped to
+"legal/footer only"), could honestly cover. See `text-fine`'s own
+comment in `global.css` for the full reasoning, including why it's a
+genuinely new step rather than a repurposed `text-micro`.
 
 ## Hard rules — do not violate these regardless of what a future prompt asks, unless the user explicitly overrides one
 
@@ -511,6 +518,66 @@ treatment for these icons without a real reason to.
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number is on `origin/main`.
+
+- **PR #19 — ServicesGrid's card body copy shrunk a second time, past
+  `text-caption` (14px), onto a genuinely new ninth type-scale step,
+  `text-fine` (10px).** Direct follow-up instruction: "quite a bit
+  smaller… not just one more type-scale step down." The scale's only
+  other existing step below `text-caption` — `text-micro` (12px) — is
+  deliberately scoped to "legal/footer only" by its own comment, and
+  reusing it would have both understated the requested drop (14px →
+  12px is one tier, not the two-or-more asked for) and blurred that
+  scoping. Per this project's own standing rule ("if a new size is
+  genuinely needed, add it as a ninth named step… don't improvise one
+  inline"), added `text-fine` to `global.css` instead of an arbitrary
+  bracket value in the component — 10px, continuing the scale's own
+  roughly-consistent ~1.17–1.21× step-down ratio below `text-micro`,
+  weight 500/line-height 1.5 matching `text-caption`'s own pairing
+  (not `text-micro`'s tighter 1.4, since this tier holds full
+  multi-line sentences, not short legal fragments). Heading size
+  (`text-h3`) and icon size (`size-12`) are unchanged — only the body
+  `<p>` moved.
+
+  **Contrast re-checked at the new size, not assumed to carry over**:
+  the colour-pair ratios themselves (white vs Electric Blue/Magenta,
+  Ink vs Surface Alt) are a function of colour alone and don't move
+  with font size, but which WCAG threshold applies does — confirmed
+  10px/500 still doesn't qualify for the 3:1 "large text" exemption
+  (needs ≥24px any weight or ≥18.66px at 700+; nowhere close either
+  way) any more than 14px/500 did, so this is NOT a threshold
+  crossover the way StatStrip's own 28px→20px change genuinely was —
+  both sizes were always "normal text," needing the full 4.5:1 floor.
+  Re-confirmed all three pairings still clear it: white on Electric
+  Blue ~5.17:1, white on Magenta ~7.26:1, Ink on Surface Alt ~17.8:1 —
+  identical to PR #17's own numbers, since colour (not size) drives
+  these.
+
+  A real `astro check` (0 errors, same pre-existing `ContactForm.tsx`
+  hints) and clean `astro build` were run, plus the dead-CSS-from-
+  comments audit on both touched files — confirmed `text-fine` compiles
+  correctly with real markup usage on all six cards, `text-caption`
+  still compiles correctly for its own remaining real use (Header's
+  info bar), and every other backtick-quoted token touched by this
+  diff is either still-used-elsewhere or empirically confirmed (via the
+  compiled bundle, not assumed) to generate nothing.
+
+- **PR #18 — the two contrast/design decisions PR #17 flagged
+  (Amber's nav-underline contrast, Hero's scrim opacity) were reviewed
+  by the user and both confirmed as accepted tradeoffs, not open
+  items.** Comment-only follow-up (no markup/class changes) — landed as
+  its own small PR rather than folded into #17, since #17 was merged
+  before this documentation commit made it onto the branch (the branch
+  was cherry-picked onto fresh `main` and re-opened as #18 rather than
+  force-pushed over the closed PR). Updated: `global.css`'s Amber token
+  comment, `NavLink.astro`'s own comment, `NavDrawer.tsx`'s mirrored
+  link-hover-border comment, `Hero.astro`'s scrim comment, and this
+  file (colour table, Architecture conventions bullet, PR #17 entry
+  above) — all reframed from "flagged/unresolved" to "reviewed,
+  settled, accepted," so neither gets "fixed" unprompted by a future
+  session. Amber's underline stays at its shipped ~2.15:1 (below the
+  3:1 WCAG 1.4.11 floor, explicitly accepted). Hero's scrim stays at
+  85% opacity/~4.53:1 — the offered 90%-opacity alternative (~4.74:1)
+  was explicitly declined, no code change made.
 
 - **PR #17 — Electric Blue / Magenta / Amber / Cyan-Blue rebrand,
   SCOPED to exactly four sections: Header, Hero, StatStrip, and

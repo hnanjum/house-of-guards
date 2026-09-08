@@ -296,13 +296,15 @@
  * ---------------------------------------------------------------------
  * TYPE SCALE
  * ---------------------------------------------------------------------
- * Eight named text styles. Each one bundles family + size + line-height
- * + weight into a single class, so a component only ever writes
- * `class="text-h2"` (never assembles size/weight/family by hand, and
- * never reaches for a stock Tailwind size like `text-2xl`, which isn't
- * part of this scale). This is the single source of truth for every
- * numeric size/weight value in the project — nowhere else should a
- * font-size or font-weight be written as a literal number.
+ * Nine named text styles (was eight — `text-fine` added for
+ * ServicesGrid's card body copy, see that utility's own comment below).
+ * Each one bundles family + size + line-height + weight into a single
+ * class, so a component only ever writes `class="text-h2"` (never
+ * assembles size/weight/family by hand, and never reaches for a stock
+ * Tailwind size like `text-2xl`, which isn't part of this scale). This
+ * is the single source of truth for every numeric size/weight value in
+ * the project — nowhere else should a font-size or font-weight be
+ * written as a literal number.
  *
  * Fraunces is dialled to low WONK / standard optical size throughout —
  * quiet and weighted, not the font's own default "wonky" personality.
@@ -365,6 +367,37 @@
   font-family: var(--font-sans);
   font-size: 0.75rem; /* 12px — legal/footer only */
   line-height: 1.4;
+  font-weight: 500;
+}
+
+/* NEW STEP — added for ServicesGrid.astro's card body copy, per direct
+   instruction to shrink it "quite a bit," not just one more tier down
+   from `text-caption`. The scale's own smallest existing step,
+   `text-micro`, is deliberately scoped to "legal/footer only" by its
+   own comment above — reusing it here would both understate the
+   requested reduction (`text-caption` → `text-micro` is only 14px →
+   12px, one tier, not the two-tier-or-more drop asked for) and blur
+   `text-micro`'s own documented, narrower role. Per this file's own
+   standing rule ("if a new size is genuinely needed, add it as a ninth
+   named step here, don't improvise one inline"), this is that ninth
+   step, not an arbitrary bracket value dropped into a component.
+   0.625rem (10px) — continues the scale's own roughly-consistent
+   step-down ratio below `text-micro` (each existing step down is
+   ~1.17–1.21× its neighbour; 12px / ~1.2 ≈ 10px) rather than picking
+   an arbitrary smaller number. Weight 500 and line-height 1.5 match
+   `text-caption`'s own pairing (not `text-micro`'s 1.4) — this tier
+   holds full multi-line sentences (ServicesGrid's card body copy),
+   not `text-micro`'s short single-line legal/footer fragments, so it
+   gets the more generous of the two established small-text line-
+   heights. Weight 500 continues this scale's own already-accepted
+   quirk (documented on `text-caption` and `text-micro` both) that
+   smaller steps run heavier, not lighter, for legibility at reduced
+   size — deliberately consistent with that pattern rather than a new
+   one-off decision. */
+@utility text-fine {
+  font-family: var(--font-sans);
+  font-size: 0.625rem; /* 10px — small supporting/description copy, e.g. ServicesGrid card body */
+  line-height: 1.5;
   font-weight: 500;
 }
 
