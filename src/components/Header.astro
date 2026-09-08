@@ -20,16 +20,35 @@ import NavDrawer from "./NavDrawer.tsx";
  *    Paper background with Stone text (~4.6:1, AA) — that reasoning
  *    doesn't apply any more now the fill itself is Olive Bright, not
  *    Paper.
- *    Always a single row (`flex`, never stacks) — phone + address sit
- *    on one line at every width, centered on mobile (`justify-center`,
- *    where there's no wordmark/nav alongside it to align against) and
- *    left-aligned from `sm:` up (`sm:justify-start`, matching the nav
- *    bar's own left edge below it). Real per-glyph width measurements
- *    against the actual Montserrat font file (not eyeballed) confirmed
- *    both strings already fit on one line at 375/390px at the existing
- *    icon/text sizes with real margin to spare (~28–43px slack even at
- *    a comfortable `gap-4` between them) — no further shrink needed;
- *    text/icon sizing is unchanged from before. Small line icons
+ *    Always a single row (`flex flex-nowrap`, never stacks) — phone +
+ *    address sit on one line at every width, centered on mobile
+ *    (`justify-center`, where there's no wordmark/nav alongside it to
+ *    align against) and left-aligned from `sm:` up (`sm:justify-start`,
+ *    matching the nav bar's own left edge below it).
+ *    First pass here (icon `size-3.5`, `gap-4` between the two items,
+ *    unconditional `justify-center`) was checked against real per-glyph
+ *    Montserrat advance widths and came back with real margin at
+ *    375/390px — but the deployed page still overflowed on a real
+ *    device (confirmed via a live screenshot, not a caching issue —
+ *    the correct classes WERE live). The gap between "the numbers say
+ *    it fits" and "it didn't" is almost certainly `min-width: auto`,
+ *    flexbox's own default on every item unless overridden — it can
+ *    stop a flex child from ever shrinking below its own natural
+ *    content width even when the row is told to be smaller, silently
+ *    invalidating a fits-on-paper width budget the moment real-world
+ *    variance (a slightly wider fallback font before Montserrat swaps
+ *    in, a different device's font renderer, anything) pushes the
+ *    actual layout even slightly past it.
+ *    Fixed two ways together, not just one: shrunk further for real
+ *    headroom (icon `size-3`, `gap-1.5` icon-to-text, `gap-3` between
+ *    the two items) AND added a genuine can't-overflow safety net —
+ *    the phone link gets `shrink-0` (a phone number must never
+ *    truncate, and it's short enough to never need to), the address
+ *    gets `min-w-0` (the actual override for flexbox's shrink-blocking
+ *    default) plus its text wrapped in `truncate` — so if real-world
+ *    width ever runs tighter than expected again, the address ellipses
+ *    gracefully instead of overflowing the viewport, and the phone
+ *    number is guaranteed to stay whole either way. Small line icons
  *    matching the existing icon set's stroke weight. Not sticky
  *    (scrolls away with the page) — a persistent presence here would
  *    eat vertical space on every scroll position for content that only
@@ -99,18 +118,18 @@ import NavDrawer from "./NavDrawer.tsx";
 <header>
   <div class="bg-guard-olive-bright">
     <div
-      class="mx-auto flex items-center justify-center gap-4 px-gutter py-2 sm:justify-start sm:gap-8 sm:py-2.5 md:px-12"
+      class="mx-auto flex flex-nowrap items-center justify-center gap-3 px-gutter py-2 sm:justify-start sm:gap-8 sm:py-2.5 md:px-12"
     >
       <a
         href="tel:+441274000000"
-        class="text-micro text-ink hover:text-ink/70 flex items-center gap-2 transition-colors duration-200 ease-out sm:text-caption"
+        class="text-micro text-ink hover:text-ink/70 flex shrink-0 items-center gap-1.5 transition-colors duration-200 ease-out sm:gap-2 sm:text-caption"
       >
-        <Phone class="size-3.5 shrink-0 sm:size-4" />
+        <Phone class="size-3 shrink-0 sm:size-4" />
         01274 000 000
       </a>
-      <p class="text-micro text-ink flex items-center gap-2 sm:text-caption">
-        <Location class="size-3.5 shrink-0 sm:size-4" />
-        Bradford, West Yorkshire
+      <p class="text-micro text-ink flex min-w-0 items-center gap-1.5 sm:gap-2 sm:text-caption">
+        <Location class="size-3 shrink-0 sm:size-4" />
+        <span class="truncate">Bradford, West Yorkshire</span>
       </p>
     </div>
   </div>
