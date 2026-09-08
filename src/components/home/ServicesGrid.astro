@@ -121,19 +121,48 @@ import OvernightSecurity from "../../icons/services/OvernightSecurity.astro";
  * alignment exceptions (`MissionBand`, `ClosingCta`), matching the
  * hard rule directly.
  *
- * BODY TEXT — reduced one named tier per explicit instruction:
- * `text-body` (17px) → `text-caption` (14px), the same "read the
- * current class, step down exactly one tier on the 8-step scale"
- * discipline already used on Hero and StatStrip. Worth flagging the
- * same weight quirk StatStrip's own comment already documents for this
- * exact scale, since it applies here too: `text-caption` (14px) is
- * weight 500, genuinely HEAVIER than `text-body` (17px, weight 400) —
- * so this card's body copy reads a touch BOLDER at its new, smaller
- * size than it did before, not lighter. Not corrected by hand-
- * overriding the step's own bundled weight (this system's type scale
- * is deliberately one bundled family+size+weight unit per named step,
- * not freely recombinable) — accepted as-is, matching the precedent
- * StatStrip's own comment already set for this identical situation.
+ * BODY TEXT — went through TWO reductions, not one. First pass (the
+ * Electric-Blue/Magenta/Amber rebrand) stepped down exactly one named
+ * tier: `text-body` (17px) → `text-caption` (14px), the same "read the
+ * current class, step down exactly one tier" discipline already used
+ * on Hero and StatStrip. A direct follow-up instruction asked for
+ * "quite a bit smaller… not just one more type-scale step down" —
+ * `text-caption` → `text-fine` (10px, a NEW ninth step added to the
+ * scale specifically for this, see its own comment in `global.css`),
+ * since the scale's only other existing smaller step, `text-micro`
+ * (12px), is deliberately scoped to "legal/footer only" and would only
+ * have been one tier down anyway, not the requested two-tier-or-more
+ * drop. Heading size (`text-h3`) and icon size (`size-12`) are
+ * UNCHANGED by either pass — only this one paragraph moved.
+ *
+ * CONTRAST, RE-CHECKED at 10px rather than assumed to still hold from
+ * the 14px pairing — the actual colour-pair ratios (white vs Electric
+ * Blue/Magenta, Ink vs Surface Alt) are a function of the two COLOURS
+ * only and don't change with font size, but which WCAG threshold
+ * applies (3:1 "large text" vs 4.5:1 "normal text") does depend on
+ * size/weight, and that's the thing that genuinely needed re-deriving,
+ * not assuming: WCAG's large-text exemption needs ≥24px at any weight,
+ * or ≥18.66px at 700+ weight — 14px/500 never qualified for it, and
+ * 10px/500 doesn't either, so this is NOT a threshold crossover (unlike
+ * StatStrip's own 28px→20px change, which genuinely did cross out of
+ * the large-text exemption) — both sizes were always squarely "normal
+ * text," needing the full 4.5:1 floor, both before and after this
+ * change. Re-confirmed the three pairings still clear it: white on
+ * Electric Blue ~5.17:1, white on Magenta ~7.26:1, Ink on Surface Alt
+ * ~17.8:1 — all unchanged from the rebrand's own numbers (colour, not
+ * size, drives these) and all still real, comfortable margin above
+ * 4.5:1.
+ *
+ * Worth flagging the same weight quirk StatStrip's own comment already
+ * documents for this scale, since it applies again here: `text-fine`
+ * (10px) is weight 500, same as `text-caption` was — so this card's
+ * body copy is still technically no lighter in weight than the
+ * original `text-body` (17px, weight 400), just considerably smaller.
+ * Not corrected by hand-overriding the step's own bundled weight (this
+ * system's type scale is deliberately one bundled family+size+weight
+ * unit per named step, not freely recombinable) — accepted as-is,
+ * matching the precedent StatStrip's own comment already set for this
+ * identical situation.
  *
  * ICONS — six bespoke SVGs, GEOMETRY UNCHANGED from PR #16 (same six
  * file paths under `src/icons/services/`, same paths inside, same
@@ -244,7 +273,7 @@ const ICON_ACCENT_CLASS: Record<IconAccent, string> = {
           <div data-services-reveal class:list={["flex flex-col items-start p-8 text-left sm:p-10", FILL_CLASS[fill]]}>
             <Icon class:list={["mb-6 size-12", fill === "light" && iconAccent && ICON_ACCENT_CLASS[iconAccent]]} />
             <h3 class="text-h3 mb-3">{name}</h3>
-            <p class="text-caption">{body}</p>
+            <p class="text-fine">{body}</p>
           </div>
         ))
       }
