@@ -396,7 +396,7 @@
    one-off decision. */
 @utility text-fine {
   font-family: var(--font-sans);
-  font-size: 0.625rem; /* 10px — small supporting/description copy, e.g. ServicesGrid card body */
+  font-size: 0.75rem; /* 10px — small supporting/description copy, e.g. ServicesGrid card body */
   line-height: 1.5;
   font-weight: 500;
 }
