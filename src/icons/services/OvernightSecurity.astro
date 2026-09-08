@@ -1,12 +1,77 @@
 ---
 /**
- * "Night Patrol" — a crescent above a dashed patrol route with waypoint
- * markers. Night plus movement, not a decorative moon alone.
+ * "Crescent" — a plain crescent moon, nothing else. Drops the old
+ * accordion-only "Night Patrol" concept's dashed route + waypoint dots
+ * deliberately, not by oversight — this six-icon set's "movement/
+ * patrol" idea now belongs to Manned Guarding's footprint mark (see
+ * that icon's own comment), so keeping a second patrol-route motif
+ * here would duplicate meaning across two cards; a standalone crescent
+ * reads cleanly as "night" on its own without it.
  *
- * The three waypoint dots are the one deliberate exception to this
- * icon set's stroke-only rule — a 1px-radius stroked circle at this
- * stroke-width renders as a faint blob rather than a clean dot, so they
- * are small solid fills instead.
+ * NOT a naive rescale of the old icon's own path formula — a first
+ * attempt at doing exactly that (scaling the old `M17 7 A7 7 0 1 0 17
+ * 21 A5 5 0 1 1 17 7 Z`-style two-arcs-sharing-both-endpoints
+ * construction) rasterised as a uniform-width "C"/bracket shape, not a
+ * tapered crescent, in the mandatory check. Root cause, found by
+ * checking the actual maths rather than re-guessing coordinates: an
+ * SVG arc's radius is silently scaled UP if the two given endpoints
+ * are geometrically too far apart for that radius to reach (per the
+ * SVG spec's own arc-out-of-range rule) — the old formula's inner arc
+ * radius (5, given the same top/bottom endpoints as the outer arc's
+ * own valid radius 7) was already below the minimum radius those two
+ * points require, so the renderer silently scaled it up to match the
+ * OUTER arc's radius, collapsing the intended two-different-radii
+ * crescent into two arcs of the SAME effective radius — a symmetric
+ * lens/band, not a crescent. (Whether the retired original ever
+ * actually rendered as a true crescent, or had this same latent bug
+ * the whole time, was never separately confirmed — it was read from
+ * source, never rasterised, before being retired outright.)
+ *
+ * Rebuilt here from real circle-circle intersection geometry instead
+ * of guessed endpoints: an outer circle (r=13, centre (18,20)) and a
+ * smaller inner circle (r=11, centre (25,20)) that genuinely overlap,
+ * with the path's two endpoints computed as the ACTUAL points where
+ * those two circles cross (≈(24.93, 9) and (24.93, 31) — real
+ * intersection points, not chosen by eye), so neither arc needs any
+ * spec-mandated radius correction and the crescent tapers to real
+ * points top and bottom rather than staying a constant band width.
+ *
+ * SOLID FILL, not stroke-only — the one deliberate exception to this
+ * whole icon's own `fill="none"` house style, checked empirically
+ * rather than assumed either way: with the intersection geometry above
+ * genuinely correct, a stroke-only render of the same closed path
+ * still rasterised as two visibly separate nested curves converging at
+ * the horn tips (both the outer and inner edge of the sliver are real,
+ * separately-visible lines when only the outline is stroked) — a solid
+ * fill of the identical path reads immediately and cleanly as a single
+ * crescent silhouette instead. Matches how a crescent moon is drawn in
+ * most real icon sets anyway, and the same small-solid-fill exception
+ * this project's stroke-based icons already make elsewhere for shapes
+ * that don't read cleanly as pure strokes (Manned Guarding's toe-dots,
+ * CctvMonitoring's lens-centre dot) — just applied to the whole shape
+ * here rather than one small detail within it.
+ *
+ * A second, separate mistake was caught before this shipped, worth
+ * recording plainly rather than smoothing over: the FIRST attempt to
+ * apply the verified two-arc-with-correct-sweep-flags formula above to
+ * this actual file transcribed the wrong final sweep-flag by hand (`…
+ * A11 11 0 0 0 24.93 9 Z`, flag 0) instead of the one already confirmed
+ * correct in isolation (`… A11 11 0 0 1 24.93 9 Z`, flag 1) — a single
+ * digit slip that rasterised as a near-solid blob with only a faint
+ * dimple, not a crescent, and was NOT obviously a "one digit is wrong"
+ * kind of failure to look at. Caught by diffing the exact `d` string
+ * actually shipped in this file, byte for byte, against the
+ * independently-rendered-and-confirmed-correct test value, rather than
+ * re-deriving the geometry again or trusting a second look at the
+ * broken render to spot it. The lesson: once a path string has been
+ * empirically verified correct in isolation, copy it byte-for-byte
+ * into the real file and diff the two — don't retype it from memory or
+ * from the surrounding derivation, even a value that was JUST
+ * confirmed working two minutes earlier.
+ *
+ * Colour inherits via `currentColor` (set directly on the path, not
+ * relying on the wrapping `<svg>`'s own `fill="none"` default, same as
+ * every other small solid-fill element in this icon set).
  */
 interface Props {
   class?: string;
@@ -18,15 +83,15 @@ const { class: className } = Astro.props;
   viewBox="0 0 40 40"
   fill="none"
   stroke="currentColor"
-  stroke-width="1.25"
+  stroke-width="2"
   stroke-linecap="square"
   stroke-linejoin="miter"
   class={className}
   aria-hidden="true"
 >
-  <path d="M17 7 A7 7 0 1 0 17 21 A5 5 0 1 1 17 7 Z" />
-  <path d="M7 33 Q20 29 33 33" stroke-dasharray="2 2" />
-  <circle cx="13" cy="30.5" r="1" fill="currentColor" stroke="none" />
-  <circle cx="20" cy="29.3" r="1" fill="currentColor" stroke="none" />
-  <circle cx="27" cy="30.5" r="1" fill="currentColor" stroke="none" />
+  <path
+    d="M24.93 9 A13 13 0 1 0 24.93 31 A11 11 0 0 1 24.93 9 Z"
+    fill="currentColor"
+    stroke="none"
+  />
 </svg>

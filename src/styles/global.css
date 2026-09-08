@@ -75,9 +75,12 @@
          floor), this fill clears the FULL 4.5:1 normal-text floor even
          as a bare mark directly on Paper — genuinely no "fill-only"
          limitation this time. Every bare-mark use (NavLink's active
-         underline, ServicesIndex's open-state icon + border, the
-         Hero/ClosingCta phone-link hover decoration) is a real,
-         compliant pairing now, not a flagged gap. */
+         underline, the Hero/ClosingCta phone-link hover decoration) is
+         a real, compliant pairing now, not a flagged gap. Also the
+         fill for every "green" card in ServicesGrid's checkerboard —
+         see that component's own doc comment; ServicesIndex (the old
+         accordion this fill's icon/open-state border used to belong
+         to) was fully retired when ServicesGrid replaced it. */
   --color-guard-green-secondary: #366c00;
 
   --color-guard-green-deep: #081f18; /* an independent dark, near-black-green surface — the fallback for anywhere the current accent (Guard Green Secondary)'s own fill can't carry the text colour it needs: the mission-band pull-quote's own text stays legible some other way (see MissionBand.astro), and it's still the primary/secondary button hover colour. White text on it measures ~17.2:1 (AAA) */
@@ -111,6 +114,38 @@
      the icons using this pairing are non-text graphics (WCAG 1.4.11,
      3:1 floor) with even more margin to spare. */
   --color-surface-alt: #f5f5f5;
+
+  /* SCOPED, NON-ACCENT TOKEN — read this before touching it. This is
+     `#FFB606`, the SAME hex as the long-retired `guard-yellow` token
+     (see CLAUDE.md's own "Retired tokens" note and its Recent-history
+     PR #4/#5 entries — that token no longer exists anywhere in this
+     file) — a deliberate coincidence, not a
+     revival. Guard Yellow was retired sitewide because it "didn't work
+     out visually" as a primary accent; this token is NOT that decision
+     being reversed. It exists for exactly one place — the alternating
+     checkerboard fill in `ServicesGrid.astro` (every second card) — by
+     explicit instruction, with an explicit instruction NOT to reuse it
+     as a second general-purpose accent anywhere else in the system.
+     Named `services-accent-yellow`, not `guard-yellow` or `accent-2` or
+     anything that reads as a returning sitewide colour, specifically so
+     a future session grepping for "accent" or skimming this file's own
+     colour table doesn't mistake it for one. If a second use for this
+     exact hex is ever genuinely wanted elsewhere, that's a real decision
+     to make explicitly (and probably rename this token when it's made),
+     not something to infer from this token already existing.
+     Real WCAG numbers, computed fresh — NOT assumed to inherit Guard
+     Yellow's old retired numbers just because the hex is identical
+     (the calculation doesn't care about a token's history, but it's
+     worth confirming rather than trusting memory): relative luminance
+     L≈0.5473. Ink on this fill: ~11.06:1 (AAA, real margin). White on
+     this fill: ~1.76:1 — fails even the lenient 3:1 non-text floor.
+     ServicesGrid's yellow cards use Ink text/icons/focus-ring as a
+     result — the opposite pairing from its green neighbour cards,
+     which is exactly why this can't be folded into a single shared
+     "on-dark" treatment across the whole checkerboard; see that
+     component's own doc comment for how the two are switched per
+     card. */
+  --color-services-accent-yellow: #ffb606;
 
   /* Font families. Referenced directly by the composed type-scale
      utilities below, and also usable standalone (e.g. `font-display`
