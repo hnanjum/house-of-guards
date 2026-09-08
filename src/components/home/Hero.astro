@@ -56,15 +56,22 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
  * mobile browser chrome/dynamic-toolbar resize quirks on what's
  * already a bottom-anchored overlay composition.
  *
- * FULL-IMAGE TINT — a second, separate `bg-guard-green-deep/18` layer
- * sitting between `<Image>` and the text panel, covering the ENTIRE
- * section (not just behind the text) for a slightly moodier, more
- * premium feel — independent of, and unchanged from, the text-panel
- * scrim below it. Decorative only (`aria-hidden`, `pointer-events-
- * none`); no explicit z-index needed, since an `absolute` element
- * later in the DOM than `<Image>` but earlier than the `z-10` content
- * wrapper already paints above the image and below the text, which is
- * all this layer needs to do.
+ * FULL-IMAGE TINT — a second, separate `bg-ink/28` layer sitting
+ * between `<Image>` and the text panel, covering the ENTIRE section
+ * (not just behind the text) for a moodier, more premium feel —
+ * independent of the text-panel scrim below it, which keeps its own
+ * colour (Guard Green Deep) unchanged. Ink (`#0d0d0d`, rgb(13,13,13))
+ * was used rather than a new raw `#000000` specifically because it's
+ * ALREADY a genuinely neutral near-black — R=G=B, zero hue, checked
+ * before reusing it rather than assumed — so this stays inside the
+ * existing token system with no exception needed (this was originally
+ * Guard Green Deep at 18% opacity; switched to Ink at 28% per direct
+ * feedback that the tint should read as neutral black, not green, and
+ * be more pronounced). Decorative only (`aria-hidden`, `pointer-
+ * events-none`); no explicit z-index needed, since an `absolute`
+ * element later in the DOM than `<Image>` but earlier than the `z-10`
+ * content wrapper already paints above the image and below the text,
+ * which is all this layer needs to do.
  *
  * TEXT-PANEL SCRIM — a FLAT, uniform-opacity `bg-guard-green-deep/85`
  * panel behind the text, not a percentage-based gradient. A gradient's
@@ -77,24 +84,40 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
  *
  * Real WCAG math, worst case (the underlying photo assumed PURE WHITE
  * #FFFFFF, the most extreme case it could ever show through), and
- * RE-DERIVED (not assumed carried over) now that the tint and the
- * scrim stack on top of each other under the text panel: because both
- * layers are the identical colour, two same-colour layers composite
- * into one effective layer at combined alpha = s + (1−s)·t (standard
- * same-colour src-over stacking), where s=0.85 (scrim) and t=0.18
- * (tint) → 0.85 + 0.15×0.18 ≈ 0.877. Blended colour at that combined
- * alpha ≈ rgb(38,59,52) → white-text contrast ≈ 12.0:1 (AAA) — HIGHER
- * than the original single-layer figure of 10.9:1, since stacking more
- * of the same dark colour over a white worst case can only darken it
- * further; confirmed by the actual recomputed number, not assumed from
- * that intuition alone. `outline-light`'s white border/text and the
- * default-safe-focus-ring question (`on-dark` swaps the ring to Paper
- * — needed here for the same reason it's needed on StatStrip/the
- * header info bar: this combined panel is far too dark for the
- * default Ink ring) both sit on this same combined panel, so the same
- * 12.0:1 covers them too. Button.astro's `primary` variant is
- * unaffected either way — its own opaque fill sits on top of both
- * layers regardless.
+ * RE-DERIVED FROM SCRATCH for this pass — the tint and scrim are now
+ * two DIFFERENT colours (Ink, Guard Green Deep), so the same-colour
+ * "just add the alphas" shortcut used for the previous green-on-green
+ * version no longer applies; this needed genuine two-step alpha
+ * compositing (photo → Ink at 28% → Guard Green Deep at 85% on top),
+ * not a reused formula: rgb(13,13,13)@28% over white →
+ * rgb(187,187,187), then rgb(8,31,24)@85% over THAT →
+ * rgb(34.9,54.4,48.5) → white-text contrast ≈ **12.72:1** (AAA) —
+ * higher than both the original single-layer figure (10.9:1) and the
+ * prior green-on-green two-layer figure (12.0:1). `outline-light`'s
+ * white border/text and the default-safe-focus-ring question
+ * (`on-dark` swaps the ring to Paper — needed here for the same
+ * reason it's needed on StatStrip/the header info bar: this combined
+ * panel is far too dark for the default Ink ring) both sit on this
+ * same combined panel, so the same 12.72:1 covers them too.
+ * Button.astro's `primary` variant is unaffected either way — its own
+ * opaque fill sits on top of both layers regardless.
+ *
+ * FLAGGED, NOT SILENTLY SHIPPED — a real seam risk at the panel's own
+ * edge, worth a live check: the previous (green tint + green scrim)
+ * version had ONE hue everywhere, so the panel boundary was purely a
+ * brightness step (lightly-tinted photo outside, much darker green
+ * panel inside) — cohesive. This version's tint-only worst case
+ * (outside the panel) is a NEUTRAL grey, rgb(187,187,187) — zero hue —
+ * while the panel itself is still a saturated dark green. That's a
+ * genuine HUE shift at the boundary on top of the usual brightness
+ * step, which risks reading as a differently-coloured rectangle
+ * pasted onto the image rather than a natural darkening. Not fixed
+ * here — the brief was explicit that the scrim keeps its own colour
+ * and the two layers stay separate — but check this specific edge
+ * live before considering it finished; if it reads as a visible seam,
+ * the two most likely fixes are matching the scrim to Ink instead of
+ * Guard Green Deep, or a soft edge blend, neither of which is
+ * implemented speculatively here.
  *
  * HEADER LEGIBILITY — the tint only affects the hero `<section>`
  * itself. `Header.astro`'s info bar and main nav are separate, fully
@@ -107,15 +130,25 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
  * HEADLINE SIZE — `text-h3 sm:text-h2`, stepped down one named tier at
  * each breakpoint from the first version of this component (base
  * text-h2, sm: text-h1) per direct feedback that the original read
- * too large against the subhead/CTAs. Still deliberately not
- * `text-display` (88px, this system's own "hero statement only" size)
- * — already ruled out in the original build given this headline's
+ * too large against the subhead/CTAs. Still deliberately not this
+ * system's own 88px "hero statement only" display size — already
+ * ruled out in the original build given this headline's
  * length, which would wrap into enough lines at 88px to risk the
  * exact below-the-fold problem the section-height math above works
  * around. The text panel has no explicit height anywhere — `w-full`/
  * `lg:max-w-lg` plus padding only — it's sized purely by its own
  * content, so this reduction shrinks the panel automatically; no
  * separate height adjustment was needed or made.
+ *
+ * SUBHEAD SIZE — `text-body` (17px, this system's own "running copy"
+ * size), stepped down one named tier from the first version of this
+ * component (`text-body-lg`, 20px) — read the current class before
+ * changing it rather than guessing a size, same discipline as the
+ * headline reduction above. Headline and button sizes are untouched.
+ * Same as the headline case: the text panel has no explicit height,
+ * so it shrinks to match the smaller subhead automatically — confirmed
+ * in the compiled output, not assumed, same as every other size change
+ * on this component.
  *
  * Mobile does NOT reuse the desktop's right-column placement — a
  * full-width band anchored to the bottom of the image (edge-to-edge,
@@ -148,7 +181,7 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
     fetchpriority="high"
   />
 
-  <div aria-hidden="true" class="bg-guard-green-deep/18 pointer-events-none absolute inset-0"></div>
+  <div aria-hidden="true" class="bg-ink/28 pointer-events-none absolute inset-0"></div>
 
   <div class="relative z-10 flex h-full flex-col justify-end lg:mx-auto lg:max-w-7xl lg:flex-row lg:items-center lg:justify-end lg:px-12">
     <div
@@ -157,7 +190,7 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
       <h1 data-hero-reveal class="text-h3 text-paper sm:text-h2">
         Security You Can Rely On, Every Hour of the Week
       </h1>
-      <p data-hero-reveal class="text-body-lg text-paper mt-5 max-w-md">
+      <p data-hero-reveal class="text-body text-paper mt-5 max-w-md">
         House of Guards supplies SIA licensed officers, stewards and CCTV
         operators to businesses, sites and events across the United Kingdom.
       </p>
