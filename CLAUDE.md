@@ -56,33 +56,43 @@ every component reaches for a named token class (`bg-ink`, `text-stone`,
 `border-hairline`, etc.).
 
 **SCOPE OF THE CURRENT PALETTE — read this before touching any colour
-class anywhere on this site.** As of the Electric-Blue/Magenta/Amber
-rebrand, this project runs TWO colour systems side by side, split by
-SECTION, not by preference:
-- **Header, Hero, StatStrip, and `ServicesGrid.astro`** use the new
-  four-colour system below (Electric Blue, Magenta, Amber, Cyan-Blue).
-  Guard Green Secondary and Guard Green Deep are RETIRED from these
-  four sections specifically — neither appears anywhere in
-  `Header.astro`, `Hero.astro`, `StatStrip.astro`, or
-  `ServicesGrid.astro` any more, confirmed via a full repo grep before
-  each PR describing itself as done.
-- **`MissionBand.astro` and `ClosingCta.astro`** still use Guard Green
-  Deep (Mission Band's own full-bleed fill) and Guard Green Secondary
-  (Closing CTA's phone-link hover decoration) UNCHANGED — both
-  sections are pending a SEPARATE future redesign and were explicitly
-  out of scope for the rebrand. Both Guard Green tokens are kept
-  defined in `global.css` (not deleted) purely so those two references
-  don't break — this is NOT an oversight or a partial rollout, it's a
-  deliberate, disclosed boundary. Don't "finish the job" by touching
-  Mission Band or Closing CTA without a real instruction to redesign
-  them, and don't delete either Guard Green token while those two
-  sections still reference it.
-- `Button.astro`'s `secondary` variant (Ink fill, hover to Guard Green
-  Deep) also still references Guard Green Deep — it has zero real call
-  sites anywhere in the codebase today, so it's dormant, not rendered
-  inside any of the four rebranded sections; left as-is rather than
-  repointed, since it isn't Mission Band/Closing CTA but also isn't one
-  of the four sections' own visible surfaces.
+class anywhere on this site.** This project now runs TWO colour systems
+side by side, split by SECTION, not by preference — the boundary has
+moved twice (the original four-section rebrand, then MissionBand's own
+redesign pulling it out of the Guard Green side too) and is genuinely
+down to ONE section on the old palette now, not the original four-vs-
+two split. Don't assume the older "four rebranded, two still Guard
+Green" framing still describes the current boundary:
+- **Header, Hero, StatStrip, `ServicesGrid.astro`, and now
+  `MissionBand.astro`** all use the new palette (Electric Blue, Magenta,
+  Amber, Cyan-Blue — MissionBand specifically uses Amber only, for its
+  underline rule and button, plus plain Paper/Ink for everything else
+  including its own caption, corrected there from an initial Amber
+  contrast failure — see the colour table's own Amber row and the
+  PR #20 history entry for the full story; it doesn't touch Electric
+  Blue or Magenta at all). Guard Green Secondary and Guard
+  Green Deep are RETIRED from all five of these — neither appears in
+  any of their real rendered markup, confirmed via a full repo grep
+  before each PR describing itself as done.
+- **`ClosingCta.astro`** is now the ONLY section still using a Guard
+  Green token — Guard Green Secondary, for its phone-link hover
+  decoration, unchanged, pending its own separate future redesign. This
+  is the one remaining reason `--color-guard-green-secondary` stays
+  defined in `global.css`.
+- **`Button.astro`'s `secondary` variant** (Ink fill, hover to Guard
+  Green Deep) is the ONLY remaining reference to Guard Green Deep
+  anywhere in the codebase, now that MissionBand no longer uses it —
+  and it's a DORMANT one: this variant has zero real call sites
+  anywhere on the site, so nothing actually renders this colour today.
+  This is the one remaining reason `--color-guard-green-deep` stays
+  defined — the class name is still real, literal text in
+  `Button.astro`'s own source, which is all Tailwind's scanner needs to
+  keep generating it; deleting the theme token would silently break
+  that dormant variant's compiled CSS the moment it's ever activated,
+  even though nothing on the live site would visibly change today.
+  Don't delete either Guard Green token while these two real
+  references still exist, and don't "finish the job" on `ClosingCta`
+  without a real instruction to redesign it.
 
 | Token | Hex | Role |
 |---|---|---|
@@ -90,14 +100,14 @@ SECTION, not by preference:
 | `paper` | `#FFFFFF` | The default background everywhere; also the text colour on every dark fill below |
 | `electric-blue` | `#2563EB` | **Primary block/background colour** (Header/Hero/StatStrip/ServicesGrid only) — Header's info-bar fill, StatStrip's fill, Hero's text-panel scrim (translucent, 85%), ServicesGrid's Manned Guarding/Overnight Security cards and Corporate Security's icon stroke. White/Paper on the opaque fill: ~5.17:1 (AA). Ink on it: ~3.76:1 — clears the 3:1 non-text floor but fails 4.5:1, so text/icons stay white. As an icon-stroke mark on a light card: ~5.17:1 vs Paper, ~4.74:1 vs Surface Alt — both clear 3:1 with real margin. See `global.css`'s own token comment for the full derivation, including Hero's own two-step translucent-panel composite (~4.53:1, a genuine but thin pass, flagged in that file) |
 | `magenta` | `#A5195C` | **Secondary block/background colour** (ServicesGrid only) — Close Protection's card fill, CCTV Monitoring's and Construction Site Security's icon stroke. White on the fill: ~7.26:1 (AAA, the strongest fill pairing in this rebrand). Ink on it: ~2.68:1 — fails even the lenient 3:1 floor outright, so this fill never carries Ink. As an icon-stroke mark on a light card: ~7.26:1 vs Paper, ~6.66:1 vs Surface Alt |
-| `amber` | `#F59E0B` | **The sole button/CTA colour, sitewide, no exceptions** — `Button.astro`'s `primary` variant, `NavDrawer.tsx`'s hand-matched CTA, and (as a bare non-text mark) the header nav's active-link underline. Ink on this fill: ~9.05:1 (AAA) — buttons therefore use INK text, a genuine reversal from Guard Green Secondary's own white-text pairing. White on it: ~2.15:1, fails even 3:1. **Bare-mark contrast (the nav underline directly on Paper) is ~2.15:1, below the 3:1 WCAG 1.4.11 floor — flagged in PR #17, reviewed by the user against this exact number, and explicitly KEPT AS-IS as an accepted tradeoff. This is a settled decision, not an open item — don't "fix" it without a fresh, explicit ask.** See `NavLink.astro`'s own comment |
+| `amber` | `#F59E0B` | **The sole button/CTA colour, sitewide, no exceptions** — `Button.astro`'s `primary` variant, `NavDrawer.tsx`'s hand-matched CTA, `MissionBand.astro`'s "More about us" button (the same unmodified `primary` variant, not a one-off), and (as a bare non-text mark ONLY) the header nav's active-link underline plus MissionBand's own underline rule. Ink on this fill: ~9.05:1 (AAA) — buttons therefore use INK text, a genuine reversal from Guard Green Secondary's own white-text pairing. White on it: ~2.15:1, fails even 3:1. **Bare-mark contrast (a non-text mark directly on Paper — the nav underline, MissionBand's own underline rule) is ~2.15:1, below the 3:1 WCAG 1.4.11 floor — flagged in PR #17, reviewed by the user against this exact number, and explicitly KEPT AS-IS as an accepted tradeoff for that USE (a decorative mark). This is a settled decision for bare marks, not an open item — don't "fix" it without a fresh, explicit ask.** **AMBER IS NEVER SAFE AS RUNNING TEXT COLOUR ON PAPER — this was tried once and reverted.** `MissionBand.astro`'s caption initially shipped with Amber text too (PR #20's own first commit), flagged at the time as a genuinely different, more severe case than the bare-mark precedent (text needs the 4.5:1 floor, not 3:1, and ~2.15:1 fails both) — confirmed on review to be a real contrast-failure BUG, not a style preference, and corrected outright to Ink (a follow-up commit on the same PR). Don't reach for Amber as a `text-*` foreground colour anywhere on this site; every safe use of this token is either a fill (with Ink text on top) or a bare non-text mark. See `NavLink.astro`'s and `MissionBand.astro`'s own comments |
 | `cyan-blue` | `#0EA5E9` | **Rare accent only — never a section/card background fill.** Not applied anywhere in Header/Hero/StatStrip/ServicesGrid as of this rebrand (no per-section spec called for it); defined and fully contrast-checked so it's ready the moment a hover state or icon detail needs it. White on this fill: ~2.77:1 — fails even 3:1, so white is never a safe foreground here, including as a bare mark on Paper (same number, symmetric). Ink on it: ~7.01:1 (AAA) — the only safe foreground for this token |
 | `stone` | `#6E6E6E` | Secondary text on Paper only (captions, meta, credential lines). ~4.6:1 on white — 14px and above only |
 | `hairline` | `#E4E4E4` | Borders/rules/seams on Paper. Perfectly neutral (R=G=B) — never a warm greige |
 | `footer-grey` | `#2A2A2A` | The footer's own dark neutral. Distinct from `ink` and every accent tried on purpose, so the footer reads as its own zone rather than sliding into whatever the current accent happens to be |
 | `surface-alt` | `#F5F5F5` | A light, neutral surface for a background that needs to read as visually distinct from Paper without becoming a bold accent band — ServicesGrid's light/non-filled cards (Corporate Security, CCTV Monitoring, Construction Site Security). Ink on it: ~17.8:1 (AAA) |
-| `guard-green-secondary` | `#366C00` | **RETIRED from Header/Hero/StatStrip/ServicesGrid.** Still live, unchanged, for `ClosingCta.astro`'s own phone-link hover decoration only. White/Paper on it: ~6.36:1 (AA). Ink on it: ~3.06:1 (fails 4.5:1) |
-| `guard-green-deep` | `#081F18` | **RETIRED from Header/Hero/StatStrip/ServicesGrid.** Still live, unchanged, for `MissionBand.astro`'s full-bleed fill and `Button.astro`'s dormant `secondary`-variant hover. White text on it: ~17.2:1 (AAA) |
+| `guard-green-secondary` | `#366C00` | **RETIRED from Header/Hero/StatStrip/ServicesGrid/MissionBand.** Still live, unchanged, for `ClosingCta.astro`'s own phone-link hover decoration — the ONLY remaining reference anywhere in the codebase. White/Paper on it: ~6.36:1 (AA). Ink on it: ~3.06:1 (fails 4.5:1) |
+| `guard-green-deep` | `#081F18` | **RETIRED from every homepage section, including `MissionBand.astro`** (its own full-bleed fill until this pass — see PR #20). The ONLY remaining reference anywhere in the codebase is `Button.astro`'s dormant `secondary`-variant hover — a real class-string in that file's own source, but zero real call sites render it. Kept defined for that one dormant reference only, not deletable. White text on it: ~17.2:1 (AAA) |
 
 All colour-on-background pairings above have been checked against WCAG
 AA by actual relative-luminance calculation (not eyeballed). If a new
@@ -216,11 +226,20 @@ stylistic preference:
   same four-colour system as the rest of the rebranded sections, not a
   fifth scoped-only hue.
 - **No tracked-out ALL-CAPS eyebrow labels above headings** ("WHAT WE
-  DO", "OUR MISSION"). The one sanctioned exception to letter-tracking
-  anywhere on the site is the site wordmark itself (`text-wordmark`) —
-  a persistent identity mark, structurally different from a label
-  repeated above every section. `SectionHeading.astro` has no eyebrow
-  slot at all, by design — don't add one.
+  DO", "OUR MISSION"). **`MissionBand.astro`'s own "Our mission" caption
+  is now a REAL, SCOPED, EXPLICIT exception to this rule** — built on
+  direct instruction naming that exact label, invoking the rule's own
+  stated override clause ("unless the user explicitly overrides one").
+  This is NOT the rule quietly eroding — it's ONE named section, not a
+  reopened invitation to add eyebrow labels elsewhere; `SectionHeading
+  .astro` still has no eyebrow slot at all, by design, and every other
+  routine heading on the site still follows this rule unchanged. The
+  one sanctioned exception to letter-tracking ITSELF (as opposed to
+  this specific tracked-caps-eyebrow pattern) is still the site wordmark
+  (`text-wordmark`) — a persistent identity mark, structurally different
+  from either kind of label. Don't read MissionBand's own exception as
+  licence to add a THIRD tracked-caps element anywhere without the same
+  kind of direct, explicit instruction this one had.
 - **No repeated identical icon/badge across multiple items, and the
   shield/checkmark motif is permanently banned outright** (not just
   "avoid overusing it" — don't use it at all, on anything). The six
@@ -252,16 +271,22 @@ stylistic preference:
   photo strip with hairline seams — sectors). Don't build a FOURTH
   variant, and don't add a border/shadow treatment to either existing
   one, without the same kind of explicit instruction this one had.
-- **Left-aligned by default.** Centered alignment exists in exactly two
-  sanctioned places sitewide: a pull-quote-style moment (`MissionBand`)
-  and the closing CTA leading into the footer (`ClosingCta`).
-  (`StatStrip` briefly carried a third, explicitly-instructed exception
-  for one redesign pass — reverted back to left-aligned in a later
-  pass along with the rest of that section's content/treatment, so
-  this is back to exactly two; don't resurrect that entry assuming it
-  was dropped by mistake.) Don't
-  center a routine heading or hero — `SectionHeading`'s `align` prop
-  defaults to `"left"` for this reason.
+- **Left-aligned by default.** Centered alignment exists in exactly ONE
+  sanctioned place sitewide now: the closing CTA leading into the footer
+  (`ClosingCta`). **This dropped from two to one on direct instruction**
+  when `MissionBand` was rebuilt (PR #20) — its old centred pull-quote
+  is gone, replaced by a genuine two-column image+text layout with the
+  text column left-aligned, matching every other section's own default.
+  Don't resurrect MissionBand as a centred exception assuming this was
+  an oversight; it was a deliberate, called-out change, the same way
+  `StatStrip`'s own brief third exception (introduced then reverted
+  across two earlier passes) was deliberate both times. If a future
+  session finds this rule described as "exactly two" anywhere else in
+  this file (only in Recent History's own dated PR entries, which stay
+  as accurate history rather than being rewritten), that's the state
+  BEFORE PR #20, not the current one. Don't centre a routine heading or
+  hero — `SectionHeading`'s `align` prop defaults to `"left"` for this
+  reason.
 - **No stock photography that isn't genuinely relevant to a UK security
   company.** Every photo currently in the codebase (the hero image, the
   six sector images) is an **unthemed Lorem Picsum placeholder** — fixed
@@ -276,10 +301,24 @@ stylistic preference:
 - **GSAP + ScrollTrigger + Lenis** (`src/lib/smoothScroll.ts`) are the
   primary tools for scroll-based and page-load animation — Lenis is
   wired into GSAP's own ticker so `ScrollTrigger` stays in sync with
-  Lenis's scroll position rather than the native scroll event.
-  `src/lib/heroMuster.ts` (the homepage hero's one orchestrated load-in
-  sequence) and `src/lib/scrollReveal.ts` are the existing examples of
-  this pattern.
+  Lenis's scroll position rather than the native scroll event. Four
+  small, section-scoped modules exist on top of it, each wired into
+  `index.astro`'s own `astro:page-load` handler: `src/lib/heroMuster.ts`
+  (the homepage hero's one orchestrated LOAD-triggered sequence — the
+  one exception to "scroll-triggered," since the hero is already in
+  view on load), `src/lib/scrollReveal.ts` (a plain generic fade/rise,
+  `[data-reveal]`, used by StatStrip), `src/lib/servicesGridReveal.ts`
+  (ServicesGrid's own scale+tilt entrance, `[data-services-reveal]`,
+  one independent trigger PER card), and `src/lib/missionReveal.ts`
+  (MissionBand's own two-part entrance — a pure clip-path image unveil
+  plus a five-beat staggered text cascade, `[data-mission-image]`/
+  `[data-mission-reveal]` — see that module's own comment for why it
+  needed a genuinely different MECHANISM, not just different numbers,
+  to read as distinct from the other three). Each of these four is a
+  real, deliberate design decision about which shape of motion suits
+  that specific section — don't assume any of them is the "default"
+  pattern a fifth section should just copy; read the specific section's
+  own brief first.
 - **Framer Motion is scoped to exactly two React islands** —
   `NavDrawer.tsx` and `ContactForm.tsx` — and only for their own local
   interactive transitions (drawer slide, status-message fade). Never use
@@ -505,8 +544,10 @@ treatment for these icons without a real reason to.
   with two overlapping circles as an infinity motif — reading as a
   target or a face). Never assume a hand-drawn shape reads correctly
   from the path coordinates alone.
-- **This project's 8-step named type scale is not monotonically
-  weighted by size** — `text-caption` (14px) is weight 500, genuinely
+- **This project's named type scale is not monotonically weighted by
+  size** (nine steps as of `text-fine`'s own addition — see the Design
+  system section above; this bullet's own finding predates that step
+  and still holds) — `text-caption` (14px) is weight 500, genuinely
   HEAVIER than `text-body-lg` (20px, weight 400), despite being
   smaller. Don't assume stepping two different elements down the scale
   independently preserves their relative boldness — check the actual
@@ -518,6 +559,134 @@ treatment for these icons without a real reason to.
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number is on `origin/main`.
+
+- **PR #20 — `MissionBand.astro` fully rebuilt: white/Paper background,
+  a real two-column image+text layout, Amber accents, a genuine
+  clip-path image unveil.** Real, disclosed mismatch worth reading
+  before assuming otherwise: the brief described this as "restyle
+  existing structure," but the PREVIOUS `MissionBand.astro` was a
+  single centred pull-quote on solid Guard Green Deep — no image, no
+  caption, no button, no two-column layout. A full repo grep and a
+  `git log -S` search for each exact phrase confirmed none of the six
+  described pieces (caption, headline, underline, two-column grid,
+  button) existed anywhere before this pass — flagged plainly at the
+  time rather than silently building net-new content under a "restyle"
+  label. The two body paragraphs ARE genuine continuity — the previous
+  version's own two sentences, carried over (one had its literal
+  curly-quote punctuation stripped, since it was pull-quote-specific
+  typography, not part of the sentence; the other is byte-for-byte
+  unchanged).
+
+  **New asset**: `src/assets/mission/mission-team.png` (1536×1024,
+  AI-generated — four officers, backs to camera, branded jackets, urban
+  street — noted for provenance, not as a placeholder; this is the real,
+  final asset per direct instruction, the same status `hero-officer.png`
+  already has), placed following that exact same convention and
+  rendered through `astro:assets`' `<Image />`, never a plain `<img>`.
+  REAL geometry checked before choosing a crop, not guessed (same
+  discipline `Hero.astro`'s own comment established): cropped edge
+  strips of the source confirmed the four officers span roughly 5%–95%
+  of the frame width, leaving almost no safe margin for even a modest
+  portrait crop — the image is rendered at its own real native ratio,
+  `aspect-[3/2]`, uncropped, rather than forcing a taller column crop
+  that would have cut into an officer's arm on both edges.
+
+  **TWO real, deliberate, EXPLICIT hard-rule changes, both updated in
+  this same commit so code and doc agree** (the same discipline every
+  prior rule override in this project has followed):
+  - The "no tracked-out ALL-CAPS eyebrow labels" rule gains a second
+    named, scoped exception — MissionBand's own "Our mission" caption,
+    built on direct instruction naming that exact banned example text,
+    invoking the rule's own explicit-override clause.
+  - The "centred alignment in exactly two places" rule drops to
+    EXACTLY ONE (`ClosingCta`) — MissionBand's old centred pull-quote is
+    gone, its text column is left-aligned like every other section's
+    default, and this was a deliberate, called-out change per direct
+    instruction, not an accidental drift a restyle should have avoided.
+
+  **COLOUR — one genuinely severe contrast bug, flagged at ship time,
+  then CONFIRMED and FIXED within the same PR, not left open.** The
+  caption label first shipped using Amber as actual TEXT colour
+  (~2.15:1 against Paper) — the SAME pairing already reviewed and
+  accepted for the header nav's own Amber underline (PR #17/#18), but
+  that precedent only ever covered Amber as a bare, non-text, decorative
+  mark (3:1 floor). Text needs the stricter 4.5:1 floor (confirmed
+  `text-caption` at 14px/500 doesn't qualify for the large-text
+  exemption either, same threshold check already run on ServicesGrid's
+  own body-text pass) — ~2.15:1 fails BOTH floors, and no prior review
+  had ever accepted Amber as running TEXT anywhere on this site. Shipped
+  initially per the explicit "Caption label… Amber" instruction, flagged
+  prominently in this PR's own description rather than treated as
+  equivalent to the already-settled underline case — **on review this
+  was confirmed as a genuine contrast-failure BUG, not a design
+  preference, and the caption was replaced outright with Ink** (a
+  follow-up commit on this same PR, not a separate one), matching the
+  sitewide default (~19.44:1 AAA). The underline rule ITSELF (a
+  decorative 2px bar, non-text) was never the problem — it correctly
+  reuses the already-accepted bare-mark precedent and was left
+  untouched by this fix. The button is the unmodified `Button.astro`
+  `primary` variant (Amber fill/Ink text, ~9.05:1 AAA) — the same
+  component every other primary CTA on the site uses, not a one-off
+  style, also untouched. **Standing lesson from this one, worth
+  remembering**: Amber's own bare-mark-on-Paper exception (accepted for
+  the nav underline) does NOT generalise to Amber-as-text — the two are
+  governed by different WCAG floors (3:1 vs 4.5:1) and reusing one
+  accepted exception's colour for a different KIND of use needs its own
+  fresh check, not an assumption that "it's the same colour, so it's
+  already been reviewed."
+
+  **RETIREMENT**: Guard Green Deep is now retired from every homepage
+  section — MissionBand was the last one still using it. The token
+  itself stays defined in `global.css`: `Button.astro`'s dormant
+  `secondary` variant is the one remaining real (if unrendered anywhere)
+  reference. `ClosingCta.astro` is now the ONLY section left on the
+  Guard Green palette at all (Guard Green Secondary, its own phone-link
+  hover decoration, unchanged). See the Design system section's own
+  updated SCOPE note for the full current accounting — it's moved
+  twice now (the original four-section rebrand, then this pass), don't
+  assume either earlier framing still describes the current boundary.
+
+  **MOTION** — a new dedicated module, `src/lib/missionReveal.ts`, not
+  bolted onto any existing one: the image gets a PURE clip-path
+  "unveil" (no opacity change at all, the one thing that makes it
+  genuinely distinct from every fade-based entrance on the rest of the
+  site) — `inset(0% 0% 100% 0%)` → `inset(0% 0% 0% 0%)`, which reveals
+  the image growing downward from its own top edge (a vertical,
+  top-to-bottom unveil; a horizontal wipe was the other option named in
+  the brief, vertical was chosen as reading more like a deliberate
+  unveiling and less like a slider transition). GSAP tweens `clip-path`
+  natively for two same-shape `inset()` strings, no extra plugin. The
+  text column's five elements (caption, headline, underline, the two
+  paragraphs together as ONE shared beat, button) fade+rise on a single
+  shared GSAP `stagger` — the same mechanism `heroMuster.ts` already
+  uses for its own cascade, safe here because every element shares one
+  scroll trigger, unlike `servicesGridReveal.ts`'s six independent
+  per-card triggers. Full `prefers-reduced-motion` fallback: the image
+  jumps straight to fully revealed, every text element straight to its
+  final position, no ScrollTrigger registered for either.
+
+  A real `astro check` (0 errors, 36 files, same pre-existing unrelated
+  `ContactForm.tsx` hints) and clean `astro build` were run, plus the
+  dead-CSS-from-comments audit on every touched file — this audit
+  caught a REAL instance, not a hypothetical one: an early draft of this
+  file's own RETIREMENT paragraph literally spelled out the now-orphaned
+  bare `bg-guard-green-deep` class name in a backtick-quoted token,
+  which generated a genuine dead rule in the compiled bundle (confirmed
+  via direct inspection before fixing) — reworded to prose before
+  shipping, the exact failure mode this project's own standing
+  convention already warns about, caught in the act rather than assumed
+  safe.
+
+  **Follow-up commit, same PR**: the caption's Amber text-colour bug
+  (see the colour table's own Amber row above for the fix itself) was
+  corrected to Ink. Re-verified with the same discipline — `astro
+  check`/`astro build` clean, and confirmed via direct `dist/`
+  inspection that `.text-amber{...}` (the foreground-colour utility,
+  distinct from `bg-amber`/`border-amber`) disappeared from the compiled
+  bundle entirely once the caption stopped using it, since the caption
+  was its only real call site anywhere in the codebase — confirmed not
+  orphaned by any leftover comment mention either, the same audit this
+  PR's own first commit already required.
 
 - **PR #19 — ServicesGrid's card body copy shrunk a second time, past
   `text-caption` (14px), onto a genuinely new ninth type-scale step,
@@ -912,13 +1081,20 @@ Secondary), dividers between every pair of items at every breakpoint,
 see PR #11–#15 and the rebrand entry — services grid, a six-card mixed
 fill/light layout (Electric Blue, Magenta, and light `surface-alt`
 cards, rebranded off the original Guard-Green/Yellow checkerboard), see
-PR #16 and the rebrand entry — mission band, sectors strip, closing
-CTA, footer, all still on the original Guard Green palette, pending a
-separate future redesign). Header, Hero, StatStrip, and ServicesGrid
-now run a genuinely different colour system (Electric Blue, Magenta,
-Amber, Cyan-Blue) from the rest of the site (Guard Green Secondary/
-Deep) — see the Design system section above for the exact scope
-boundary, and don't assume the two ever need to match.
+PR #16 and the rebrand entry — mission band, a real two-column
+image+text section (a genuine AI-generated team photo, not a Picsum
+placeholder, plus an "Our mission" caption/headline/underline/two
+paragraphs/button, all on plain Paper with Amber accents), rebuilt from
+the original centred Guard-Green-Deep pull-quote, see PR #20 — sectors
+strip, closing CTA, footer, both still on the original Guard Green
+palette, pending a separate future redesign). Header, Hero, StatStrip,
+ServicesGrid, and now MissionBand all run the newer colour system
+(Electric Blue, Magenta, Amber, Cyan-Blue, though MissionBand itself
+only actually uses Amber) — ClosingCta is the only section left on
+Guard Green Secondary, and Guard Green Deep's only remaining reference
+anywhere is `Button.astro`'s own dormant `secondary` variant. See the
+Design system section above for the exact, current scope boundary —
+it has moved twice now, don't assume either older framing still holds.
 
 **Not started**: the interior pages — About, Careers, Our Policies,
 Gallery, Contact. All still need building.
