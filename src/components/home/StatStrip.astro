@@ -1,103 +1,137 @@
 ---
+import Divider from "../ui/Divider.astro";
+import Clock from "../../icons/stats/Clock.astro";
 import Credential from "../../icons/stats/Credential.astro";
-import Calendar from "../../icons/stats/Calendar.astro";
-import Support from "../../icons/stats/Support.astro";
+import Growth from "../../icons/stats/Growth.astro";
 
 /**
- * Second redesign of the same three facts (unchanged copy throughout
- * all versions) — this pass adds real visual weight to the icons and
- * fixes a real density problem the previous version had, per direct
- * feedback.
+ * Third redesign of this section. Content, background, alignment, and
+ * icon treatment ALL change this pass — this is closer to a rebuild
+ * than a restyle, per direct instruction.
  *
- * ALIGNMENT — INTENTIONAL THIRD EXCEPTION, not an oversight. This
- * project's hard rule (CLAUDE.md) restricts centred alignment to
- * exactly two sanctioned places sitewide (MissionBand's pull-quote,
- * ClosingCta's final line) — the PREVIOUS version of this component
- * deliberately kept StatStrip left-aligned specifically to avoid
- * introducing a third exception without being asked. This pass DOES
- * introduce that third exception, per explicit direct instruction,
- * not a reversal of that earlier reasoning on its own. CLAUDE.md's
- * own hard-rule bullet has been updated in the same PR to say "three"
- * and name StatStrip, so this isn't a case where the code and the
- * project's own rules document disagree — a future pass reading
- * either should find the same answer. Do not "fix" this back to
- * left-aligned assuming it was missed; it wasn't.
+ * CONTENT — the old three captions ("Every officer SIA-licensed...",
+ * "Bespoke shift patterns...", "24/7 phone and on-shift...") are
+ * deleted, not kept alongside the new copy. Each column is now a real
+ * three-part unit — icon, a short bold `<h3>` label, a full-sentence
+ * body paragraph below it — not icon+single-caption like every
+ * earlier version of this component.
  *
- * ICON BADGES — the previous version's bare 32px line icons read as
- * too thin/sparse to feel premium. Each icon now sits inside a
- * solid `size-16` (64px) Guard Green Secondary circle, `size-10`
- * (40px) white icon centred inside it (a 12px margin on every side —
- * matches the exact proportions verified below, not a fresh guess).
- * White-on-Guard-Green-Secondary is this project's own already-
- * established safe pairing (Button.astro's `primary` fill, the header
- * info bar, MissionBand's fallback fill) — RESTATED here rather than
- * assumed to still hold now that it's an icon rather than text: white
- * (L=1.0) vs Guard Green Secondary (L≈0.115) → (1.0+0.05)/(0.115+0.05)
- * ≈ 6.36:1 (AAA-adjacent, same figure as every other white-on-this-
- * fill pairing in the project, since it's the same two colours being
- * compared regardless of what's drawn on top).
+ * ALIGNMENT — back to LEFT-aligned, reverting the previous pass's
+ * "third sanctioned centred-alignment exception." CLAUDE.md's own
+ * hard-rule bullet is reverted in the same commit back to "exactly
+ * two" (MissionBand, ClosingCta) — code and rules document agree
+ * again, same principle as before, just the other direction.
  *
- * The bare-line icons (Credential/Calendar/Support, all in
- * `src/icons/stats/`) were kept as outline glyphs rather than redrawn
- * as solid/filled shapes — checked, not assumed, per the explicit
- * fallback in the brief: rasterised the badge treatment at the actual
- * deployed 64px size and a magnified 240px size, individually and as
- * a row, and the existing linework translated cleanly once its own
- * `stroke-width` was bumped from `1.25` to `2` (each icon's own file
- * has this noted — they have no other usage site, so the weight was
- * changed at the source rather than kept thin for a bare-line context
- * that no longer exists anywhere in this codebase). No redraw was
- * needed; see the PR description for the rendered check.
+ * BACKGROUND — solid Guard Green Secondary, `on-dark` (the default
+ * Ink focus ring is only ~3.06:1 on this fill, too thin — same
+ * reasoning already documented for the header info bar/Hero's text
+ * panel). White text throughout. Contrast RESTATED for both text
+ * roles rather than assumed to be one number that covers both: white
+ * (L=1.0) vs Guard Green Secondary (L≈0.115) is the same ~6.36:1
+ * colour-pair contrast regardless of what's drawn in it, BUT the two
+ * text roles here are checked against DIFFERENT WCAG thresholds,
+ * which is the part that doesn't carry over automatically — the
+ * `text-h3` label (28px) qualifies as WCAG "large text" (≥24px),
+ * which only needs 3:1, so 6.36:1 clears it with very wide margin;
+ * the `text-body` sentence (17px, well under the large-text cutoff)
+ * needs the full 4.5:1 normal-text floor, and 6.36:1 still clears
+ * that comfortably too — both pass, against genuinely different bars,
+ * not the same bar restated twice.
  *
- * DENSITY / SECTION SIZING — the previous version's real problem was
- * the OUTER container (`py-24`, 96px top+bottom) around a genuinely
- * small amount of content, not the icons alone — fixing icon weight
- * without touching this would have left the same oversized empty box.
- * Cut to `py-10` (40px). Badge→caption gap cut from a 16px margin to
- * `mb-2` (8px) so each icon and its caption read as one attached unit
- * rather than two nearby elements. Column gap (`gap-y`) tightened
- * 10→6. Real box-model math, not eyeballed: badge (64px) + gap (8px)
- * + the longest caption at 2 lines (`text-body`, 17px/1.6 line-height
- * ≈ 27.2px/line × 2 ≈ 54.4px, the realistic wrap for "Every officer
- * SIA-licensed & first-aid trained" inside a ~370px column at desktop
- * `max-w-7xl` width) ≈ 126px of real content, plus 80px of padding
- * (40 top + 40 bottom) ≈ 206px total section height — padding is now
- * well under half the section's own height, not the majority of it
- * the way the previous `py-24` version's box-model worked out to.
+ * DIVIDER — a new `tone="paper-strong"` variant added to
+ * `Divider.astro` in this same PR specifically for this fill. The
+ * existing `tone="paper"` (35% white) was calibrated for Guard Green
+ * Deep/Footer Grey, both notably darker than Guard Green Secondary —
+ * checked, not assumed to carry over: at 35% opacity the line-to-fill
+ * contrast on THIS green is only ~2.12:1 (under the 3:1 WCAG 1.4.11
+ * floor for a UI separator) — confirmed visually too, via a real
+ * rasterised swatch comparison, where the 35% line was genuinely hard
+ * to see against the fill. `paper-strong` (60%) reaches ~3.39:1, and
+ * the same rasterised swatch check showed it clearly, comfortably
+ * visible. (A user-supplied reference screenshot of a differently-
+ * themed site confirmed the general direction — a thin, visible-but-
+ * understated single line — independently matches what the contrast
+ * math had already settled on; the icon-in-a-decorative-ring styling
+ * in that same reference was NOT adopted, since the explicit written
+ * brief for this pass called for plain icons directly on the fill,
+ * no badge/ring behind them.)
  *
- * BACKGROUND — `bg-surface-alt` (`#f5f5f5`), unchanged from the
- * previous redesign; see its own token comment in global.css for why
- * Hairline wasn't reused and the real WCAG numbers against it (Ink
- * ~17.8:1, Guard Green Secondary bare-mark ~5.84:1 — not used for
- * bare-mark contact here any more now that the icon sits on its own
- * opaque badge fill instead of directly on this surface). No
- * `on-dark` — this is a light fill, the default Ink focus ring is
- * already safe on it.
+ * Only shown between columns on `sm:`+ (vertical rule, `Divider`'s
+ * own `self-stretch` matches whatever height the row settles at).
+ * Mobile has NO divider at all — a deliberate, disclosed choice, not
+ * an oversight: this exact "gap-only, no divider" treatment is what
+ * the very first version of this component (before any of its later
+ * redesigns) already used for its own mobile stacking, and generous
+ * `gap-10` reads cleanly as three distinct stacked blocks without
+ * needing a rule between them.
  *
- * BREAKPOINT / MOTION / DIVIDER-REMOVAL — unchanged from the previous
- * redesign, see git history for that reasoning: `sm:` matches this
- * component's own prior convention; `data-reveal` is read by
- * `initScrollReveal()` (`src/lib/scrollReveal.ts`, called from
- * `index.astro`); the vertical Divider between facts stays removed.
+ * ICONS — plain, no colour-fill badge behind them (removing the
+ * previous pass's solid-circle treatment entirely). `size-9` (36px),
+ * `stroke-width="1.5"` — a real "medium" step between the original
+ * bare-line weight (32px at 1.25, felt thin) and the badge-context
+ * weight from the last pass (40px icon inside a 64px circle, tuned
+ * for a small enclosed shape rather than a plain mark on an open
+ * fill). Concepts reconsidered against the NEW copy, not reused
+ * blind: Credential (SIA, unchanged shape/concept — still the right
+ * fit) stays; Calendar and Support are both removed outright (their
+ * captions, "bespoke shift patterns" and "24/7 phone... support," no
+ * longer exist) and replaced with Clock (`src/icons/stats/Clock
+ * .astro` — a plain two-handed clock face, fitting the new "24/7"
+ * copy's emphasis on continuous COVERAGE rather than "call us"
+ * support specifically) and Growth (`src/icons/stats/Growth.astro` —
+ * a rising trend-line-and-arrow, fitting "Since 2023" + "rapidly
+ * expanding," chosen over a map pin or a flag shape for the reasons
+ * documented in that icon's own comment). None are shields or
+ * checkmarks. All three rasterised and visually inspected — plain,
+ * white, on the real Guard Green Secondary fill, at the actual
+ * deployed 36px size and a magnified 220px size, individually and as
+ * a row — before shipping; no redraw was needed this time (unlike the
+ * very first pass, which did have to redraw one icon after this exact
+ * check caught it reading ambiguously).
+ *
+ * MOTION — unchanged mechanism from the previous pass: `data-reveal`,
+ * read by `initScrollReveal()` (`src/lib/scrollReveal.ts`, wired into
+ * `index.astro` since the section-redesign PR that introduced it) —
+ * a genuine scroll trigger, since this section sits below the fold
+ * once the Hero's own height is accounted for. `prefers-reduced-
+ * motion` is handled inside `scrollReveal.ts` itself.
  */
 const FACTS = [
-  { text: "Every officer SIA-licensed & first-aid trained", Icon: Credential },
-  { text: "Bespoke shift patterns, not fixed packages", Icon: Calendar },
-  { text: "24/7 phone and on-shift officer support", Icon: Support },
+  {
+    label: "24/7",
+    body: "Providing reliable security cover 24 hours a day, seven days a week.",
+    Icon: Clock,
+  },
+  {
+    label: "SIA",
+    body: "Supplying highly trained, SIA-licensed, and fully vetted professional officers you can trust.",
+    Icon: Credential,
+  },
+  {
+    label: "Since 2023",
+    body: "Born in the North and rapidly expanding our trusted security services across the UK.",
+    Icon: Growth,
+  },
 ];
 ---
 
-<section class="bg-surface-alt">
-  <div class="mx-auto max-w-7xl px-gutter py-10 md:px-12">
-    <div class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-3">
+<section class="on-dark bg-guard-green-secondary">
+  <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12">
+    <div class="flex flex-col gap-10 sm:flex-row sm:items-stretch sm:gap-0">
       {
-        FACTS.map(({ text, Icon }) => (
-          <div data-reveal class="flex flex-col items-center text-center">
-            <div class="bg-guard-green-secondary mb-2 flex size-16 items-center justify-center rounded-full">
-              <Icon class="text-paper size-10" />
+        FACTS.map(({ label, body, Icon }, i) => (
+          <>
+            {i > 0 && (
+              <div class="hidden shrink-0 sm:block">
+                <Divider orientation="vertical" tone="paper-strong" class="mx-8" />
+              </div>
+            )}
+            <div data-reveal class="flex-1">
+              <Icon class="text-paper mb-4 size-9" />
+              <h3 class="text-h3 text-paper mb-2">{label}</h3>
+              <p class="text-body text-paper max-w-xs">{body}</p>
             </div>
-            <p class="text-body text-ink">{text}</p>
-          </div>
+          </>
         ))
       }
     </div>

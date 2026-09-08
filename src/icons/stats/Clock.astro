@@ -1,0 +1,53 @@
+---
+/**
+ * "Round-the-clock cover" — a plain analogue clock face (circle + two
+ * hands reading 12-and-3, plus four cardinal tick marks). Pairs the
+ * "24/7" label and "Providing reliable security cover 24 hours a day,
+ * seven days a week" body — this copy is about continuous COVERAGE,
+ * not specifically "call us" support, so a plain clock is the more
+ * literal fit here than a headset would be (the previous set's
+ * headset icon paired a different stat, "24/7 phone and on-shift
+ * officer support," which no longer exists as a caption).
+ *
+ * Deliberately plain, not the earlier abandoned "clock face + two
+ * overlapping circles as an infinity motif" concept from an even
+ * earlier pass of this component family — that read as a target or a
+ * face at real size and was dropped for exactly that reason. A
+ * two-handed clock with simple tick marks is a well-understood,
+ * unambiguous pictogram; verified by rasterising and inspecting it
+ * (individually, magnified, and alongside the other two icons in this
+ * set) at the actual deployed size before shipping, same as every
+ * other icon in this family.
+ *
+ * 40×40 viewBox, square caps, miter joins — matches Credential.astro
+ * and Growth.astro. `stroke-width="1.5"` — this icon set sits plain
+ * on the section's own solid Guard Green Secondary fill (no badge
+ * behind it, unlike an earlier pass of this component), sized to read
+ * as a genuine "medium" mark rather than the original thin bare-line
+ * weight or the heavier badge-context weight used at other points in
+ * this component's history.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg
+  viewBox="0 0 40 40"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="square"
+  stroke-linejoin="miter"
+  class={className}
+  aria-hidden="true"
+>
+  <circle cx="20" cy="20" r="14" />
+  <line x1="20" y1="8" x2="20" y2="10.5" />
+  <line x1="32" y1="20" x2="29.5" y2="20" />
+  <line x1="20" y1="32" x2="20" y2="29.5" />
+  <line x1="8" y1="20" x2="10.5" y2="20" />
+  <line x1="20" y1="20" x2="20" y2="11" />
+  <line x1="20" y1="20" x2="26" y2="20" />
+</svg>
