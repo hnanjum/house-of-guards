@@ -140,15 +140,18 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
  * content, so this reduction shrinks the panel automatically; no
  * separate height adjustment was needed or made.
  *
- * SUBHEAD SIZE — `text-body` (17px, this system's own "running copy"
- * size), stepped down one named tier from the first version of this
- * component (`text-body-lg`, 20px) — read the current class before
- * changing it rather than guessing a size, same discipline as the
- * headline reduction above. Headline and button sizes are untouched.
- * Same as the headline case: the text panel has no explicit height,
- * so it shrinks to match the smaller subhead automatically — confirmed
- * in the compiled output, not assumed, same as every other size change
- * on this component.
+ * SUBHEAD SIZE — `text-caption` (14px), stepped down a SECOND named
+ * tier per a direct follow-up request to shrink it further: first
+ * pass went `text-body-lg` (20px) → `text-body` (17px), this pass
+ * `text-body` → `text-caption`. Read the current class each time
+ * before changing it rather than guessing a size. Headline and button
+ * sizes are untouched. Worth flagging plainly: `text-caption` is this
+ * system's nav-link/meta-line size (see `NavLink.astro`, the header
+ * info bar) — genuinely small for a hero subhead paragraph, not just
+ * "a bit smaller." Shipped as explicitly requested, not silently
+ * pushed back on. The text panel has no explicit height, so it
+ * shrinks to match automatically — confirmed in the compiled output,
+ * not assumed, same as every other size change on this component.
  *
  * Mobile does NOT reuse the desktop's right-column placement — a
  * full-width band anchored to the bottom of the image (edge-to-edge,
@@ -190,7 +193,7 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
       <h1 data-hero-reveal class="text-h3 text-paper sm:text-h2">
         Security You Can Rely On, Every Hour of the Week
       </h1>
-      <p data-hero-reveal class="text-body text-paper mt-5 max-w-md">
+      <p data-hero-reveal class="text-caption text-paper mt-5 max-w-md">
         House of Guards supplies SIA licensed officers, stewards and CCTV
         operators to businesses, sites and events across the United Kingdom.
       </p>
