@@ -170,15 +170,16 @@
          number" discipline (see Guard Green Secondary's own note
          above for why that discipline exists): Amber vs Paper ≈2.15:1
          — FAILS the 3:1 WCAG 1.4.11 non-text/UI floor outright, not a
-         thin-margin pass. This is a REAL, FLAGGED, UNRESOLVED
-         accessibility gap, shipped anyway per the explicit instruction
-         to use Amber for the underline "to stay consistent with
-         buttons everywhere else" — it is NOT being silently treated as
-         compliant. See `NavLink.astro`'s own comment and the PR
-         description for the same flag; revisit if a compliant
-         treatment (a darker amber variant reserved for bare marks
-         only, or a non-colour affordance like weight/thickness) is
-         ever wanted here. */
+         thin-margin pass. Flagged as a genuine compliance gap in PR
+         #17's own description at the time; **the user reviewed this
+         exact number and explicitly confirmed keeping Amber here is
+         accepted, not something to silently treat as passing but not
+         something to "fix" unprompted either.** Don't reopen this
+         without a fresh explicit ask — the two compliant alternatives
+         considered and NOT taken (a darker amber variant reserved for
+         bare marks only, or a non-colour affordance like weight/
+         thickness) are still on record in `NavLink.astro`'s own
+         comment if this is ever revisited by direct instruction. */
   --color-amber: #f59e0b;
 
   /* CYAN-BLUE — a rare accent only (hover states, a small icon detail,

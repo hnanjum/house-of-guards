@@ -13,23 +13,25 @@
  * instruction) rather than reusing whichever block colour a given
  * section happens to be filled with.
  *
- * REAL, FLAGGED, UNRESOLVED CONTRAST GAP — read before assuming this
- * is compliant. Amber's bare-mark-on-Paper contrast is ~2.15:1 (see
- * global.css's own Amber token comment for the full derivation) —
- * this FAILS the 3:1 WCAG 1.4.11 non-text/UI floor outright, not a
- * thin-margin pass. Every accent this underline has used before this
- * one was checked and passed (Guard Green Secondary ~6.36:1, clearing
- * even the full 4.5:1 text floor; Guard Yellow ~1.76:1 and Guard Olive
- * ~3.11:1 both failed too, for what it's worth, so this isn't
- * unprecedented for this exact underline — but it IS a real
- * regression from the immediately-previous, fully-compliant pairing).
- * Shipped anyway, on direct instruction to use Amber here "to stay
- * consistent with buttons everywhere else" — this is a known,
- * disclosed gap, not something silently treated as passing. Revisit
- * with either a darker amber reserved for bare marks only, or a
- * non-colour affordance (weight, thickness) if this needs to actually
- * clear WCAG. A transparent underline sits there at rest so nothing
- * shifts layout when it appears.
+ * KNOWN, REVIEWED, ACCEPTED CONTRAST GAP — not something to silently
+ * assume is compliant, but also not open for an unprompted "fix".
+ * Amber's bare-mark-on-Paper contrast is ~2.15:1 (see global.css's own
+ * Amber token comment for the full derivation) — this FAILS the 3:1
+ * WCAG 1.4.11 non-text/UI floor outright, not a thin-margin pass.
+ * Every accent this underline has used before this one was checked and
+ * passed (Guard Green Secondary ~6.36:1, clearing even the full 4.5:1
+ * text floor; Guard Yellow ~1.76:1 and Guard Olive ~3.11:1 both failed
+ * too, for what it's worth, so this isn't unprecedented for this exact
+ * underline — but it IS a real regression from the immediately-
+ * previous, fully-compliant pairing). Shipped on direct instruction to
+ * use Amber here "to stay consistent with buttons everywhere else" —
+ * flagged plainly in PR #17's own description, and **the user reviewed
+ * this exact ~2.15:1 number afterward and explicitly confirmed keeping
+ * it as shipped.** This is now a settled, accepted tradeoff, not an
+ * open item — don't "fix" it (a darker amber reserved for bare marks
+ * only, or a non-colour affordance like weight/thickness) without a
+ * fresh, explicit ask to revisit it. A transparent underline sits
+ * there at rest so nothing shifts layout when it appears.
  *
  * `tone="paper"` — for a link sitting on a Footer Grey / Guard Green
  * Deep background, where dark text would be nearly invisible. White

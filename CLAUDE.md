@@ -90,7 +90,7 @@ SECTION, not by preference:
 | `paper` | `#FFFFFF` | The default background everywhere; also the text colour on every dark fill below |
 | `electric-blue` | `#2563EB` | **Primary block/background colour** (Header/Hero/StatStrip/ServicesGrid only) — Header's info-bar fill, StatStrip's fill, Hero's text-panel scrim (translucent, 85%), ServicesGrid's Manned Guarding/Overnight Security cards and Corporate Security's icon stroke. White/Paper on the opaque fill: ~5.17:1 (AA). Ink on it: ~3.76:1 — clears the 3:1 non-text floor but fails 4.5:1, so text/icons stay white. As an icon-stroke mark on a light card: ~5.17:1 vs Paper, ~4.74:1 vs Surface Alt — both clear 3:1 with real margin. See `global.css`'s own token comment for the full derivation, including Hero's own two-step translucent-panel composite (~4.53:1, a genuine but thin pass, flagged in that file) |
 | `magenta` | `#A5195C` | **Secondary block/background colour** (ServicesGrid only) — Close Protection's card fill, CCTV Monitoring's and Construction Site Security's icon stroke. White on the fill: ~7.26:1 (AAA, the strongest fill pairing in this rebrand). Ink on it: ~2.68:1 — fails even the lenient 3:1 floor outright, so this fill never carries Ink. As an icon-stroke mark on a light card: ~7.26:1 vs Paper, ~6.66:1 vs Surface Alt |
-| `amber` | `#F59E0B` | **The sole button/CTA colour, sitewide, no exceptions** — `Button.astro`'s `primary` variant, `NavDrawer.tsx`'s hand-matched CTA, and (as a bare non-text mark) the header nav's active-link underline. Ink on this fill: ~9.05:1 (AAA) — buttons therefore use INK text, a genuine reversal from Guard Green Secondary's own white-text pairing. White on it: ~2.15:1, fails even 3:1. **Bare-mark contrast (the nav underline directly on Paper) is ~2.15:1 — a real, disclosed, UNRESOLVED failure of the 3:1 WCAG 1.4.11 floor**, shipped anyway per explicit instruction to keep the underline consistent with the button colour; see `NavLink.astro`'s own comment |
+| `amber` | `#F59E0B` | **The sole button/CTA colour, sitewide, no exceptions** — `Button.astro`'s `primary` variant, `NavDrawer.tsx`'s hand-matched CTA, and (as a bare non-text mark) the header nav's active-link underline. Ink on this fill: ~9.05:1 (AAA) — buttons therefore use INK text, a genuine reversal from Guard Green Secondary's own white-text pairing. White on it: ~2.15:1, fails even 3:1. **Bare-mark contrast (the nav underline directly on Paper) is ~2.15:1, below the 3:1 WCAG 1.4.11 floor — flagged in PR #17, reviewed by the user against this exact number, and explicitly KEPT AS-IS as an accepted tradeoff. This is a settled decision, not an open item — don't "fix" it without a fresh, explicit ask.** See `NavLink.astro`'s own comment |
 | `cyan-blue` | `#0EA5E9` | **Rare accent only — never a section/card background fill.** Not applied anywhere in Header/Hero/StatStrip/ServicesGrid as of this rebrand (no per-section spec called for it); defined and fully contrast-checked so it's ready the moment a hover state or icon detail needs it. White on this fill: ~2.77:1 — fails even 3:1, so white is never a safe foreground here, including as a bare mark on Paper (same number, symmetric). Ink on it: ~7.01:1 (AAA) — the only safe foreground for this token |
 | `stone` | `#6E6E6E` | Secondary text on Paper only (captions, meta, credential lines). ~4.6:1 on white — 14px and above only |
 | `hairline` | `#E4E4E4` | Borders/rules/seams on Paper. Perfectly neutral (R=G=B) — never a warm greige |
@@ -379,10 +379,11 @@ treatment for these icons without a real reason to.
   ="hairline"` (the defaults) assume a Paper background and use Amber
   (rebranded off Guard Green Secondary) for hover/emphasis, which
   doesn't read against a dark surface. **`tone="ink"`'s Amber underline
-  is a real, disclosed, unresolved WCAG gap** (~2.15:1 as a bare mark on
-  Paper, fails the 3:1 non-text floor — see the colour table above) —
-  known, not silently compliant. Use `tone="paper"` on anything sitting
-  in the header, footer, or a bold-fill section.
+  is below the 3:1 WCAG non-text floor** (~2.15:1 as a bare mark on
+  Paper — see the colour table above) — a KNOWN, REVIEWED, ACCEPTED
+  tradeoff (PR #17, user confirmed keeping it as shipped), not an open
+  item to "fix" unprompted. Use `tone="paper"` on anything sitting in
+  the header, footer, or a bold-fill section.
 - **`SectionHeading.astro`** is left-aligned by default, has no eyebrow
   slot (see hard rules), and takes an optional `description` slot for a
   plain sentence-case supporting line below the heading — a legitimate,
@@ -529,22 +530,22 @@ log` alone. Newest first; each PR number is on `origin/main`.
   - **Header** — info-bar fill Electric Blue (white text/icons,
     ~5.17:1, down from Guard Green Secondary's own ~6.36:1 but still
     real AA margin), `.on-dark` kept (Ink ring ~3.76:1, thin). Active
-    nav-link underline Amber, matching the button colour — a real,
-    disclosed, UNRESOLVED WCAG gap (~2.15:1 as a bare mark on Paper,
-    fails 3:1), shipped per explicit instruction, not silently treated
-    as compliant. `NavDrawer.tsx`'s hand-matched CTA and its own
-    link-hover border both moved to Amber alongside it, per the
+    nav-link underline Amber, matching the button colour — flagged at
+    the time as a real WCAG gap (~2.15:1 as a bare mark on Paper, fails
+    3:1); **the user reviewed this exact number after the PR and
+    explicitly confirmed keeping it as shipped — a settled, accepted
+    tradeoff, not an open item.** `NavDrawer.tsx`'s hand-matched CTA and
+    its own link-hover border both moved to Amber alongside it, per the
     standing "keep hand-matched copies in sync" note — this repo's own
     documented drift risk, closed proactively rather than waited on.
   - **Hero** — text-panel scrim Electric Blue at 85% opacity
     (unchanged mechanism, new colour). Re-derived contrast from
     scratch, not carried forward from the old ~12.72:1 figure:
-    **~4.53:1** — a genuine PASS but a razor-thin one, flagged
-    prominently in `Hero.astro`'s own comment as a real regression in
-    safety margin, not silently accepted as equivalent. A 90%-opacity
-    alternative (~4.74:1, real headroom) was computed and is ready to
-    apply if a wider margin is wanted, but wasn't shipped speculatively
-    since it wasn't asked for.
+    **~4.53:1** — a genuine PASS but a much thinner margin than the old
+    figure, flagged at the time in `Hero.astro`'s own comment. A
+    90%-opacity alternative (~4.74:1, real headroom) was computed and
+    offered; **the user explicitly declined it — the scrim stays at
+    85%/~4.53:1 by deliberate choice, no further action pending here.**
   - **StatStrip** — fill Electric Blue (white text/icons, same ~5.17:1
     as Header's info bar, `.on-dark` kept). `Divider`'s
     `tone="paper-strong"` was RECALIBRATED, not left at its old value —

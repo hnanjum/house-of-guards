@@ -96,24 +96,22 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
  * Electric Blue rgb(37,99,235)@85% over THAT → rgb(59.5,112.2,227.8)
  * → white-text contrast ≈ **4.53:1**.
  *
- * FLAG, NOT SILENTLY SHIPPED — this is a genuine PASS (clears the
- * 4.5:1 AA floor) but by a razor-thin margin, a real, disclosed
- * REGRESSION from the previous figure (12.72:1 → 4.53:1), not a wash.
- * The number itself is mathematically sound — it's already the
- * worst-case derivation (a lighter underlying photo colour than pure
- * white would only make the panel darker and the margin bigger, never
- * smaller) — but 4.53:1 leaves almost no room for anything else that
+ * FLAGGED AT SHIP TIME, NOW A SETTLED, REVIEWED DECISION — this is a
+ * genuine PASS (clears the 4.5:1 AA floor) but by a much thinner
+ * margin than the previous figure (12.72:1 → 4.53:1), not a wash. The
+ * number itself is mathematically sound — it's already the worst-case
+ * derivation (a lighter underlying photo colour than pure white would
+ * only make the panel darker and the margin bigger, never smaller) —
+ * but 4.53:1 leaves less room than 12.72:1 did for anything else that
  * could nudge real-world contrast down even slightly (a slightly
  * different browser colour-management pass, a headline/subhead font
- * that renders a hair lighter than assumed). This did NOT get the
- * "too thin to trust, swap something" treatment this codebase gives
- * comparably thin margins elsewhere (e.g. Guard Green Secondary's own
- * ~3.06:1 focus-ring case) because doing so would mean changing the
- * panel's own opacity beyond what this pass was asked to touch — flag
- * it here instead, plainly, for a real decision: if a wider safety
- * margin is wanted, bumping the scrim from 85% to 90% opacity lifts
- * this to ~4.74:1 with real headroom, checked and ready to apply, not
- * shipped speculatively. `outline-light`'s white border/text and the
+ * that renders a hair lighter than assumed). A 90%-opacity alternative
+ * (~4.74:1, real headroom) was computed and OFFERED to the user in PR
+ * #17's own description — **the user reviewed both numbers and
+ * explicitly declined the change; the scrim stays at 85%/~4.53:1 on
+ * purpose.** Don't bump the opacity unprompted, this was a real
+ * decision, not an oversight left for a future session to "improve."
+ * `outline-light`'s white border/text and the
  * default-safe-focus-ring question (`on-dark` swaps the ring to Paper
  * — kept here for the same reason StatStrip/the header info bar keep
  * it against Electric Blue: Ink-on-this-panel is ~4.29:1, which clears
