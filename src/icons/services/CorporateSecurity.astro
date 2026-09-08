@@ -1,7 +1,29 @@
 ---
 /**
- * "Perimeter" — a stepped office-tower silhouette with a wide ground
- * line at its base. Protecting a place of business, not a person.
+ * "Office" — a plain building facade: a rectangular outline, a
+ * symmetric 2×2 grid of windows, and a single door at the base.
+ * Straightforward, literal "office/corporate premises" — no stepped
+ * tower silhouette (that was this same slot's OLD accordion-only
+ * concept, "Perimeter" — replaced outright, not tuned, since this
+ * icon now renders directly on a bold solid card fill at roughly 2x
+ * the old accordion's display size and needs a simpler, bolder
+ * silhouette to read cleanly at that size and weight).
+ *
+ * Colour is intentionally NOT set here — it inherits from the parent's
+ * text colour via `currentColor`. In `ServicesGrid.astro` that's
+ * `text-paper` (white) on a Guard Green Secondary card or `text-ink`
+ * on a Guard Green Secondary neighbour's yellow counterpart — this
+ * icon never renders in Ink-on-Paper the way the old accordion set
+ * did.
+ *
+ * `stroke-width="2"` — a deliberate bump from this icon family's
+ * baseline 1.25 (still used by the footer's Phone/Email icons and
+ * documented as the house default in CLAUDE.md's "Icon set" section),
+ * specifically because this set now sits directly on a bold solid
+ * colour fill at a larger display size, not Ink/Green-on-white inside
+ * a compact accordion row — a thin 1.25 stroke read as visually weak
+ * against that context in the mandatory rasterised check (see
+ * ServicesGrid.astro's own comment for the verification process).
  */
 interface Props {
   class?: string;
@@ -13,16 +35,16 @@ const { class: className } = Astro.props;
   viewBox="0 0 40 40"
   fill="none"
   stroke="currentColor"
-  stroke-width="1.25"
+  stroke-width="2"
   stroke-linecap="square"
   stroke-linejoin="miter"
   class={className}
   aria-hidden="true"
 >
-  <rect x="13" y="11" width="14" height="23" />
-  <rect x="16" y="5" width="8" height="6" />
-  <line x1="16" y1="17" x2="24" y2="17" />
-  <line x1="16" y1="22" x2="24" y2="22" />
-  <line x1="16" y1="27" x2="24" y2="27" />
-  <line x1="9" y1="34" x2="31" y2="34" />
+  <rect x="10" y="8" width="20" height="26" />
+  <rect x="14" y="13" width="4" height="4" />
+  <rect x="22" y="13" width="4" height="4" />
+  <rect x="14" y="21" width="4" height="4" />
+  <rect x="22" y="21" width="4" height="4" />
+  <rect x="17" y="29" width="6" height="5" />
 </svg>

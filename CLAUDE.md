@@ -64,6 +64,7 @@ every component reaches for a named token class (`bg-ink`, `text-stone`,
 | `stone` | `#6E6E6E` | Secondary text on Paper only (captions, meta, credential lines). ~4.6:1 on white — 14px and above only |
 | `hairline` | `#E4E4E4` | Borders/rules/seams on Paper. Perfectly neutral (R=G=B) — never a warm greige |
 | `footer-grey` | `#2A2A2A` | The footer's own dark neutral. Distinct from `ink` and both greens on purpose, so the footer reads as its own zone rather than a third green band or a slide into black |
+| `services-accent-yellow` | `#FFB606` | **NOT a general-purpose accent — read `global.css`'s own token comment before touching this.** Scoped to exactly one place, `ServicesGrid.astro`'s alternating-card checkerboard, by direct instruction. Same hex as the long-retired `guard-yellow` (coincidence, not a revival — Yellow was retired sitewide for a real reason, see PR #4/#5 below, and that decision stands everywhere else). Ink text/icon on this fill: ~11.06:1 (AAA). White on it: ~1.76:1 — fails even the lenient 3:1 floor, so yellow cards use Ink, the opposite pairing from their green neighbours |
 
 All colour-on-background pairings above have been checked against WCAG
 AA by actual relative-luminance calculation (not eyeballed) — white
@@ -139,29 +140,57 @@ stylistic preference:
 
 - **No cream/off-white backgrounds** (nothing near `#F5F1E8`), **no
   gold/amber fill colours**, **no blue**, **no purple/terracotta**. The
-  background is pure white; the only accent hues in the system are the
-  two greens above and the one dedicated footer grey.
+  background is pure white; the only GENERAL-PURPOSE accent hues in the
+  system are the two greens above and the one dedicated footer grey.
+  **One narrow, explicit, scoped exception**: `ServicesGrid.astro`'s
+  alternating checkerboard uses `--color-services-accent-yellow`
+  (`#FFB606`) on every second card, per direct instruction — see that
+  token's own long comment in `global.css` for the full reasoning. The
+  RULE's actual intent (no second general-purpose accent hue loose in
+  the system, available for any future component to reach for) is
+  still fully intact — this token is deliberately named/scoped/
+  documented so it can't be mistaken for one, and isn't used anywhere
+  outside that one component. Don't read this exception as the rule
+  being quietly abandoned, and don't reach for that token — or any new
+  amber/gold value — anywhere else without the same explicit,
+  scoped-on-purpose treatment.
 - **No tracked-out ALL-CAPS eyebrow labels above headings** ("WHAT WE
   DO", "OUR MISSION"). The one sanctioned exception to letter-tracking
   anywhere on the site is the site wordmark itself (`text-wordmark`) —
   a persistent identity mark, structurally different from a label
   repeated above every section. `SectionHeading.astro` has no eyebrow
   slot at all, by design — don't add one.
-- **No repeated identical icon/badge across multiple items.** The six
+- **No repeated identical icon/badge across multiple items, and the
+  shield/checkmark motif is permanently banned outright** (not just
+  "avoid overusing it" — don't use it at all, on anything). The six
   service icons (`src/icons/services/*.astro`) each have a genuinely
-  different overall silhouette (a doorframe+figure, a stepped tower, a
-  figure pair+arc, a camera+cone, a barrier+hatching, a crescent+dashed
-  route) — never a single shield/badge shape with a different glyph
+  different overall silhouette — currently a building facade, a figure
+  inside an open protective arc, a wall camera, two offset footprints,
+  a hard hat, and a crescent moon (rebuilt for `ServicesGrid.astro`;
+  the earlier accordion-era silhouettes — a doorframe+figure, a stepped
+  tower, a figure pair+shallow arc, a camera+view-cone, a barrier+
+  hazard-ticks, a crescent+dashed patrol route — are gone, not kept
+  anywhere) — never a single shield/badge shape with a different glyph
   swapped into the middle. Any new icon must clear the same bar.
 - **No arrows appended to link/button text** ("All services →"). The
   `Button` primitive never renders one; affordance comes from
   weight/colour/border only.
 - **No identical bordered/shadowed card grids with no real hierarchy.**
-  There is no card-grid component in this codebase and none should be
-  added for services/sectors-shaped content — see `ServicesIndex.astro`
-  (a numbered, expandable list) and `SectorsStrip.astro` (an edge-to-edge
-  photo strip with hairline seams) for the two sanctioned alternative
-  treatments already built.
+  `ServicesIndex.astro` (the old numbered/expandable-list treatment
+  this rule originally pointed at) has been deleted outright, replaced
+  by `ServicesGrid.astro` — a genuine card grid, built on direct,
+  explicit instruction (see that component's own top-of-file comment
+  for the full reasoning on why this is a real, sanctioned exception
+  rather than the rule being silently dropped, and for exactly why it
+  doesn't even literally violate the rule's own "bordered/shadowed"
+  wording — solid colour fills, no border, no shadow, real per-card
+  hierarchy). There are now genuinely THREE sanctioned card-shaped
+  treatments for services/sectors-shaped content, not the original
+  two: `ServicesGrid.astro` (solid alternating-colour cards, no
+  border/shadow — services) and `SectorsStrip.astro` (an edge-to-edge
+  photo strip with hairline seams — sectors). Don't build a FOURTH
+  variant, and don't add a border/shadow treatment to either existing
+  one, without the same kind of explicit instruction this one had.
 - **Left-aligned by default.** Centered alignment exists in exactly two
   sanctioned places sitewide: a pull-quote-style moment (`MissionBand`)
   and the closing CTA leading into the footer (`ClosingCta`).
@@ -211,22 +240,52 @@ stylistic preference:
 ## Icon set
 
 Six custom line icons exist, one per service, each with a genuinely
-distinct silhouette (see the hard rule above) — `src/icons/services/`.
-All share one stroke language: `viewBox="0 0 40 40"`, `stroke-width
-="1.25"`, `stroke-linecap="square"`, `stroke-linejoin="miter"`,
-`fill="none"`, `stroke="currentColor"` (colour is set by whatever
-wraps them — Ink by default, Guard Green in an open service row).
+distinct silhouette (see the hard rule above) — `src/icons/services/`,
+rendered by `ServicesGrid.astro` (the accordion these were originally
+built for, `ServicesIndex.astro`, is gone — see Recent history). Shared
+stroke language across all six: `viewBox="0 0 40 40"`,
+`stroke-linecap="square"`, `stroke-linejoin="miter"`, `fill="none"`,
+`stroke="currentColor"` (colour is set by whatever wraps them —
+`text-paper`/`text-ink` per card, switched with the checkerboard fill;
+see `ServicesGrid.astro`'s own comment).
+
+**`stroke-width` is now `"2"`, not this family's original `"1.25"`** —
+bumped when these six were rebuilt for `ServicesGrid.astro`'s bolder,
+larger on-card context (directly on a solid colour fill at `size-12`/
+48px, not Ink/Green-on-Paper inside a compact `1.25`-weight accordion
+row). `1.25` is no longer used anywhere in this icon family — if a
+`1.25`-weight service icon is ever needed again (e.g. a smaller/
+compact context), treat it as a genuinely new decision, not a reversion
+to an old default that's still "really" the house standard; `2` is
+what's actually shipped and correct today.
+
+One icon in the six, `OvernightSecurity.astro`'s crescent, is solid-
+filled (`fill="currentColor" stroke="none"` on its one `<path>`) rather
+than stroke-only — a deliberate, checked exception (a stroke-only
+render of a crescent SLIVER's own boundary shows both its inner and
+outer edge as separate visible lines, not a clean silhouette; see that
+icon's own comment for the full story, including a real transcription
+bug caught and fixed before shipping). The other five stay pure stroke
+outlines, `fill="none"` throughout, aside from a few small solid detail
+dots each already carries (toe-cluster dots, a camera lens centre) —
+the same small-fill-for-a-detail-that-doesn't-stroke-well exception
+this icon family has used since before this rebuild.
 
 Two functional icons for the footer — `src/icons/Phone.astro` and
 `src/icons/Email.astro` — deliberately break that stroke language
-(rounded caps on `Phone`) since they need to read instantly as universal
-pictograms next to real contact details, not as bespoke brand marks.
+(rounded caps on `Phone`, and they've never picked up the `2`-weight
+bump above — still `1.25`) since they need to read instantly as
+universal pictograms next to real contact details, not as bespoke
+brand marks.
 
-**Placement rule, load-bearing**: the six service icons render **only
-inside the expanded state of their own service row** (`ServicesIndex
-.astro`, via the native `<details>`/`<summary>` disclosure — no icon is
-visible on a collapsed row. Don't add an icon to the collapsed/default
-row state; opening a row is what earns it.
+**Placement rule, load-bearing, UPDATED from the old accordion-only
+version of this rule**: the six service icons now render on EVERY card
+in `ServicesGrid.astro`, always visible, never gated behind a hover/
+expand/open state — the "only inside an open accordion row" rule that
+used to live here was specific to `ServicesIndex.astro`'s own
+`<details>`/`<summary>` disclosure mechanism, which no longer exists
+anywhere in this codebase. Don't resurrect a hide-until-interacted-with
+treatment for these icons without a real reason to.
 
 ## Architecture conventions
 
@@ -261,9 +320,14 @@ row state; opening a row is what earns it.
   plain sentence-case supporting line below the heading — a legitimate,
   different thing from a tracked-caps label above it.
 - Homepage-specific sections live in `src/components/home/` (`Hero`,
-  `StatStrip`, `MissionBand`, `SectorsStrip`, `ClosingCta`), assembled in
-  `src/pages/index.astro`. Shared primitives live in
-  `src/components/ui/`.
+  `StatStrip`, `ServicesGrid`, `MissionBand`, `SectorsStrip`,
+  `ClosingCta`), assembled in `src/pages/index.astro`. Shared
+  primitives live in `src/components/ui/`. (`ServicesGrid`'s own
+  predecessor, `ServicesIndex.astro`, lived directly under
+  `src/components/` instead — an inconsistency with this convention
+  that's now moot, since it's deleted; if anything else is ever found
+  sitting outside this structure, that's the convention to bring it
+  back in line with, not a precedent to follow.)
 
 ## Standing conventions
 
@@ -378,6 +442,87 @@ row state; opening a row is what earns it.
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number is on `origin/main`.
+
+- **PR #16 — `ServicesIndex.astro`'s accordion replaced outright by
+  `ServicesGrid.astro`, a real card grid — a deliberate, explicit
+  exception to two standing hard rules, both updated in the same
+  commit so the doc and the code agree (see those rules' own updated
+  text above for the full reasoning, not repeated here): "no card grid
+  for services content" and "no gold/amber fill colours." Built on
+  direct, detailed instruction (exact 3×2/mobile-stack layout, exact
+  alternating Guard-Green-Secondary/yellow checkerboard fill, exact
+  per-card copy) — six cards, icon + heading + body each, left-aligned
+  (this section is explicitly NOT a third centred-alignment exception).
+
+  **Yellow is a new, deliberately SCOPED-ONLY token** —
+  `--color-services-accent-yellow` (`#FFB606`, same hex as the long-
+  retired `guard-yellow`, a coincidence not a revival — see
+  `global.css`'s own token comment and the colour table above for the
+  full "why a real token and not an arbitrary bracket value, and why
+  it's explicitly not a returning global accent" reasoning). Contrast
+  computed fresh, not assumed from Guard Yellow's own old numbers even
+  though the hex matches: Ink on this fill ~11.06:1 (AAA), white
+  ~1.76:1 (fails even the lenient 3:1 floor) — yellow cards therefore
+  use Ink text/icon/focus-ring, the OPPOSITE pairing from their green
+  neighbours (white/`.on-dark`, reusing StatStrip's already-established
+  ~6.36:1 pairing unchanged). `index % 2` alternation, which — with
+  this grid's odd 3-column count — produces a genuine checkerboard (row
+  two starts on the opposite colour from row one) for free, no
+  row/column-aware math needed.
+
+  **Six new bespoke icons**, replacing the retired accordion set's own
+  geometry outright at the same six file paths (`src/icons/services/`)
+  — building/office facade, a figure inside an open protective arc (not
+  a closed ring, not a shield — shields stay permanently banned),
+  wall camera, two offset footprints, a hard hat, a crescent moon.
+  `stroke-width` bumped from this family's `1.25` baseline to `2` (a
+  larger, bolder on-card context than the old compact accordion row) —
+  see "Icon set" above for the full sitewide implication of that
+  change. Went through the mandatory rasterise-and-look process for
+  real, not as a formality — it caught and fixed two genuine problems
+  before shipping, not zero: a first Manned Guarding draft (one bigger
+  toe-circle flush against the sole) read as a figure-8/snowman, fixed
+  by switching to a proper sole-plus-three-small-separated-toe-dots
+  construction (the standard footprint pictogram shape, not a tuning
+  pass on the broken one); and Overnight Security's crescent needed
+  TWO separate fixes in sequence — first, a naive rescale of the old
+  icon's own two-shared-endpoint arc formula silently collapsed into a
+  symmetric band/bracket shape (an SVG spec rule scales an arc's radius
+  up when the given endpoints are too far apart for it, which quietly
+  destroyed the intended two-different-radii asymmetry), fixed by
+  rebuilding the path from real circle-circle intersection geometry
+  instead of guessed coordinates; second, even with that geometry
+  correct, a stroke-only render of the same path showed two separate
+  nested curves rather than a clean crescent (an inherent property of
+  stroking a thin sliver's own boundary), fixed by switching that one
+  icon to a solid fill — and a hand-transcription slip (one sweep-flag
+  digit, `0` instead of the already-verified-correct `1`) carried the
+  WRONG value from the isolated test into the real file regardless,
+  rasterising as a near-solid blob, caught only by diffing the exact
+  path string actually shipped against the independently-confirmed-
+  correct one rather than trusting a second glance at the broken
+  render. See `OvernightSecurity.astro`'s own comment for the full,
+  granular account — kept there rather than condensed further here,
+  since "verify the exact string you shipped, not just the geometry
+  you derived" is a real, generalisable lesson worth a future session
+  actually reading in full once, not just skimming a summary of.
+
+  **Motion**: a new dedicated module, `src/lib/servicesGridReveal.ts`
+  (not a new option bolted onto `scrollReveal.ts`'s existing plain
+  fade/rise) — scale-up-from-0.85 + settle-from-a-few-degrees-tilt,
+  alternating tilt direction per card, `power3.out` easing throughout
+  (no bounce/elastic, matching the sitewide motion rule), staggered via
+  an explicit per-card `delay` keyed off column position rather than
+  GSAP's own `stagger` option (which only staggers one shared tween
+  across a target array — doesn't apply once each card has its OWN
+  independent `ScrollTrigger`, which it needs since this section sits
+  below the fold). Reduced-motion fallback is the same instant-final-
+  state pattern every other entry point on this site already uses.
+
+  A real `astro check` (0 errors, 35 files) and clean `astro build`
+  were run before shipping, plus the dead-CSS-from-comments audit this
+  file's own standing conventions require for anything touching this
+  component family — confirmed clean, nothing orphaned.
 
 - **PR #15 — StatStrip dividers extended to mobile; a permanent fix
   for dead-CSS-from-CLAUDE.md.** Follow-up to PR #14's own divider
@@ -546,8 +691,9 @@ Cloudflare config) and the full homepage (header, hero — now a real
 officer photo with a black tint overlay and a green text-panel scrim,
 see PR #7–#10 — stat strip — icon-led, three columns, solid Guard
 Green Secondary fill, dividers between every pair of items at every
-breakpoint, see PR #11–#15 — services index, mission band, sectors
-strip, closing CTA, footer).
+breakpoint, see PR #11–#15 — services grid, a six-card checkerboard
+replacing the old numbered accordion, see PR #16 — mission band,
+sectors strip, closing CTA, footer).
 
 **Not started**: the interior pages — About, Careers, Our Policies,
 Gallery, Contact. All still need building.

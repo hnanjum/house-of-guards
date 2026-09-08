@@ -1,0 +1,181 @@
+---
+import SectionHeading from "../ui/SectionHeading.astro";
+import CorporateSecurity from "../../icons/services/CorporateSecurity.astro";
+import CloseProtection from "../../icons/services/CloseProtection.astro";
+import CctvMonitoring from "../../icons/services/CctvMonitoring.astro";
+import MannedGuarding from "../../icons/services/MannedGuarding.astro";
+import ConstructionSecurity from "../../icons/services/ConstructionSecurity.astro";
+import OvernightSecurity from "../../icons/services/OvernightSecurity.astro";
+
+/**
+ * "Services We Offer" — replaces `ServicesIndex.astro`'s numbered
+ * accordion outright as the homepage's services section, per explicit
+ * instruction. `ServicesIndex.astro` itself has been deleted, not left
+ * unused (see its own removal in this commit's diff) — nothing else in
+ * the codebase referenced it.
+ *
+ * THIS IS A DELIBERATE, EXPLICIT EXCEPTION TO A STANDING HARD RULE —
+ * READ BEFORE TOUCHING THIS SECTION AGAIN. CLAUDE.md's own hard rules
+ * state "No identical bordered/shadowed card grids with no real
+ * hierarchy… There is no card-grid component in this codebase and
+ * none should be added for services/sectors-shaped content." This
+ * section IS a card grid for services-shaped content, built on
+ * direct, explicit, detailed instruction (exact 3×2 layout, exact
+ * alternating fill colours, exact per-card content) — not a case of
+ * that rule being quietly ignored or forgotten. It also isn't a
+ * literal violation of the rule's own stated target: every card here
+ * is a SOLID colour fill with no border and no shadow at all (the
+ * rule specifically named "bordered/shadowed" grids), and each card
+ * carries real icon+heading+body hierarchy, not identical repeated
+ * content. CLAUDE.md's hard-rules section itself has been updated in
+ * this same commit to name this section as a third sanctioned
+ * card-shaped treatment alongside `SectorsStrip.astro`'s photo grid —
+ * don't read the original rule text in isolation and assume this
+ * component is a mistake sitting on top of it.
+ *
+ * LAYOUT — `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3` (matches
+ * `SectorsStrip.astro`'s own graduated-breakpoint convention for a
+ * six-item grid, rather than jumping straight from 1 to 3 columns) —
+ * resolves to the requested "3 columns / 2 rows" shape at `lg:`+ and a
+ * genuine single-column stack on mobile. No `gap` between cells and no
+ * dividers — the cards sit truly edge-to-edge (like `SectorsStrip`'s
+ * own edge-to-edge photo grid), since the colour change between
+ * adjacent cards IS the visual seam here; a gap or hairline would
+ * dilute the checkerboard read rather than reinforce it. CSS Grid's
+ * own default `align-items: stretch` equalises every card in a row to
+ * the tallest card's height automatically — no fixed/min height was
+ * set on any card, so this stays fully content-driven like every
+ * other section on the site.
+ *
+ * CHECKERBOARD — plain `index % 2` alternation. With an ODD column
+ * count (3) this genuinely produces a true checkerboard, not stripes:
+ * row one is Green/Yellow/Green (indices 0,1,2), row two starts at
+ * index 3 (odd → Yellow) giving Yellow/Green/Yellow — each row is
+ * offset by one colour from the row above it, the actual checkerboard
+ * property, which falls out of the odd column count for free rather
+ * than needing any row/column-aware math.
+ *
+ * COLOUR + CONTRAST, both computed, not assumed to mirror the other:
+ * - GREEN cards (`on-dark bg-guard-green-secondary text-paper`) reuse
+ *   the already-established StatStrip/header-info-bar pairing exactly
+ *   — white text/icon on Guard Green Secondary, ~6.36:1 (AA, real
+ *   margin), `.on-dark` for the focus ring per the same fill's own
+ *   documented reasoning in `global.css`.
+ * - YELLOW cards use a new, DELIBERATELY SCOPED-ONLY token,
+ *   `--color-services-accent-yellow` (`#ffb606`, `global.css`) — see
+ *   that token's own comment for the full "why a new token instead of
+ *   an arbitrary bracket colour, and why it's explicitly NOT a
+ *   returning global accent" reasoning; not repeated here. Computed
+ *   fresh (not assumed from the retired `guard-yellow` token's old
+ *   numbers, even though the hex is identical): Ink text/icon on this
+ *   fill measures ~11.06:1 (AAA, real margin) — White measures ~1.76:1
+ *   and fails even the lenient 3:1 non-text floor outright. Yellow
+ *   cards therefore use plain Ink (the sitewide default — no `.on-
+ *   dark`, no override needed; the default Ink focus ring is already
+ *   safe at this same ~11.06:1). This is the OPPOSITE pairing from the
+ *   green cards' own, which is exactly why the checkerboard can't share
+ *   one blanket text-colour class across the whole grid — colour is
+ *   switched per card below, keyed off the same `isGreen` boolean that
+ *   drives the fill itself, so the two can never drift out of sync.
+ *
+ * ALIGNMENT — left-aligned card content throughout (`SectionHeading`'s
+ * own left-aligned default, `items-start text-left` on every card) —
+ * this section is explicitly NOT one of the two sanctioned centred-
+ * alignment exceptions (`MissionBand`, `ClosingCta`), matching the
+ * hard rule directly.
+ *
+ * ICONS — six new bespoke SVGs replacing the retired accordion set's
+ * own geometry outright (same six file paths under `src/icons/
+ * services/`, new concepts/paths inside) — `stroke-width="2"` (bumped
+ * from this icon family's 1.25 baseline; see any one icon's own
+ * comment for why) since they now sit directly on a bold solid card
+ * fill at a larger display size, not Ink/Green-on-Paper inside a
+ * compact accordion row. `size-12` (48px) here — noticeably larger
+ * than StatStrip's own `size-9` (36px) sibling icons, a deliberate
+ * "icon leads the card" hierarchy for a six-way grid where the icon is
+ * the first, largest thing a reader's eye lands on, not a supporting
+ * detail beside a bigger headline the way StatStrip's numbers are.
+ * Every icon was rasterised (real 48px display size AND magnified,
+ * individually and composited into a row alongside its five siblings,
+ * on both real card fills) and visually inspected before shipping —
+ * this caught and fixed two real problems, not zero: a first Manned
+ * Guarding draft (one larger toe-circle sitting flush against the
+ * sole ellipse) read as a figure-8/snowman rather than a footprint,
+ * and a first Overnight Security crescent, once its own geometry bug
+ * was separately fixed, briefly shipped with a hand-transcribed sweep-
+ * flag typo that rendered as a near-solid blob rather than a crescent
+ * — see each icon's own file for its own fuller account. Colour
+ * inherits via `currentColor` from each card's own `text-paper`/
+ * `text-ink` wrapper — no colour prop threaded through the icons
+ * themselves.
+ *
+ * MOTION — `data-services-reveal` + `initServicesGridReveal()`
+ * (`src/lib/servicesGridReveal.ts`, wired into `index.astro`'s own
+ * `astro:page-load` handler alongside the Hero/StatStrip entries
+ * already there) — a genuine scroll-triggered scale-up-from-0.85 +
+ * settle-from-a-few-degrees-tilt entrance, staggered per card, calm
+ * `power3.out` easing throughout (no bounce/elastic). See that
+ * module's own comment for the full mechanism and the reduced-motion
+ * fallback (a plain, instant full-opacity/flat/full-scale state, no
+ * animation, matching every other entry point on this site).
+ */
+const SERVICES = [
+  {
+    name: "Corporate Security",
+    body: "Front-of-house officers, access control and CCTV oversight that reflect the standards of your organisation.",
+    Icon: CorporateSecurity,
+  },
+  {
+    name: "Close Protection",
+    body: "Discreet personal protection for individuals, families and visiting guests, at home and in transit.",
+    Icon: CloseProtection,
+  },
+  {
+    name: "CCTV Monitoring",
+    body: "Round-the-clock camera monitoring with rapid escalation the moment something looks wrong.",
+    Icon: CctvMonitoring,
+  },
+  {
+    name: "Manned Guarding",
+    body: "Highly trained, SIA licensed guards providing a visible presence from crowd control to mobile patrol.",
+    Icon: MannedGuarding,
+  },
+  {
+    name: "Construction Site Security",
+    body: "Protecting plant, materials and part-built structures on sites that are a magnet for thieves.",
+    Icon: ConstructionSecurity,
+  },
+  {
+    name: "Overnight Security",
+    body: "Dedicated night cover for premises that are most vulnerable once the working day ends.",
+    Icon: OvernightSecurity,
+  },
+];
+---
+
+<section class="bg-paper">
+  <div class="mx-auto max-w-7xl px-gutter py-24 md:px-12">
+    <SectionHeading level="h2">Services We Offer</SectionHeading>
+
+    <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        SERVICES.map(({ name, body, Icon }, i) => {
+          const isGreen = i % 2 === 0;
+          return (
+            <div
+              data-services-reveal
+              class:list={[
+                "flex flex-col items-start p-8 text-left sm:p-10",
+                isGreen ? "on-dark bg-guard-green-secondary text-paper" : "bg-services-accent-yellow text-ink",
+              ]}
+            >
+              <Icon class="mb-6 size-12" />
+              <h3 class="text-h3 mb-3">{name}</h3>
+              <p class="text-body">{body}</p>
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>
