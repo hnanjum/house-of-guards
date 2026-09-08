@@ -1,0 +1,51 @@
+---
+/**
+ * A single header/footer nav link. Sentence case, Caption scale (14px)
+ * — deliberately quiet rather than a large, loud nav bar. No icon, no
+ * arrow.
+ *
+ * `tone="ink"` (default) — for a link sitting on a Paper background.
+ * Text is always Ink (never Guard Olive — at 14px, Olive text on Paper
+ * only measures ~3.11:1, well under the 4.5:1 AA floor for normal
+ * text). Active/hover state is a 2px Guard Olive underline instead —
+ * a non-text accent, where the lenient 3:1 non-text-contrast floor
+ * applies and Olive-on-Paper clears it. A transparent underline sits
+ * there at rest so nothing shifts layout when it appears.
+ *
+ * `tone="paper"` — for a link sitting on a Footer Grey / Guard Green
+ * Deep background, where dark text would be nearly invisible. White
+ * text instead; hover/current state is communicated by opacity, not a
+ * hue shift, since there's no second colour that reads clearly on
+ * every dark surface this can appear on.
+ */
+interface Props {
+  href: string;
+  tone?: "ink" | "paper";
+  class?: string;
+}
+
+const { href, tone = "ink", class: className } = Astro.props;
+
+const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
+const linkPath = href.replace(/\/$/, "") || "/";
+const isActive = currentPath === linkPath;
+
+const toneClasses = {
+  ink: isActive
+    ? "text-ink border-guard-olive"
+    : "text-ink border-transparent hover:border-guard-olive",
+  paper: isActive ? "text-paper border-transparent" : "text-paper hover:text-paper/70 border-transparent",
+};
+---
+
+<a
+  href={href}
+  aria-current={isActive ? "page" : undefined}
+  class:list={[
+    "text-caption border-b-2 pb-0.5 transition-colors duration-200 ease-out",
+    toneClasses[tone],
+    className,
+  ]}
+>
+  <slot />
+</a>

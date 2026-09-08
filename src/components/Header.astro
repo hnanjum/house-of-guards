@@ -1,0 +1,106 @@
+---
+import NavLink from "./ui/NavLink.astro";
+import Button from "./ui/Button.astro";
+import Divider from "./ui/Divider.astro";
+import Phone from "../icons/Phone.astro";
+import Location from "../icons/Location.astro";
+import NavDrawer from "./NavDrawer.tsx";
+
+/**
+ * Site header. Two bars, both Paper/white — this is a deliberate
+ * departure from the old solid Guard Green fill (see the design-system
+ * note in global.css on why Guard Olive can't carry that role: white
+ * text on it is only ~3.11:1, well under AA).
+ *
+ * 1. Info bar — Stone (muted grey) text, not Ink and not Guard Olive.
+ *    Olive was considered and rejected: at this text's size (12–14px)
+ *    Olive-on-Paper is only ~3.11:1, under the 4.5:1 AA floor for
+ *    running text (see the house rule in global.css — Olive never
+ *    carries text on Paper). Stone is the token this codebase already
+ *    defines for exactly this role ("secondary text... captions, meta,
+ *    credential lines") and measures ~4.6:1, a real if modest AA pass;
+ *    darkens to Ink on hover for a bit of extra presence on the one
+ *    interactive item (the phone link). Phone + address, small line
+ *    icons matching the existing icon set's stroke weight. Not sticky
+ *    (scrolls away with the page) — a persistent presence here would
+ *    eat vertical space on every scroll position for content that only
+ *    matters at the top of the page.
+ * 2. Main nav bar — wordmark left, a single (links + CTA) cluster
+ *    right, sticky at the top on scroll. The links and the CTA are
+ *    grouped into one flex block rather than being 3 separate
+ *    `justify-between` children — with only 3 unevenly-sized items
+ *    (wordmark / nav / CTA), `justify-between` was distributing the
+ *    row's leftover space into two large, uncontrolled gaps around the
+ *    nav block, which is what read as "sparse." Now there are only 2
+ *    top-level items (wordmark, cluster), so the whole row's leftover
+ *    space collapses into one gap between them, and the internal
+ *    link-to-link and links-to-CTA gaps are both a fixed, tightened
+ *    `gap-6` instead of whatever `justify-between` happened to leave.
+ *    `border-b border-hairline` here is a real, needed addition (not
+ *    decorative): the old header's colour boundary against the Paper
+ *    page below is gone now that both are Paper — without a line, a
+ *    pinned sticky bar would visually vanish into whatever scrolls
+ *    underneath it.
+ *
+ * Neither bar carries `on-dark` any more — Paper backgrounds use the
+ * default Ink focus ring, which is already the safe choice here.
+ *
+ * `lg` (1024px) is the nav↔hamburger breakpoint, same as before. Read
+ * literally, "desktop/tablet" could mean showing the full six-link nav
+ * as low as ~768px (portrait tablet) — measured that against the real
+ * content (wordmark + 6 links + CTA) and it doesn't fit without
+ * wrapping/cramming at that width. Kept `lg` so "tablet" resolves to
+ * landscape-tablet-and-up (1024px = iPad landscape exactly), and
+ * anything narrower gets the hamburger instead of a broken nav row.
+ *
+ * NOTE: phone number is the same placeholder already flagged in
+ * Footer.astro (repeated zeros, not a real number) — swap both before
+ * launch. Address is a real, correct one (Bradford, West Yorkshire —
+ * matches the footer/CLAUDE.md's stated location), not a placeholder.
+ */
+---
+
+<header>
+  <div class="bg-paper">
+    <div
+      class="mx-auto flex flex-col gap-1.5 px-gutter py-2 sm:flex-row sm:items-center sm:gap-8 sm:py-2.5 md:px-12"
+    >
+      <a
+        href="tel:+441274000000"
+        class="text-micro text-stone hover:text-ink flex items-center gap-2 transition-colors duration-200 ease-out sm:text-caption"
+      >
+        <Phone class="size-3.5 shrink-0 sm:size-4" />
+        01274 000 000
+      </a>
+      <p class="text-micro text-stone flex items-center gap-2 sm:text-caption">
+        <Location class="size-3.5 shrink-0 sm:size-4" />
+        Bradford, West Yorkshire
+      </p>
+    </div>
+  </div>
+
+  <Divider class="w-full" />
+
+  <div class="border-hairline sticky top-0 z-30 border-b bg-paper">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-gutter py-4 md:px-12">
+      <a href="/" class="text-wordmark text-ink shrink-0">House of Guards</a>
+
+      <div class="hidden items-center gap-6 lg:flex">
+        <nav class="flex items-center gap-6" aria-label="Primary">
+          <NavLink href="/">Home</NavLink>
+          <NavLink href="/about">About Us</NavLink>
+          <NavLink href="/services">Services</NavLink>
+          <NavLink href="/careers">Careers</NavLink>
+          <NavLink href="/policies">Our Policies</NavLink>
+          <NavLink href="/gallery">Gallery</NavLink>
+        </nav>
+
+        <Button href="/contact">Get a Quote</Button>
+      </div>
+
+      <div class="lg:hidden">
+        <NavDrawer client:load />
+      </div>
+    </div>
+  </div>
+</header>

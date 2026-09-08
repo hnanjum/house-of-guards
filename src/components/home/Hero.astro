@@ -1,0 +1,64 @@
+---
+import Button from "../ui/Button.astro";
+import Divider from "../ui/Divider.astro";
+
+/**
+ * The homepage hero. Stays on Paper — the colour boldness in this
+ * design comes from the header above it and the stat strip/mission
+ * band below it, not from the hero itself. Left-aligned headline
+ * (never centered — a centered hero is the single most templated
+ * pattern in this category), an asymmetric framed photograph (not a
+ * full-bleed banner), a sentence-case credential line beside it.
+ *
+ * `data-muster-*` markers are read by initHeroMuster() (called once
+ * from index.astro) to drive the hero's single load-in sequence.
+ *
+ * NOTE: the photograph is an unthemed Lorem Picsum placeholder (a
+ * fixed seed, so it's stable across reloads, but the actual subject
+ * matter is random stock photography, not real House of Guards
+ * content) — swap the src for a real documentary-style photograph.
+ */
+---
+
+<section class="bg-paper">
+  <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12 md:py-24">
+    <div data-muster-rule>
+      <Divider class="mb-12 md:mb-16" />
+    </div>
+
+    <div class="grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:items-start">
+      <div>
+        <h1 data-muster-headline class="text-display text-ink">Security built on trust.</h1>
+        <p data-muster-headline class="text-body-lg text-stone mt-6 max-w-md">
+          We supply SIA-licensed officers, built around your site, your shift
+          pattern, and your risk — not a fixed package.
+        </p>
+        <div data-muster-headline class="mt-8 flex flex-wrap items-center gap-6">
+          <Button href="/contact">Get a Quote</Button>
+          <a
+            href="tel:+441274000000"
+            class="text-body text-ink underline decoration-transparent underline-offset-4 transition-colors duration-200 ease-out hover:decoration-guard-olive"
+          >
+            01274 000 000
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <div class="relative aspect-[4/5] overflow-hidden bg-hairline">
+          <img
+            src="https://picsum.photos/seed/house-of-guards-hero/800/1000"
+            alt="A House of Guards officer on site — placeholder photograph"
+            class="h-full w-full object-cover"
+            width="800"
+            height="1000"
+            loading="eager"
+            fetchpriority="high"
+          />
+          <div data-muster-mask class="absolute inset-0 bg-guard-green-deep"></div>
+        </div>
+        <p class="text-caption text-stone mt-4">Bradford, West Yorkshire · Est. 2023</p>
+      </div>
+    </div>
+  </div>
+</section>

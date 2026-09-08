@@ -1,0 +1,41 @@
+---
+/**
+ * A page/section heading. Left-aligned by default, per the layout
+ * concept — `center` exists only for the small number of sanctioned
+ * exceptions (a pull-quote, the footer's closing line), not for
+ * routine section heads.
+ *
+ * Deliberately has no "eyebrow" slot or prop. A tracked-caps label
+ * sitting above a heading was one of the specific patterns this whole
+ * design system exists to avoid — there is nowhere in this component
+ * for that pattern to be reintroduced. An optional description renders
+ * as a plain sentence-case paragraph *below* the heading, which is a
+ * different, legitimate thing (a supporting line, not a topic tag).
+ */
+interface Props {
+  level?: "h1" | "h2" | "h3";
+  align?: "left" | "center";
+  class?: string;
+}
+
+const { level = "h2", align = "left", class: className } = Astro.props;
+
+const sizeClass = { h1: "text-h1", h2: "text-h2", h3: "text-h3" }[level];
+const alignClass = align === "center" ? "text-center" : "text-left";
+const hasDescription = Astro.slots.has("description");
+
+const Tag = level;
+---
+
+<div class:list={[alignClass, className]}>
+  <Tag class:list={[sizeClass, "text-ink"]}>
+    <slot />
+  </Tag>
+  {
+    hasDescription && (
+      <p class:list={["text-body-lg text-stone mt-4 max-w-2xl", align === "center" && "mx-auto"]}>
+        <slot name="description" />
+      </p>
+    )
+  }
+</div>

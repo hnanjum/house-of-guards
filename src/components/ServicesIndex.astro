@@ -1,0 +1,100 @@
+---
+import SectionHeading from "./ui/SectionHeading.astro";
+import Divider from "./ui/Divider.astro";
+import MannedGuarding from "../icons/services/MannedGuarding.astro";
+import CorporateSecurity from "../icons/services/CorporateSecurity.astro";
+import CloseProtection from "../icons/services/CloseProtection.astro";
+import CctvMonitoring from "../icons/services/CctvMonitoring.astro";
+import ConstructionSecurity from "../icons/services/ConstructionSecurity.astro";
+import OvernightSecurity from "../icons/services/OvernightSecurity.astro";
+
+/**
+ * The services index: a numbered list, not a card grid. Rows are
+ * native <details>/<summary> — no JS, fully keyboard/screen-reader
+ * accessible by default, and instant open/close (no animated height
+ * transition), which is also inherently safe for reduced motion since
+ * there's no motion to disable.
+ *
+ * The six custom icons render ONLY inside an open row, next to its
+ * description — never beside a collapsed row. Opening a row is what
+ * earns the icon; the collapsed list stays purely numeral/name-led.
+ *
+ * Row name/toggle glyph stay Ink at every state, even open — at 28px
+ * (text-h3) Guard Olive-on-Paper technically clears the 3:1 AA
+ * large-text floor (~3.11:1), but only by ~4%, and that's too thin a
+ * margin to build the open-state on. The open indicator is a 2px Guard
+ * Olive left border on the row instead (a non-text accent, same 3:1
+ * floor, same number, but as a UI-component boundary rather than as
+ * legibility-critical text). The icon itself stays Guard Olive — also
+ * non-text.
+ */
+const SERVICES = [
+  {
+    number: "01",
+    name: "Manned Guarding",
+    description:
+      "Static and mobile officers on your site, briefed and in smart uniform, backed by 24/7 phone and on-shift support.",
+    Icon: MannedGuarding,
+  },
+  {
+    number: "02",
+    name: "Corporate Security",
+    description:
+      "Front-of-house and access control for offices and corporate premises, built around your own procedures — not a fixed package.",
+    Icon: CorporateSecurity,
+  },
+  {
+    number: "03",
+    name: "Close Protection",
+    description:
+      "Discreet personal protection drawn from real experience across stadiums, marathons, and major events — not a generic detail package.",
+    Icon: CloseProtection,
+  },
+  {
+    number: "04",
+    name: "CCTV Monitoring",
+    description:
+      "Live monitoring and clear reporting on every deployment, from officers trained to the same SIA and first-aid standard as our guarding teams.",
+    Icon: CctvMonitoring,
+  },
+  {
+    number: "05",
+    name: "Construction Site Security",
+    description:
+      "Controlled access and overnight cover for active sites, with shift patterns built around the build programme, not a fixed rota.",
+    Icon: ConstructionSecurity,
+  },
+  {
+    number: "06",
+    name: "Overnight Security",
+    description:
+      "Punctual, briefed officers covering the hours daytime teams can't — with the same 24/7 phone and officer support as every shift.",
+    Icon: OvernightSecurity,
+  },
+];
+---
+
+<div>
+  <SectionHeading level="h2">Services</SectionHeading>
+  <Divider class="mt-6" />
+  {
+    SERVICES.map(({ number, name, description, Icon }) => (
+      <details class="group border-b border-hairline border-l-2 border-l-transparent transition-colors duration-200 ease-out open:border-l-guard-olive">
+        <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-6 pl-4 [&::-webkit-details-marker]:hidden">
+          <span class="flex items-center gap-6">
+            <span class="text-caption text-stone w-6 shrink-0">{number}</span>
+            <span class="text-h3 text-ink">{name}</span>
+          </span>
+          <span class="text-h3 text-ink shrink-0" aria-hidden="true">
+            <span class="group-open:hidden">+</span>
+            <span class="hidden group-open:inline">–</span>
+          </span>
+        </summary>
+        <div class="flex flex-col gap-4 pb-8 pl-16 sm:flex-row sm:items-start sm:gap-8">
+          <Icon class="size-10 shrink-0 text-guard-olive" />
+          <p class="text-body text-stone max-w-2xl">{description}</p>
+        </div>
+      </details>
+    ))
+  }
+</div>

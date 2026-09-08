@@ -1,0 +1,50 @@
+---
+import SectionHeading from "../ui/SectionHeading.astro";
+
+/**
+ * The sectors photographic strip — evidence-of-range, not a card grid.
+ * Six photographs sit edge-to-edge with hairline seams (a shared grid
+ * border, not individual bordered/shadowed cards), captions beneath in
+ * plain sentence case. White background between/around the photos, per
+ * the brief — the accent colour in this design lives in the header and
+ * the two bold sections either side of this one, not here.
+ *
+ * NOTE: all six photographs are unthemed Lorem Picsum placeholders
+ * (fixed seeds, so stable across reloads) — swap for real photography
+ * of each real environment before launch.
+ */
+const SECTORS = [
+  { name: "Retail", seed: "hog-sector-retail" },
+  { name: "Distribution", seed: "hog-sector-distribution" },
+  { name: "Corporate", seed: "hog-sector-corporate" },
+  { name: "Events", seed: "hog-sector-events" },
+  { name: "Healthcare", seed: "hog-sector-healthcare" },
+  { name: "Education", seed: "hog-sector-education" },
+];
+---
+
+<section class="bg-paper">
+  <div class="mx-auto max-w-7xl px-gutter py-24 md:px-12">
+    <SectionHeading level="h2">Who we protect</SectionHeading>
+
+    <div class="border-hairline divide-hairline mt-12 grid grid-cols-2 divide-x divide-y border sm:grid-cols-3 lg:grid-cols-6">
+      {
+        SECTORS.map(({ name, seed }) => (
+          <div>
+            <div class="aspect-square overflow-hidden bg-hairline">
+              <img
+                src={`https://picsum.photos/seed/${seed}/400/400`}
+                alt={`${name} — placeholder photograph`}
+                class="h-full w-full object-cover"
+                width="400"
+                height="400"
+                loading="lazy"
+              />
+            </div>
+            <p class="text-caption text-stone px-3 py-3">{name}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
