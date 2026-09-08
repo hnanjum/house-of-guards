@@ -35,9 +35,10 @@ import Divider from "../ui/Divider.astro";
         </p>
         <div data-muster-headline class="mt-8 flex flex-wrap items-center gap-6">
           <Button href="/contact">Get a Quote</Button>
+          {/* hover:decoration-guard-yellow — non-text accent on Paper, ~1.76:1, under the 3:1 floor; see global.css's Guard Yellow comment. Hover-only decoration, not a state indicator, so left as-is rather than reworked. */}
           <a
             href="tel:+441274000000"
-            class="text-body text-ink underline decoration-transparent underline-offset-4 transition-colors duration-200 ease-out hover:decoration-guard-olive"
+            class="text-body text-ink underline decoration-transparent underline-offset-4 transition-colors duration-200 ease-out hover:decoration-guard-yellow"
           >
             01274 000 000
           </a>
