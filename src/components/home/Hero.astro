@@ -56,26 +56,66 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
  * mobile browser chrome/dynamic-toolbar resize quirks on what's
  * already a bottom-anchored overlay composition.
  *
- * SCRIM — a FLAT, uniform-opacity `bg-guard-green-deep/85` panel
- * behind the text, not a percentage-based gradient. A gradient's safe-
- * contrast zone depends on exactly where it sits relative to the
+ * FULL-IMAGE TINT — a second, separate `bg-guard-green-deep/18` layer
+ * sitting between `<Image>` and the text panel, covering the ENTIRE
+ * section (not just behind the text) for a slightly moodier, more
+ * premium feel — independent of, and unchanged from, the text-panel
+ * scrim below it. Decorative only (`aria-hidden`, `pointer-events-
+ * none`); no explicit z-index needed, since an `absolute` element
+ * later in the DOM than `<Image>` but earlier than the `z-10` content
+ * wrapper already paints above the image and below the text, which is
+ * all this layer needs to do.
+ *
+ * TEXT-PANEL SCRIM — a FLAT, uniform-opacity `bg-guard-green-deep/85`
+ * panel behind the text, not a percentage-based gradient. A gradient's
+ * safe-contrast zone depends on exactly where it sits relative to the
  * text, which in turn depends on the panel's real rendered height —
  * unknowable without a live render. A flat panel's contrast is the
  * same at every pixel behind the text regardless of exact dimensions,
  * which matters given nothing here can be visually verified before
- * shipping. Real WCAG math, worst case (the underlying photo assumed
- * PURE WHITE #FFFFFF, the most extreme case it could ever show
- * through): blended colour at 85% opacity ≈ rgb(45,65,59) →
- * white-text contrast ≈ 10.9:1 (AAA, and this is the *worst* case —
- * the real photo's brightest patches are marble/glass in the ~220–245
- * range, not pure white, so real contrast will be higher still). Even
- * dropped to 75% opacity the same worst-case math still clears AAA
- * (≈7.7:1) — see the PR description for the full working. `outline-
- * light`'s white border/text sit on this same flat panel, so the same
- * number applies to it and to the default-safe-focus-ring question
- * (`on-dark` swaps the ring to Paper — needed here for the same
- * reason it's needed on StatStrip/the header info bar: this panel is
- * far too dark for the default Ink ring).
+ * shipping.
+ *
+ * Real WCAG math, worst case (the underlying photo assumed PURE WHITE
+ * #FFFFFF, the most extreme case it could ever show through), and
+ * RE-DERIVED (not assumed carried over) now that the tint and the
+ * scrim stack on top of each other under the text panel: because both
+ * layers are the identical colour, two same-colour layers composite
+ * into one effective layer at combined alpha = s + (1−s)·t (standard
+ * same-colour src-over stacking), where s=0.85 (scrim) and t=0.18
+ * (tint) → 0.85 + 0.15×0.18 ≈ 0.877. Blended colour at that combined
+ * alpha ≈ rgb(38,59,52) → white-text contrast ≈ 12.0:1 (AAA) — HIGHER
+ * than the original single-layer figure of 10.9:1, since stacking more
+ * of the same dark colour over a white worst case can only darken it
+ * further; confirmed by the actual recomputed number, not assumed from
+ * that intuition alone. `outline-light`'s white border/text and the
+ * default-safe-focus-ring question (`on-dark` swaps the ring to Paper
+ * — needed here for the same reason it's needed on StatStrip/the
+ * header info bar: this combined panel is far too dark for the
+ * default Ink ring) both sit on this same combined panel, so the same
+ * 12.0:1 covers them too. Button.astro's `primary` variant is
+ * unaffected either way — its own opaque fill sits on top of both
+ * layers regardless.
+ *
+ * HEADER LEGIBILITY — the tint only affects the hero `<section>`
+ * itself. `Header.astro`'s info bar and main nav are separate, fully
+ * opaque, normal-flow elements rendered BEFORE `<main>` in
+ * `BaseLayout.astro` (`<Header /><main><slot /></main>`) — never
+ * stacked over the hero image at any scroll position, confirmed via
+ * source rather than assumed, since nothing about this header is a
+ * transparent overlay the way a true floating hero header would be.
+ *
+ * HEADLINE SIZE — `text-h3 sm:text-h2`, stepped down one named tier at
+ * each breakpoint from the first version of this component (base
+ * text-h2, sm: text-h1) per direct feedback that the original read
+ * too large against the subhead/CTAs. Still deliberately not
+ * `text-display` (88px, this system's own "hero statement only" size)
+ * — already ruled out in the original build given this headline's
+ * length, which would wrap into enough lines at 88px to risk the
+ * exact below-the-fold problem the section-height math above works
+ * around. The text panel has no explicit height anywhere — `w-full`/
+ * `lg:max-w-lg` plus padding only — it's sized purely by its own
+ * content, so this reduction shrinks the panel automatically; no
+ * separate height adjustment was needed or made.
  *
  * Mobile does NOT reuse the desktop's right-column placement — a
  * full-width band anchored to the bottom of the image (edge-to-edge,
@@ -108,11 +148,13 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
     fetchpriority="high"
   />
 
+  <div aria-hidden="true" class="bg-guard-green-deep/18 pointer-events-none absolute inset-0"></div>
+
   <div class="relative z-10 flex h-full flex-col justify-end lg:mx-auto lg:max-w-7xl lg:flex-row lg:items-center lg:justify-end lg:px-12">
     <div
       class="on-dark bg-guard-green-deep/85 w-full px-6 py-8 sm:px-10 sm:py-10 lg:w-auto lg:max-w-lg lg:px-10 lg:py-12"
     >
-      <h1 data-hero-reveal class="text-h2 text-paper sm:text-h1">
+      <h1 data-hero-reveal class="text-h3 text-paper sm:text-h2">
         Security You Can Rely On, Every Hour of the Week
       </h1>
       <p data-hero-reveal class="text-body-lg text-paper mt-5 max-w-md">
