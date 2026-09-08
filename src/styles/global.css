@@ -375,28 +375,43 @@
    from `text-caption`. The scale's own smallest existing step,
    `text-micro`, is deliberately scoped to "legal/footer only" by its
    own comment above — reusing it here would both understate the
-   requested reduction (`text-caption` → `text-micro` is only 14px →
-   12px, one tier, not the two-tier-or-more drop asked for) and blur
-   `text-micro`'s own documented, narrower role. Per this file's own
-   standing rule ("if a new size is genuinely needed, add it as a ninth
-   named step here, don't improvise one inline"), this is that ninth
-   step, not an arbitrary bracket value dropped into a component.
-   0.625rem (10px) — continues the scale's own roughly-consistent
-   step-down ratio below `text-micro` (each existing step down is
-   ~1.17–1.21× its neighbour; 12px / ~1.2 ≈ 10px) rather than picking
-   an arbitrary smaller number. Weight 500 and line-height 1.5 match
-   `text-caption`'s own pairing (not `text-micro`'s 1.4) — this tier
-   holds full multi-line sentences (ServicesGrid's card body copy),
-   not `text-micro`'s short single-line legal/footer fragments, so it
-   gets the more generous of the two established small-text line-
-   heights. Weight 500 continues this scale's own already-accepted
+   originally-requested reduction (`text-caption` → `text-micro` is
+   only 14px → 12px, one tier, not the two-tier-or-more drop asked for
+   at the time) and blur `text-micro`'s own documented, narrower role.
+   Per this file's own standing rule ("if a new size is genuinely
+   needed, add it as a ninth named step here, don't improvise one
+   inline"), this is that ninth step, not an arbitrary bracket value
+   dropped into a component.
+
+   SIZE HISTORY, READ BEFORE ASSUMING THIS IS STILL A DISTINCT SIZE
+   FROM `text-micro` — it isn't, as of a direct edit to `main` outside
+   any PR (confirmed with the project owner directly: deliberate, not a
+   mistake). Originally shipped at 0.625rem (10px), continuing the
+   scale's own roughly-consistent step-down ratio below `text-micro`
+   (~1.17–1.21× per step; 12px / ~1.2 ≈ 10px). Changed to 0.75rem
+   (12px) afterward — the SAME font-size as `text-micro` — so the two
+   steps are now genuinely IDENTICAL in size. `line-height` (1.5 here
+   vs `text-micro`'s 1.4) and each step's own documented SCOPE
+   (`text-fine` for full multi-line body copy like ServicesGrid's card
+   text; `text-micro` for short single-line legal/footer fragments) are
+   the only things that still distinguish them — flagged here as a
+   real, open question worth a future decision, not resolved
+   unilaterally: either keep both as deliberately-separate semantic
+   steps that happen to share a size right now (a legitimate choice —
+   scope/line-height can still diverge independently later without
+   another rename), or consolidate `ServicesGrid.astro`'s own body copy
+   onto `text-micro` directly and retire this step. Don't assume either
+   direction without checking back — this comment exists so a future
+   session sees the real state and the real reason, not a stale "10px,
+   two tiers below text-micro" story that no longer matches what's
+   shipped. Weight 500 continues this scale's own already-accepted
    quirk (documented on `text-caption` and `text-micro` both) that
    smaller steps run heavier, not lighter, for legibility at reduced
    size — deliberately consistent with that pattern rather than a new
-   one-off decision. */
+   one-off decision, unaffected by the size change above. */
 @utility text-fine {
   font-family: var(--font-sans);
-  font-size: 0.75rem; /* 10px — small supporting/description copy, e.g. ServicesGrid card body */
+  font-size: 0.75rem; /* 12px — small supporting/description copy, e.g. ServicesGrid card body. Same size as text-micro (see this rule's own comment above) — line-height and documented scope are what still separate the two, not size. */
   line-height: 1.5;
   font-weight: 500;
 }

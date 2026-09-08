@@ -178,14 +178,23 @@ rules (`text-display`, `text-h1`, `text-h2`, `text-h3`, `text-body-lg`,
 size + line-height + weight in a single class — never assemble a
 heading from a raw Tailwind size utility (`text-2xl`) or an arbitrary
 value (`text-[17px]`); if a new size is genuinely needed, add it as a
-named step here, don't improvise one inline. `text-fine` (10px, weight
-500) is the most recent example of this rule actually being followed —
+named step here, don't improvise one inline. `text-fine` (weight 500)
+is the most recent example of this rule actually being followed —
 added specifically for `ServicesGrid.astro`'s card body copy when
 `text-caption` (14px) needed to shrink further than the scale's
 previous smallest step, `text-micro` (12px, deliberately scoped to
-"legal/footer only"), could honestly cover. See `text-fine`'s own
-comment in `global.css` for the full reasoning, including why it's a
-genuinely new step rather than a repurposed `text-micro`.
+"legal/footer only"), could honestly cover; originally shipped at 10px
+for that reason. **`text-fine` is now 12px too** — the project owner
+changed it directly on `main`, outside any PR, confirmed deliberate not
+a mistake — so `text-fine` and `text-micro` are currently IDENTICAL in
+size, distinguished only by line-height (1.5 vs 1.4) and each one's own
+documented scope (`text-fine` for multi-line body copy, `text-micro`
+for short legal/footer fragments). This is flagged as a real, open
+question in `text-fine`'s own `global.css` comment — whether to keep
+both as deliberately-separate steps that happen to share a size right
+now, or consolidate `ServicesGrid.astro` onto `text-micro` directly —
+not resolved here or there; check that comment for the current state
+before assuming either direction.
 
 ## Hard rules — do not violate these regardless of what a future prompt asks, unless the user explicitly overrides one
 
@@ -560,6 +569,36 @@ Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number is on `origin/main`.
 
+- **PR #21 — docs-only correction: `text-fine`'s own comment and this
+  file both still said 10px after the project owner changed it directly
+  to 12px on `main`, outside any PR** (commit `936d2a4`, "Update
+  global.css" — confirmed with the owner directly that this was a
+  deliberate change, not a mistake, before touching anything). No code
+  change here — `global.css`'s value itself was already 12px and stays
+  12px; only the surrounding prose was wrong. Fixed both: `text-fine`'s
+  own `global.css` comment (previously argued at length for WHY 10px
+  specifically, not 12px — that argument directly contradicted the
+  value actually shipped, not just a stale number) and this file's own
+  Design system section. Both now state the real current fact plainly:
+  `text-fine` and `text-micro` are IDENTICAL in font-size (12px) as of
+  this change, distinguished only by line-height (1.5 vs 1.4) and each
+  step's own documented scope — flagged as a genuine open question
+  (keep both as separate steps that happen to share a size, or
+  consolidate `ServicesGrid.astro` onto `text-micro` directly) rather
+  than resolved unilaterally either way. PR #19's own history entry
+  below is left as accurate point-in-time record of what that PR
+  actually shipped (10px) — not rewritten — with a forward-pointer
+  added to this note instead, the same "history stays historical,
+  point forward to what's current" pattern this file already uses
+  elsewhere (e.g. the centred-alignment rule's own PR #20 note).
+
+  A real `astro check` and clean `astro build` were run even though
+  this is comment-only — confirmed no other file references the old
+  "10px" framing, and confirmed via the dead-CSS-from-comments audit
+  that nothing in the reworded comment introduces a new backtick-quoted
+  Tailwind-class-shaped token (this file's comments are Tailwind-
+  scanned like any other `.astro`/`.css` file's).
+
 - **PR #20 — `MissionBand.astro` fully rebuilt: white/Paper background,
   a real two-column image+text layout, Amber accents, a genuine
   clip-path image unveil.** Real, disclosed mismatch worth reading
@@ -690,7 +729,11 @@ log` alone. Newest first; each PR number is on `origin/main`.
 
 - **PR #19 — ServicesGrid's card body copy shrunk a second time, past
   `text-caption` (14px), onto a genuinely new ninth type-scale step,
-  `text-fine` (10px).** Direct follow-up instruction: "quite a bit
+  `text-fine` (10px at the time — changed to 12px directly on `main`
+  afterward, outside any PR; see the Design system section's own
+  current note on `text-fine` for the up-to-date state, this entry is
+  accurate history of what PR #19 itself actually shipped, not the
+  current value).** Direct follow-up instruction: "quite a bit
   smaller… not just one more type-scale step down." The scale's only
   other existing step below `text-caption` — `text-micro` (12px) — is
   deliberately scoped to "legal/footer only" by its own comment, and
