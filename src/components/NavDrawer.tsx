@@ -131,14 +131,15 @@ export default function NavDrawer() {
 
               {/* hover:border-amber — mirrors the desktop NavLink's own
                   active/hover underline exactly, kept in sync per the
-                  standing "hand-matched copies drift apart" note. Real,
-                  disclosed gap, not silently compliant: this bare mark
-                  on Paper measures ~2.15:1, which FAILS the 3:1 WCAG
-                  1.4.11 non-text floor — see global.css's Amber token
-                  comment and NavLink.astro's own comment for the full
-                  derivation. Shipped anyway per the explicit "Amber
-                  everywhere for consistency" instruction; not treated
-                  as compliant. */}
+                  standing "hand-matched copies drift apart" note. This
+                  bare mark on Paper measures ~2.15:1, which FAILS the
+                  3:1 WCAG 1.4.11 non-text floor — see global.css's
+                  Amber token comment and NavLink.astro's own comment
+                  for the full derivation. Shipped per the explicit
+                  "Amber everywhere for consistency" instruction, then
+                  reviewed by the user against this exact number and
+                  explicitly kept as-is — a settled, accepted tradeoff,
+                  not an open item. */}
               <motion.ul
                 className="divide-hairline flex-1 divide-y overflow-y-auto"
                 variants={listVariants}
