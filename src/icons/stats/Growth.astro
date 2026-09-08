@@ -1,0 +1,54 @@
+---
+/**
+ * "Founded and expanding" — a rising, slightly jagged trend line
+ * ending in a right-angle arrowhead (a well-established, widely
+ * recognised "growth" pictogram — not a hand-invented shape). Pairs
+ * the "Since 2023" label and "Born in the North and rapidly expanding
+ * our trusted security services across the UK" body.
+ *
+ * Considered and rejected two other suggested concepts for this same
+ * stat: a map pin (reads as "a location," not clearly tied to a
+ * founding year or expansion over time) and a flag-on-a-pole
+ * "founding" motif (explicitly avoided per the brief — a pennant/
+ * banner shape risks reading as a national or political flag rather
+ * than "this is where we started"). An upward trend line reads
+ * unambiguously as growth/expansion and needs no literal date or
+ * location to make its point, which is what the label and body text
+ * are already doing in words.
+ *
+ * Deliberately simpler (3 primitives) than Credential.astro and
+ * Clock.astro (6–7 each) — not an inconsistency, a real property of
+ * this particular glyph: a trend line + arrowhead is already a
+ * complete, immediately legible mark, and padding it out with extra
+ * ornamentation (unlike Calendar's now-retired single-filled-day
+ * accent, which carried real meaning) would only add visual noise.
+ * Checked side by side with the other two at real size regardless —
+ * same overall stroke weight and ink density, doesn't read as
+ * conspicuously thinner or bolder than its neighbours.
+ *
+ * 40×40 viewBox, square caps, miter joins, `stroke-width="1.5"` —
+ * matches Credential.astro and Clock.astro exactly. Rasterised and
+ * visually inspected (individually, magnified, and alongside the
+ * other two icons in this set) at the actual deployed size before
+ * shipping.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg
+  viewBox="0 0 40 40"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="square"
+  stroke-linejoin="miter"
+  class={className}
+  aria-hidden="true"
+>
+  <polyline points="7,29 16,20 22,26 33,12" />
+  <line x1="26" y1="12" x2="33" y2="12" />
+  <line x1="33" y1="12" x2="33" y2="19" />
+</svg>

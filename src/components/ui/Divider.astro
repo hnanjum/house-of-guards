@@ -6,21 +6,37 @@
  * `tone="hairline"` (default) — the neutral grey token, for use on
  * Paper backgrounds.
  *
- * `tone="paper"` — a translucent white line, for use on a Guard Green
- * Deep / Footer Grey background, where the grey Hairline token would
- * barely register. This is white at reduced opacity, not a new colour
- * token.
+ * `tone="paper"` — a translucent white line at 35% opacity, for use on
+ * a Guard Green Deep / Footer Grey background, where the grey Hairline
+ * token would barely register. This is white at reduced opacity, not
+ * a new colour token.
  *
- * `tone="ink"` — a translucent Ink line, for use on a Guard Olive
- * background (StatStrip). Olive sits mid-lightness, so neither the
- * pale Hairline grey (would nearly disappear) nor a translucent white
- * (would look washed-out/low-contrast against a light fill) reads well
- * there — a translucent Ink line does, and matches the same Ink-on-
- * Olive pairing already used for text in that context.
+ * `tone="paper-strong"` — a translucent white line at 60% opacity, for
+ * a Guard Green Secondary background specifically (StatStrip). Real,
+ * checked reason this needs a HIGHER opacity than `tone="paper"`
+ * rather than reusing that same 35% value unchanged: Guard Green
+ * Secondary (`#366c00`, L≈0.115) is meaningfully lighter/more
+ * saturated than Guard Green Deep or Footer Grey, the two fills
+ * `tone="paper"` was actually calibrated against — at 35% opacity the
+ * line-to-fill contrast on Guard Green Secondary is only ~2.12:1,
+ * under the 3:1 WCAG 1.4.11 non-text/UI-component floor (the line
+ * would read as too faint to reliably notice). 60% clears that floor
+ * with real margin, ~3.39:1 — checked via the same relative-luminance
+ * math as every other colour pairing in this project, not guessed or
+ * assumed to inherit `tone="paper"`'s own number unchanged.
+ *
+ * `tone="ink"` — a translucent Ink line at 25% opacity. Currently
+ * UNUSED anywhere in this codebase (kept as an available option, not
+ * dead-code-removed) — originally calibrated for a StatStrip version
+ * filled with the long-retired Guard Olive accent (see CLAUDE.md's
+ * "Retired tokens" note); that specific pairing no longer exists
+ * anywhere on the site. Re-verify the actual math against whatever
+ * fill it's used on before reaching for this again, the same way
+ * `tone="paper-strong"` was checked fresh above rather than assumed.
  */
 interface Props {
   orientation?: "horizontal" | "vertical";
-  tone?: "hairline" | "paper" | "ink";
+  tone?: "hairline" | "paper" | "paper-strong" | "ink";
   class?: string;
 }
 
@@ -29,6 +45,7 @@ const { orientation = "horizontal", tone = "hairline", class: className } = Astr
 const colorClass = {
   hairline: { border: "border-hairline", bg: "bg-hairline" },
   paper: { border: "border-paper/35", bg: "bg-paper/35" },
+  "paper-strong": { border: "border-paper/60", bg: "bg-paper/60" },
   ink: { border: "border-ink/25", bg: "bg-ink/25" },
 }[tone];
 ---
