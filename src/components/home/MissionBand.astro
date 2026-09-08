@@ -112,8 +112,10 @@ import missionTeam from "../../assets/mission/mission-team.png";
  * (see the rule's own history note about StatStrip's brief third
  * exception for the precedent this follows).
  *
- * COLOUR — three real pairings, one of them a genuine, disclosed
- * concern worth reading in full, not glossed over:
+ * COLOUR — three real pairings. One of them, the caption, went through
+ * a real correction after this section first shipped — read that entry
+ * in full before assuming Amber is safe to reach for as TEXT colour
+ * anywhere on this site, including here:
  *   - Body text: Ink on Paper, ~19.44:1 (AAA) — the sitewide default,
  *     no new computation needed, restated here only for completeness
  *     with every other pairing on this page.
@@ -122,31 +124,32 @@ import missionTeam from "../../assets/mission/mission-team.png";
  *     the exact same component every other primary CTA on the site
  *     uses, not a one-off style. See `Button.astro`'s own comment for
  *     the full derivation.
- *   - Caption + underline rule: Amber. The underline (a decorative,
- *     non-text 2px bar) reuses the ALREADY-REVIEWED-AND-ACCEPTED
- *     bare-mark-on-Paper pairing (`NavLink.astro`'s own active
- *     underline, ~2.15:1, below the 3:1 WCAG 1.4.11 floor, explicitly
- *     confirmed as a kept tradeoff in PR #18) — consistent precedent,
- *     not a new problem. **The CAPTION TEXT is a genuinely NEW and
- *     MORE SEVERE issue, flagged here plainly rather than assumed
- *     equivalent to the underline**: this is the SAME two colours
- *     (Amber vs Paper, ~2.15:1 — contrast is a pure function of the two
- *     colours, unaffected by what renders them), but text needs the
- *     4.5:1 normal-text floor (or 3:1 at large-text sizes, which
- *     `text-caption` at 14px/500 doesn't qualify for, checked the same
- *     way ServicesGrid's own body-text pass already checked this exact
- *     threshold question — nowhere close either way), a materially
- *     STRICTER bar than the 3:1 non-text floor the underline only has
- *     to clear. ~2.15:1 fails BOTH floors, and unlike the underline,
- *     no prior review has ever accepted Amber as an actual TEXT colour
- *     anywhere on this site — every existing Amber use is either a
- *     button fill (Ink text sits ON TOP of it) or a bare decorative
- *     mark. Shipped per the explicit "Caption label… Amber" instruction
- *     — not silently treated as fine. Flagged prominently in the PR
- *     description for a real decision, the same way Hero's thin scrim
- *     margin and NavLink's own underline were both flagged and then
- *     explicitly resolved by the user in PR #17/#18, rather than
- *     assumed acceptable by default.
+ *   - Underline rule: Amber. A decorative, non-text 2px bar — reuses
+ *     the ALREADY-REVIEWED-AND-ACCEPTED bare-mark-on-Paper pairing
+ *     (`NavLink.astro`'s own active underline, ~2.15:1, below the 3:1
+ *     WCAG 1.4.11 non-text floor, explicitly confirmed as a kept
+ *     tradeoff in PR #18) — consistent precedent, correctly checked
+ *     against the floor that actually applies to a non-text mark, not
+ *     touched by the fix below.
+ *   - **Caption — CORRECTED from Amber to INK, a real contrast-failure
+ *     fix, not a style change.** The first version of this section used
+ *     Amber for the caption too, on the theory that it was the same
+ *     already-accepted pairing as the underline — flagged plainly at
+ *     the time as a genuinely separate, MORE SEVERE case, not silently
+ *     shipped as fine: the underline is a non-text mark (3:1 floor);
+ *     the caption is actual TEXT, needing the stricter 4.5:1 floor (or
+ *     3:1 at large-text sizes, which `text-caption` at 14px/500 doesn't
+ *     qualify for — checked the same way ServicesGrid's own body-text
+ *     pass already checked this exact threshold question). Amber vs
+ *     Paper is ~2.15:1 regardless of what renders it (contrast is a
+ *     pure function of the two colours) — that FAILS the 4.5:1 text
+ *     floor badly, not a thin-margin pass. Confirmed after review: this
+ *     was a genuine defect, not a preference call, so it was replaced
+ *     outright with Ink (`text-ink`, the sitewide default, ~19.44:1
+ *     AAA) rather than offered as one option among several. The
+ *     underline stays Amber, untouched — that pairing was already
+ *     correctly checked against the floor that actually applies to it
+ *     and was never the problem.
  *
  * MOTION — this section's real "premium upgrade." See
  * `src/lib/missionReveal.ts`'s own comment for the full mechanism
@@ -210,7 +213,7 @@ import missionTeam from "../../assets/mission/mission-team.png";
       </div>
 
       <div class="text-left">
-        <p data-mission-reveal class="text-caption text-amber uppercase tracking-[0.14em]">Our mission</p>
+        <p data-mission-reveal class="text-caption text-ink uppercase tracking-[0.14em]">Our mission</p>
 
         <h2 data-mission-reveal class="text-h2 text-ink mt-4">Meeting your needs, to excellence</h2>
 

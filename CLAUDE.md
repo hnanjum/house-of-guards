@@ -66,8 +66,11 @@ Green" framing still describes the current boundary:
 - **Header, Hero, StatStrip, `ServicesGrid.astro`, and now
   `MissionBand.astro`** all use the new palette (Electric Blue, Magenta,
   Amber, Cyan-Blue — MissionBand specifically uses Amber only, for its
-  caption/underline/button, plus plain Paper/Ink; it doesn't touch
-  Electric Blue or Magenta at all). Guard Green Secondary and Guard
+  underline rule and button, plus plain Paper/Ink for everything else
+  including its own caption, corrected there from an initial Amber
+  contrast failure — see the colour table's own Amber row and the
+  PR #20 history entry for the full story; it doesn't touch Electric
+  Blue or Magenta at all). Guard Green Secondary and Guard
   Green Deep are RETIRED from all five of these — neither appears in
   any of their real rendered markup, confirmed via a full repo grep
   before each PR describing itself as done.
@@ -97,7 +100,7 @@ Green" framing still describes the current boundary:
 | `paper` | `#FFFFFF` | The default background everywhere; also the text colour on every dark fill below |
 | `electric-blue` | `#2563EB` | **Primary block/background colour** (Header/Hero/StatStrip/ServicesGrid only) — Header's info-bar fill, StatStrip's fill, Hero's text-panel scrim (translucent, 85%), ServicesGrid's Manned Guarding/Overnight Security cards and Corporate Security's icon stroke. White/Paper on the opaque fill: ~5.17:1 (AA). Ink on it: ~3.76:1 — clears the 3:1 non-text floor but fails 4.5:1, so text/icons stay white. As an icon-stroke mark on a light card: ~5.17:1 vs Paper, ~4.74:1 vs Surface Alt — both clear 3:1 with real margin. See `global.css`'s own token comment for the full derivation, including Hero's own two-step translucent-panel composite (~4.53:1, a genuine but thin pass, flagged in that file) |
 | `magenta` | `#A5195C` | **Secondary block/background colour** (ServicesGrid only) — Close Protection's card fill, CCTV Monitoring's and Construction Site Security's icon stroke. White on the fill: ~7.26:1 (AAA, the strongest fill pairing in this rebrand). Ink on it: ~2.68:1 — fails even the lenient 3:1 floor outright, so this fill never carries Ink. As an icon-stroke mark on a light card: ~7.26:1 vs Paper, ~6.66:1 vs Surface Alt |
-| `amber` | `#F59E0B` | **The sole button/CTA colour, sitewide, no exceptions** — `Button.astro`'s `primary` variant, `NavDrawer.tsx`'s hand-matched CTA, `MissionBand.astro`'s "More about us" button (the same unmodified `primary` variant, not a one-off), and (as a bare non-text mark) the header nav's active-link underline PLUS MissionBand's own caption label and underline rule. Ink on this fill: ~9.05:1 (AAA) — buttons therefore use INK text, a genuine reversal from Guard Green Secondary's own white-text pairing. White on it: ~2.15:1, fails even 3:1. **Bare-mark contrast (a non-text mark directly on Paper — the nav underline, MissionBand's own underline rule) is ~2.15:1, below the 3:1 WCAG 1.4.11 floor — flagged in PR #17, reviewed by the user against this exact number, and explicitly KEPT AS-IS as an accepted tradeoff for that USE (a decorative mark). This is a settled decision for bare marks, not an open item — don't "fix" it without a fresh, explicit ask.** **MissionBand's caption is a GENUINELY DIFFERENT, MORE SEVERE, and NOT-YET-REVIEWED case: this is Amber used as actual TEXT colour (not a bare mark) for the first time anywhere on the site — same ~2.15:1, but text needs the 4.5:1 floor (or 3:1 at qualifying large-text sizes, which this doesn't reach), a stricter bar the bare-mark precedent never had to clear either. Shipped per direct instruction, flagged prominently in PR #20 for a real decision — do not assume this is covered by the nav-underline's own already-settled review.** See `NavLink.astro`'s and `MissionBand.astro`'s own comments |
+| `amber` | `#F59E0B` | **The sole button/CTA colour, sitewide, no exceptions** — `Button.astro`'s `primary` variant, `NavDrawer.tsx`'s hand-matched CTA, `MissionBand.astro`'s "More about us" button (the same unmodified `primary` variant, not a one-off), and (as a bare non-text mark ONLY) the header nav's active-link underline plus MissionBand's own underline rule. Ink on this fill: ~9.05:1 (AAA) — buttons therefore use INK text, a genuine reversal from Guard Green Secondary's own white-text pairing. White on it: ~2.15:1, fails even 3:1. **Bare-mark contrast (a non-text mark directly on Paper — the nav underline, MissionBand's own underline rule) is ~2.15:1, below the 3:1 WCAG 1.4.11 floor — flagged in PR #17, reviewed by the user against this exact number, and explicitly KEPT AS-IS as an accepted tradeoff for that USE (a decorative mark). This is a settled decision for bare marks, not an open item — don't "fix" it without a fresh, explicit ask.** **AMBER IS NEVER SAFE AS RUNNING TEXT COLOUR ON PAPER — this was tried once and reverted.** `MissionBand.astro`'s caption initially shipped with Amber text too (PR #20's own first commit), flagged at the time as a genuinely different, more severe case than the bare-mark precedent (text needs the 4.5:1 floor, not 3:1, and ~2.15:1 fails both) — confirmed on review to be a real contrast-failure BUG, not a style preference, and corrected outright to Ink (a follow-up commit on the same PR). Don't reach for Amber as a `text-*` foreground colour anywhere on this site; every safe use of this token is either a fill (with Ink text on top) or a bare non-text mark. See `NavLink.astro`'s and `MissionBand.astro`'s own comments |
 | `cyan-blue` | `#0EA5E9` | **Rare accent only — never a section/card background fill.** Not applied anywhere in Header/Hero/StatStrip/ServicesGrid as of this rebrand (no per-section spec called for it); defined and fully contrast-checked so it's ready the moment a hover state or icon detail needs it. White on this fill: ~2.77:1 — fails even 3:1, so white is never a safe foreground here, including as a bare mark on Paper (same number, symmetric). Ink on it: ~7.01:1 (AAA) — the only safe foreground for this token |
 | `stone` | `#6E6E6E` | Secondary text on Paper only (captions, meta, credential lines). ~4.6:1 on white — 14px and above only |
 | `hairline` | `#E4E4E4` | Borders/rules/seams on Paper. Perfectly neutral (R=G=B) — never a warm greige |
@@ -601,24 +604,36 @@ log` alone. Newest first; each PR number is on `origin/main`.
     default, and this was a deliberate, called-out change per direct
     instruction, not an accidental drift a restyle should have avoided.
 
-  **COLOUR — one genuinely severe, NOT-YET-REVIEWED contrast concern,
-  flagged prominently, not glossed over**: the caption label uses Amber
-  as actual TEXT colour (~2.15:1 against Paper) — the SAME pairing
-  already reviewed and accepted for the header nav's own Amber
-  underline (PR #17/#18), but that precedent only ever covered Amber as
-  a bare, non-text, decorative mark (3:1 floor). Text needs the
-  stricter 4.5:1 floor (confirmed `text-caption` at 14px/500 doesn't
-  qualify for the large-text exemption either, same threshold check
-  already run on ServicesGrid's own body-text pass) — ~2.15:1 fails
-  BOTH floors, and no prior review has ever accepted Amber as running
-  TEXT anywhere on this site before. Shipped per the explicit "Caption
-  label… Amber" instruction, not silently treated as equivalent to the
-  already-settled underline case — this needs its own explicit review.
-  The underline rule ITSELF (a decorative 2px bar, non-text) reuses the
-  already-accepted bare-mark precedent directly, no new concern there.
-  The button is the unmodified `Button.astro` `primary` variant (Amber
-  fill/Ink text, ~9.05:1 AAA) — the same component every other primary
-  CTA on the site uses, not a one-off style.
+  **COLOUR — one genuinely severe contrast bug, flagged at ship time,
+  then CONFIRMED and FIXED within the same PR, not left open.** The
+  caption label first shipped using Amber as actual TEXT colour
+  (~2.15:1 against Paper) — the SAME pairing already reviewed and
+  accepted for the header nav's own Amber underline (PR #17/#18), but
+  that precedent only ever covered Amber as a bare, non-text, decorative
+  mark (3:1 floor). Text needs the stricter 4.5:1 floor (confirmed
+  `text-caption` at 14px/500 doesn't qualify for the large-text
+  exemption either, same threshold check already run on ServicesGrid's
+  own body-text pass) — ~2.15:1 fails BOTH floors, and no prior review
+  had ever accepted Amber as running TEXT anywhere on this site. Shipped
+  initially per the explicit "Caption label… Amber" instruction, flagged
+  prominently in this PR's own description rather than treated as
+  equivalent to the already-settled underline case — **on review this
+  was confirmed as a genuine contrast-failure BUG, not a design
+  preference, and the caption was replaced outright with Ink** (a
+  follow-up commit on this same PR, not a separate one), matching the
+  sitewide default (~19.44:1 AAA). The underline rule ITSELF (a
+  decorative 2px bar, non-text) was never the problem — it correctly
+  reuses the already-accepted bare-mark precedent and was left
+  untouched by this fix. The button is the unmodified `Button.astro`
+  `primary` variant (Amber fill/Ink text, ~9.05:1 AAA) — the same
+  component every other primary CTA on the site uses, not a one-off
+  style, also untouched. **Standing lesson from this one, worth
+  remembering**: Amber's own bare-mark-on-Paper exception (accepted for
+  the nav underline) does NOT generalise to Amber-as-text — the two are
+  governed by different WCAG floors (3:1 vs 4.5:1) and reusing one
+  accepted exception's colour for a different KIND of use needs its own
+  fresh check, not an assumption that "it's the same colour, so it's
+  already been reviewed."
 
   **RETIREMENT**: Guard Green Deep is now retired from every homepage
   section — MissionBand was the last one still using it. The token
@@ -661,6 +676,17 @@ log` alone. Newest first; each PR number is on `origin/main`.
   shipping, the exact failure mode this project's own standing
   convention already warns about, caught in the act rather than assumed
   safe.
+
+  **Follow-up commit, same PR**: the caption's Amber text-colour bug
+  (see the colour table's own Amber row above for the fix itself) was
+  corrected to Ink. Re-verified with the same discipline — `astro
+  check`/`astro build` clean, and confirmed via direct `dist/`
+  inspection that `.text-amber{...}` (the foreground-colour utility,
+  distinct from `bg-amber`/`border-amber`) disappeared from the compiled
+  bundle entirely once the caption stopped using it, since the caption
+  was its only real call site anywhere in the codebase — confirmed not
+  orphaned by any leftover comment mention either, the same audit this
+  PR's own first commit already required.
 
 - **PR #19 — ServicesGrid's card body copy shrunk a second time, past
   `text-caption` (14px), onto a genuinely new ninth type-scale step,
