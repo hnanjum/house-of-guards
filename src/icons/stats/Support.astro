@@ -1,0 +1,48 @@
+---
+/**
+ * "On-shift support" — a headset (band + two ear cups + a mic boom
+ * ending in a solid dot), not a phone handset. Deliberately different
+ * from `Phone.astro` (already used for the real phone-number links in
+ * the header/footer) so this stat doesn't visually repeat that icon —
+ * a headset reads as "support desk," specific to round-the-clock
+ * officer/phone support, without competing with the literal phone
+ * pictogram used elsewhere. Pairs "24/7 phone and on-shift officer
+ * support."
+ *
+ * REDRAWN once before shipping — the first attempt in this set (a
+ * clock face with two overlapping circles standing in for an
+ * infinity/"always on" motif) was rasterised and inspected the same
+ * way as the other two icons and did NOT read clearly at either 32px
+ * or 200px — it looked like a target or a face with two eyes, not
+ * "24/7." Same failure shape as this project's own Phone.astro
+ * history (an abstract hand-drawn attempt reading as "two connected
+ * dots"), caught the same way: render it, look at it, redraw rather
+ * than ship an ambiguous shape.
+ *
+ * Same house style as the six service icons and the other two icons
+ * in this set — 40×40 viewBox, `stroke-width="1.25"`, square caps,
+ * miter joins, one deliberate filled accent (the mic tip) matching
+ * Calendar.astro's own single-filled-accent convention.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg
+  viewBox="0 0 40 40"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.25"
+  stroke-linecap="square"
+  stroke-linejoin="miter"
+  class={className}
+  aria-hidden="true"
+>
+  <path d="M 9 21 A 11 11 0 0 1 31 21" />
+  <rect x="7" y="19" width="5" height="10" rx="1.5" />
+  <rect x="28" y="19" width="5" height="10" rx="1.5" />
+  <path d="M 30 29 L 30 32 L 23 32" />
+  <circle cx="22" cy="32" r="1.4" fill="currentColor" />
+</svg>

@@ -1,47 +1,91 @@
 ---
-import Divider from "../ui/Divider.astro";
+import Credential from "../../icons/stats/Credential.astro";
+import Calendar from "../../icons/stats/Calendar.astro";
+import Support from "../../icons/stats/Support.astro";
 
 /**
- * One of the two required bold accent sections — now Guard Green
- * Secondary. White/Paper text (~6.36:1, AA), not Ink (~3.06:1, fails
- * AA normal-text) — the inverse pairing of the previous two accents
- * this section has used (Guard Yellow, Guard Olive), both of which
- * needed Ink instead — see the design-token comment in global.css.
- * Translucent Paper (white) dividers between the three facts, not Ink
- * — this fill is dark enough that a pale/translucent Ink line would
- * be hard to see, the same reasoning `tone="paper"` already documents
- * for a Guard Green Deep / Footer Grey background; a translucent Ink
- * divider was only ever right for the two prior, much lighter accents.
+ * Redesign of the previous bold-fill fact strip — same three facts,
+ * unchanged copy, now an icon-led 3-column layout on a light neutral
+ * surface instead of dense text on a solid Guard Green Secondary
+ * band. This is the ONE below-the-fold section on the homepage that
+ * ISN'T a bold-fill accent band any more (MissionBand keeps that
+ * role) — StatStrip's job here is a quiet, scannable supporting
+ * strip, not a second bold statement.
  *
- * Carries `on-dark` now — a real change, not a restatement. Ink ring
- * on this fill is only ~3.06:1 (barely above the 3:1 floor, too thin
- * to trust); white ring on it is ~6.36:1, a real margin. Both previous
- * accents here (Yellow ~11.06:1, Olive ~6.24:1) kept the default Ink
- * ring comfortably safe on their own and explicitly did NOT carry
- * `on-dark` — that reasoning doesn't transfer to this darker fill.
+ * BACKGROUND — `bg-surface-alt` (`#f5f5f5`, new token, see its own
+ * comment in global.css for why Hairline wasn't reused and the real
+ * WCAG numbers against it: Ink ~17.8:1, Guard Green Secondary ~5.84:1
+ * — lower than its already-documented ~6.36:1 on pure Paper, since
+ * this surface's own luminance sits slightly below white's, but still
+ * clears the full 4.5:1 AA text floor with real margin). No `on-dark`
+ * here — this is a light fill, the default Ink focus ring is already
+ * safe on it.
+ *
+ * ICONS — Guard Green Secondary fill/stroke (`text-guard-green-
+ * secondary`, inherited via `currentColor`), `size-8` (32px) — small/
+ * medium, a supporting visual, not the section's focal point. Three
+ * purpose-built icons in `src/icons/stats/` (Credential, Calendar,
+ * Support), each specific to its own stat and explicitly NOT a
+ * shield or checkmark (both permanently banned) — see each icon's own
+ * doc comment for its design rationale, and the PR description for
+ * the rasterised-and-inspected verification performed on all three
+ * before shipping (one of the three, Support.astro, was redrawn after
+ * its first draft didn't read clearly at deployed size).
+ *
+ * ALIGNMENT — left-aligned columns (icon top-left, text below,
+ * left-aligned), not centered. A centered icon-over-centered-text
+ * column is a common pattern for this content shape, but this
+ * project's own hard rule restricts centered alignment to exactly two
+ * sanctioned places sitewide (MissionBand's pull-quote, ClosingCta's
+ * final line) — this redesign doesn't introduce a third, even at the
+ * column level, without being asked to.
+ *
+ * DIVIDER — removed. The previous dense-text-row layout used a
+ * vertical Divider between facts to separate otherwise-unbroken
+ * paragraphs sitting flush against each other; an icon-led column
+ * with its own icon+whitespace above each block doesn't need the same
+ * separator — added visual noise for no real gain once the layout
+ * itself already reads as three distinct groups. Not stated either
+ * way in the brief; a deliberate, disclosed judgment call, not an
+ * oversight (`Divider.astro` itself is untouched, still used
+ * elsewhere).
+ *
+ * BREAKPOINT — `sm:` (640px), matching this exact component's own
+ * prior convention (`sm:flex-row` before this redesign), not the
+ * header's separate `lg` (1024px) nav breakpoint, which solves a
+ * different problem (fitting a 6-link nav + CTA in one row) unrelated
+ * to a simple 1-vs-3-column content switch.
+ *
+ * MOTION — `data-reveal`, read by `initScrollReveal()`
+ * (`src/lib/scrollReveal.ts`, called from `index.astro`'s own script
+ * block) — genuinely scroll-triggered now, not part of Hero's
+ * load-triggered `initHeroMuster()` timeline any more (this section
+ * sits below the fold; a load-triggered reveal has nothing to
+ * trigger off for content not yet in view). Worth being honest about
+ * rather than implying an established pattern: `initScrollReveal()`
+ * already existed in this codebase but had never actually been wired
+ * into any page before this — this is that utility's first real use,
+ * not a switch from one already-observed convention to another.
+ * `prefers-reduced-motion` is handled inside `scrollReveal.ts` itself
+ * (sets every `[data-reveal]` element straight to its final visible
+ * state, no animation, no scroll listener at all).
  */
 const FACTS = [
-  "Every officer SIA-licensed & first-aid trained",
-  "Bespoke shift patterns, not fixed packages",
-  "24/7 phone and on-shift officer support",
+  { text: "Every officer SIA-licensed & first-aid trained", Icon: Credential },
+  { text: "Bespoke shift patterns, not fixed packages", Icon: Calendar },
+  { text: "24/7 phone and on-shift officer support", Icon: Support },
 ];
 ---
 
-<section class="on-dark bg-guard-green-secondary">
-  <div class="mx-auto max-w-7xl px-gutter py-10 md:px-12">
-    <div class="flex flex-col gap-6 sm:flex-row sm:items-stretch sm:gap-0">
+<section class="bg-surface-alt">
+  <div class="mx-auto max-w-7xl px-gutter py-24 md:px-12">
+    <div class="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-3">
       {
-        FACTS.map((fact, i) => (
-          <>
-            {i > 0 && (
-              <div data-stat-divider class="hidden shrink-0 sm:block">
-                <Divider orientation="vertical" tone="paper" class="mx-8" />
-              </div>
-            )}
-            <div data-stat-text class="flex-1">
-              <p class="text-body text-paper">{fact}</p>
-            </div>
-          </>
+        FACTS.map(({ text, Icon }) => (
+          <div data-reveal class="flex flex-col items-start text-left">
+            <Icon class="text-guard-green-secondary mb-4 size-8" />
+            <p class="text-body text-ink">{text}</p>
+          </div>
         ))
       }
     </div>

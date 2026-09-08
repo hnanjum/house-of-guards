@@ -1,0 +1,41 @@
+---
+/**
+ * "Bespoke shift pattern" — a calendar with three days in a row, the
+ * middle one solid-filled where the other two stay outline-only.
+ * Deliberately NOT a plain, undifferentiated calendar (too generic/
+ * literal for "bespoke, not fixed") and not a clock — the one filled
+ * day is the whole point: it's the single deliberate exception to
+ * this set's otherwise unfilled, stroke-only language, used exactly
+ * because the meaning here IS "one thing set apart from the rest,"
+ * not a styling inconsistency. Pairs "Bespoke shift patterns, not
+ * fixed packages."
+ *
+ * Same house style as the six service icons and Credential.astro —
+ * 40×40 viewBox, `stroke-width="1.25"`, square caps, miter joins.
+ * Rasterised and visually inspected at 32px and 200px, individually
+ * and alongside the other two icons in this set, before shipping.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg
+  viewBox="0 0 40 40"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.25"
+  stroke-linecap="square"
+  stroke-linejoin="miter"
+  class={className}
+  aria-hidden="true"
+>
+  <rect x="7" y="10" width="26" height="22" rx="1.5" />
+  <line x1="13" y1="7" x2="13" y2="12" />
+  <line x1="27" y1="7" x2="27" y2="12" />
+  <line x1="7" y1="16" x2="33" y2="16" />
+  <rect x="12" y="21" width="4" height="4" />
+  <rect x="18" y="21" width="4" height="4" fill="currentColor" />
+  <rect x="24" y="21" width="4" height="4" />
+</svg>

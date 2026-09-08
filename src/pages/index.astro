@@ -24,9 +24,11 @@ import ClosingCta from "../components/home/ClosingCta.astro";
 
   <script>
     import { initHeroMuster } from "../lib/heroMuster";
+    import { initScrollReveal } from "../lib/scrollReveal";
 
     document.addEventListener("astro:page-load", () => {
       initHeroMuster();
+      initScrollReveal();
     });
   </script>
 </BaseLayout>

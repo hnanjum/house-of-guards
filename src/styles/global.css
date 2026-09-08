@@ -69,6 +69,33 @@
   --color-hairline: #e4e4e4; /* borders, rules, dividers, seams on Paper. Perfectly neutral (R=G=B) — never a warm greige */
   --color-footer-grey: #2a2a2a; /* the footer's own dark neutral — distinct from Ink and both greens so the footer reads as its own zone, not a third band or a slide into black. White text ~14.4:1 (AAA) */
 
+  /* NEW TOKEN (StatStrip redesign) — a light, neutral SURFACE, for a
+     section background that needs to read as visually distinct from
+     Paper without becoming a bold accent band. Checked `--color-
+     hairline` first rather than reaching for a new value on
+     principle, per this file's own "reuse before inventing" rule —
+     rejected on purpose, not just left unconsidered: Hairline's own
+     documented role above is borders/rules/seams specifically, and
+     its one existing background use (SectorsStrip's small image-
+     loading placeholder box) is a tiny transient placeholder, not a
+     full-section fill — reusing a border-scoped token as a section
+     background would blur what it means everywhere else it's used.
+     Perfectly neutral (R=G=B, same discipline as Hairline) and
+     deliberately a step lighter than Hairline (#e4e4e4) rather than
+     matching it, so this reads as its own quiet "alt surface," not a
+     reused border colour stretched over a whole section.
+     Real WCAG numbers, not assumed to inherit the equivalent Paper
+     pairing unchanged: Ink on this fill is ~17.8:1 (AAA, trivially
+     safe regardless of exact grey chosen in any reasonable range).
+     Guard Green Secondary on this fill is ~5.84:1 — LOWER than its
+     already-documented ~6.36:1 on pure Paper (this surface's own
+     luminance is slightly below white's, so the pairing genuinely
+     isn't identical just because both are "light backgrounds") — but
+     still clears the full 4.5:1 AA text floor with real margin, and
+     the icons using this pairing are non-text graphics (WCAG 1.4.11,
+     3:1 floor) with even more margin to spare. */
+  --color-surface-alt: #f5f5f5;
+
   /* Font families. Referenced directly by the composed type-scale
      utilities below, and also usable standalone (e.g. `font-display`
      on the header wordmark). */
