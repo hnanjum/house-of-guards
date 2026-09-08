@@ -32,48 +32,53 @@ every component reaches for a named token class (`bg-ink`, `text-stone`,
 |---|---|---|
 | `ink` | `#0D0D0D` | Near-black text, `secondary` button fill, icon strokes, the default focus ring |
 | `paper` | `#FFFFFF` | The default background everywhere; also the text colour on every dark fill below |
-| `guard-yellow` | `#FFB606` | **The accent** — `primary` button fill, header info-bar background, header active-nav-link underline, stat strip background, icon/border accents. Ink text/icon on it: ~11.06:1 (AAA). White/Paper on it: ~1.76:1 — fails badly, even as a bare non-text accent (under the 3:1 floor). Never used as running text, or as a bare icon/border/underline mark, directly on Paper — several existing sites still do the latter as a flagged, known gap (kept for continuity from the retired Guard Olive token, which *did* clear that floor at ~3.11:1 — Yellow does not). See `global.css`'s own token comment for the full write-up, and each affected component's own comment for the specific flag |
-| `guard-green-secondary` | `#366C00` | **Reserved — not applied anywhere yet.** A dark, saturated forest-olive green, distinct from `guard-green-deep`. White on it: ~6.36:1 (AA, real margin, ~9% short of AAA). Ink on it: ~3.06:1 — fails AA normal-text outright and only barely clears the 3:1 non-text floor; white is the only sound foreground once this is assigned to something |
-| `guard-green-deep` | `#081F18` | An independent dark, near-black-green surface — the fallback wherever the current accent's lighter fill can't carry white text (the mission-band pull-quote, `primary`/`secondary` button hover) |
+| `guard-green-secondary` | `#366C00` | **The accent** — `primary` button fill, header info-bar background, header active-nav-link underline, stat strip background, ServicesIndex icon/open-state border, Hero/ClosingCta phone-link hover decoration. White/Paper text/icon on it: ~6.36:1 (AA, real margin). Ink on it: ~3.06:1 — fails AA normal-text outright, so every fill using this accent pairs it with white, the *opposite* of the two accents before it (both needed Ink). As a bare mark directly on Paper (underline/icon/border), this fill measures the same ~6.36:1 — genuinely compliant even at the 4.5:1 normal-text floor, not just the lenient 3:1 one; neither retired accent managed that. See `global.css`'s own token comment for the full write-up, including why the bare-mark number is provably the same as the fill number, not assumed to be |
+| `guard-green-deep` | `#081F18` | An independent dark, near-black-green surface — the fallback wherever the current accent's own fill can't carry the text colour it needs (the mission-band pull-quote, `primary`/`secondary` button hover) |
 | `stone` | `#6E6E6E` | Secondary text on Paper only (captions, meta, credential lines). ~4.6:1 on white — 14px and above only |
 | `hairline` | `#E4E4E4` | Borders/rules/seams on Paper. Perfectly neutral (R=G=B) — never a warm greige |
 | `footer-grey` | `#2A2A2A` | The footer's own dark neutral. Distinct from `ink` and both greens on purpose, so the footer reads as its own zone rather than a third green band or a slide into black |
 
 All colour-on-background pairings above have been checked against WCAG
 AA by actual relative-luminance calculation (not eyeballed) — white
-text on `guard-green-deep`/`footer-grey` lands at 17–14:1 (AAA); Ink on
-`guard-yellow` lands at ~11.06:1 (AAA). If a new pairing is ever
-introduced, verify it the same way before shipping it, don't assume —
-`guard-yellow` in particular has already broken one assumption that
-held for the token it replaced (Guard Olive): Olive-on-Paper (~3.11:1)
-used to just clear the 3:1 non-text floor, which is why several
-components use the accent as a bare icon/border/underline mark
-directly on Paper; Guard-Yellow-on-Paper (~1.76:1) does not clear that
-floor at all. Don't assume a pattern that worked for one accent colour
-carries over to the next one — re-verify per colour, every time.
+text on `guard-green-deep`/`footer-grey` lands at 17–14:1 (AAA); white
+on `guard-green-secondary` lands at ~6.36:1 (AA). If a new pairing is
+ever introduced, verify it the same way before shipping it, don't
+assume — this accent has already broken TWO assumptions that held for
+its predecessors: (1) both retired accents (Guard Yellow, Guard Olive)
+needed Ink text on their own fills; this one needs white, Ink actively
+fails on it (~3.06:1). (2) both retired accents' default Ink focus
+ring stayed comfortably safe on their own fill; on this one it doesn't
+(~3.06:1, too thin to trust) — see the `.on-dark` note below. Don't
+assume a pattern that worked for one accent colour carries over to the
+next one — re-verify per colour, every time, including things that
+"obviously" wouldn't change.
 
 **Retired tokens, fully removed (not deprecated-in-place)**: `guard-green`
-(`#0F3D2E`), `guard-olive` (`#8A9A2E`), `guard-olive-bright` (`#A7AF4A`)
-have all been replaced by later accents and no longer exist as tokens —
-confirmed via a full repo grep before each removal that nothing
-referenced the class names any more, so they were deleted outright
-rather than left as deprecated-but-present. If any of these names turn
-up in a future change request, they're gone — check `git log` on
-`global.css` for what actually replaced them and when, don't assume
-they're still defined somewhere.
+(`#0F3D2E`), `guard-olive` (`#8A9A2E`), `guard-olive-bright` (`#A7AF4A`),
+`guard-yellow` (`#FFB606`) have all been replaced by later accents and
+no longer exist as tokens — confirmed via a full repo grep before each
+removal that nothing referenced the class names any more, so they were
+deleted outright rather than left as deprecated-but-present. If any of
+these names turn up in a future change request, they're gone — check
+`git log` on `global.css` for what actually replaced them and when,
+don't assume they're still defined somewhere.
 
 **A real trap already hit once, and the fix it led to**: the original
 default focus ring colour was the accent itself (then Guard Green) —
 invisible against a same-coloured fill. The default `:focus-visible`
-ring is now **Ink** instead (safe against Paper and against every
-accent fill tried since, including Guard Yellow at ~11.06:1 — no swap
-needed for any of them so far). `.on-dark` (swaps the ring to white)
-is reserved for genuinely *dark* fills only — currently just the
-Footer, plus Guard Green Deep if a future section uses it as a
-background. Do **not** add `.on-dark` to a Guard-Yellow-filled section
-(StatStrip, the info bar) — an Ink ring already clears the 3:1 floor
-there on its own, and a white ring would actually be far worse
-(~1.76:1) than Ink's own default.
+ring is now **Ink** instead — safe against Paper (~19.44:1) always,
+and safe against most accent fills tried since (Guard Yellow ~11.06:1,
+Guard Olive ~6.24:1), but **not** the current one: Ink on Guard Green
+Secondary is only ~3.06:1, too thin to trust. `.on-dark` (swaps the
+ring to white) is reserved for genuinely *dark* fills — currently the
+Footer, StatStrip, and the header info bar (the last two carry it
+specifically because of this accent's own math; neither did under the
+two lighter accents that came before it). Check this per accent, not
+by habit — a fill light enough to make `.on-dark` actively wrong
+(Guard Yellow, white-on-it was ~1.76:1) can be swapped for one dark
+enough to make it required, and the two prior accents both happened to
+land on the "doesn't need it" side, which could easily read as a rule
+rather than a coincidence if this note didn't call it out.
 
 **Type** — two typefaces, both self-hosted via `@fontsource`/
 `@fontsource-variable`, **never** the Google Fonts CDN:

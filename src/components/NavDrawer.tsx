@@ -129,7 +129,7 @@ export default function NavDrawer() {
                 </button>
               </div>
 
-              {/* hover:border-guard-yellow — non-text accent on Paper, ~1.76:1, under the 3:1 floor (see global.css's Guard Yellow comment); same gap as the desktop NavLink's own active/hover underline, kept per the same explicit instruction to replace every Olive use with Yellow. */}
+              {/* hover:border-guard-green-secondary — non-text accent on Paper, ~6.36:1, clears even the 4.5:1 normal-text floor (see global.css's Guard Green Secondary comment); same pairing as the desktop NavLink's own active/hover underline. */}
               <motion.ul
                 className="divide-hairline flex-1 divide-y overflow-y-auto"
                 variants={listVariants}
@@ -141,7 +141,7 @@ export default function NavDrawer() {
                     <a
                       href={link.href}
                       onClick={() => setOpen(false)}
-                      className="text-ink text-body block border-l-2 border-transparent px-6 py-4 transition-colors duration-200 ease-out hover:border-guard-yellow"
+                      className="text-ink text-body block border-l-2 border-transparent px-6 py-4 transition-colors duration-200 ease-out hover:border-guard-green-secondary"
                     >
                       {link.label}
                     </a>
@@ -153,7 +153,7 @@ export default function NavDrawer() {
                 <a
                   href="/contact"
                   onClick={() => setOpen(false)}
-                  className="bg-guard-yellow text-ink hover:bg-guard-green-deep hover:text-paper inline-flex w-full items-center justify-center rounded-none px-6 py-3 text-caption transition-colors duration-200 ease-out"
+                  className="bg-guard-green-secondary text-paper hover:bg-guard-green-deep inline-flex w-full items-center justify-center rounded-none px-6 py-3 text-caption transition-colors duration-200 ease-out"
                 >
                   Get a Quote
                 </a>

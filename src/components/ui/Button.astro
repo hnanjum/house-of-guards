@@ -5,27 +5,22 @@
  * chevron appended to the label. `px-5 py-2.5` at `text-caption` (14px),
  * a step down from the original `px-6 py-3`.
  *
- * REVERTED: a previous pass here tried white + bold + `text-body-lg`
- * (20px) text on `primary`, specifically to legitimately qualify for
- * WCAG's large-text 3:1 AA floor with white text on the fill colour at
- * the time (Guard Olive). That whole approach is abandoned now, not
- * adapted — the fill is Guard Yellow, and per explicit instruction the
- * button reverts to its original size/weight/colour shape (Ink,
- * `text-caption`, not bold) rather than inheriting the size bump.
- *
- * `primary` — solid Guard Yellow fill, Ink text. Real numbers (see
- * global.css's own token comment for the full write-up): Ink-on-Yellow
- * is ~11.06:1 (AAA, real margin). White-on-Yellow is only ~1.76:1 —
- * fails badly, worse than either retired Olive token's own already-
- * failing white pairing — so Ink is the only sound choice here, at any
- * size or weight. Hover is a diagonal shine sweep (a translucent white
- * band crossing the button once via `::after`), NOT a colour change —
- * the button's own fill/text stay Guard Yellow/Ink at every state,
- * still AAA. Pure CSS (`hover:`/`focus-visible:` driven transform, no
- * JS): the band sits off-screen at `-translate-x-full` and slides to
- * `translate-x-full` on interaction. `motion-reduce:` removes the
- * sweep element entirely and substitutes a plain, non-animated
- * `brightness-95` on hover instead, per prefers-reduced-motion.
+ * `primary` — solid Guard Green Secondary fill, white/Paper text (the
+ * inverse of the previous accent's own pairing — Guard Yellow, and
+ * Guard Olive before it, both needed Ink text; this accent is dark
+ * enough that white is the correct choice instead, and Ink actually
+ * fails here). Real numbers (see global.css's own token comment for
+ * the full write-up): white-on-this-fill is ~6.36:1 (AA, real margin).
+ * Ink-on-this-fill is only ~3.06:1 — fails the 4.5:1 AA floor for
+ * normal text outright. Hover is a diagonal shine sweep (a translucent
+ * white band crossing the button once via `::after`), NOT a colour
+ * change — the button's own fill/text stay Guard Green Secondary/
+ * white at every state, still AA. Pure CSS (`hover:`/`focus-visible:`
+ * driven transform, no JS): the band sits off-screen at
+ * `-translate-x-full` and slides to `translate-x-full` on interaction.
+ * `motion-reduce:` removes the sweep element entirely and substitutes
+ * a plain, non-animated `brightness-95` on hover instead, per
+ * prefers-reduced-motion.
  *
  * `secondary` — solid Ink fill, white text. What used to be the
  * primary treatment, now the quieter second choice, for a page with
@@ -34,11 +29,9 @@
  * `outline-light` — white border + white text, transparent fill. For
  * a CTA sitting ON a Guard Green Deep / Footer Grey background, where
  * Ink text would fail contrast. Hover fills solid white, text becomes
- * Ink (not Guard Yellow — Yellow-on-white is only ~1.76:1, well under
- * the 4.5:1 AA floor for this size of text, and under the 3:1 non-text
- * floor too). This one keeps its colour-shift hover — it's load-
- * bearing (the only way this variant reads on a dark background), not
- * decorative, so it's out of scope for the shine-sweep swap above.
+ * Ink. This one keeps its colour-shift hover — it's load-bearing (the
+ * only way this variant reads on a dark background), not decorative,
+ * so it's out of scope for the shine-sweep swap above.
  */
 interface Props {
   href?: string;
@@ -54,7 +47,7 @@ const base =
 
 const variants = {
   primary:
-    "relative isolate overflow-hidden bg-guard-yellow text-ink " +
+    "relative isolate overflow-hidden bg-guard-green-secondary text-paper " +
     "motion-reduce:hover:brightness-95 " +
     "after:pointer-events-none after:absolute after:inset-0 after:content-[''] " +
     "after:bg-[linear-gradient(115deg,transparent_35%,rgba(255,255,255,0.5)_50%,transparent_65%)] " +

@@ -2,19 +2,23 @@
 import Divider from "../ui/Divider.astro";
 
 /**
- * One of the two required bold accent sections — now Guard Yellow.
- * Ink text (~11.06:1, AAA — an even bigger margin than the previous
- * accent, Guard Olive, managed at ~6.24:1), not white (~1.76:1, fails
- * badly) — see the design-token comment in global.css. Translucent Ink
- * dividers between the three facts: the pale Hairline grey would
- * nearly disappear against a bright colour fill this light, and a
- * translucent white would be even less visible here than it already
- * was against Olive.
+ * One of the two required bold accent sections — now Guard Green
+ * Secondary. White/Paper text (~6.36:1, AA), not Ink (~3.06:1, fails
+ * AA normal-text) — the inverse pairing of the previous two accents
+ * this section has used (Guard Yellow, Guard Olive), both of which
+ * needed Ink instead — see the design-token comment in global.css.
+ * Translucent Paper (white) dividers between the three facts, not Ink
+ * — this fill is dark enough that a pale/translucent Ink line would
+ * be hard to see, the same reasoning `tone="paper"` already documents
+ * for a Guard Green Deep / Footer Grey background; a translucent Ink
+ * divider was only ever right for the two prior, much lighter accents.
  *
- * No `on-dark`: Guard Yellow isn't dark enough to need the white-ring
- * focus swap — the default Ink ring already measures ~11.06:1 against
- * it, comfortably clear of the 3:1 floor on its own (a white ring here
- * would actually be far worse, ~1.76:1).
+ * Carries `on-dark` now — a real change, not a restatement. Ink ring
+ * on this fill is only ~3.06:1 (barely above the 3:1 floor, too thin
+ * to trust); white ring on it is ~6.36:1, a real margin. Both previous
+ * accents here (Yellow ~11.06:1, Olive ~6.24:1) kept the default Ink
+ * ring comfortably safe on their own and explicitly did NOT carry
+ * `on-dark` — that reasoning doesn't transfer to this darker fill.
  */
 const FACTS = [
   "Every officer SIA-licensed & first-aid trained",
@@ -23,7 +27,7 @@ const FACTS = [
 ];
 ---
 
-<section class="bg-guard-yellow">
+<section class="on-dark bg-guard-green-secondary">
   <div class="mx-auto max-w-7xl px-gutter py-10 md:px-12">
     <div class="flex flex-col gap-6 sm:flex-row sm:items-stretch sm:gap-0">
       {
@@ -31,11 +35,11 @@ const FACTS = [
           <>
             {i > 0 && (
               <div data-stat-divider class="hidden shrink-0 sm:block">
-                <Divider orientation="vertical" tone="ink" class="mx-8" />
+                <Divider orientation="vertical" tone="paper" class="mx-8" />
               </div>
             )}
             <div data-stat-text class="flex-1">
-              <p class="text-body text-ink">{fact}</p>
+              <p class="text-body text-paper">{fact}</p>
             </div>
           </>
         ))

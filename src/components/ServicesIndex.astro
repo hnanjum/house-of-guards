@@ -20,20 +20,15 @@ import OvernightSecurity from "../icons/services/OvernightSecurity.astro";
  * earns the icon; the collapsed list stays purely numeral/name-led.
  *
  * Row name/toggle glyph stay Ink at every state, even open. The open
- * indicator is a 2px Guard Yellow left border on the row (a non-text
- * accent), and the icon itself is also Guard Yellow.
- * FLAGGED: with the previous accent (Guard Olive), this exact pattern
- * technically cleared the 3:1 AA non-text-contrast floor (~3.11:1,
- * only ~4% of margin — already noted as too thin to build running TEXT
- * on, which is why the row name/glyph stayed Ink even then). Guard
- * Yellow does not clear that floor at all here — Yellow-on-Paper
- * measures ~1.76:1 (see global.css's token comment), so both the left
- * border and the icon are a real, known non-text-contrast gap now, not
- * a borderline pass. Kept per explicit instruction to replace every
- * Olive use with Yellow, not silently swapped for a different
- * mechanism — the row's actual open/closed STATE is still fully
- * conveyed without relying on this colour at all (the +/− glyph swap,
- * and `<details>`'s own native `[open]` semantics for assistive tech).
+ * indicator is a 2px Guard Green Secondary left border on the row (a
+ * non-text accent), and the icon itself is also Guard Green Secondary.
+ * Genuinely compliant, not a flagged gap: this fill's own bare-mark-
+ * on-Paper contrast is ~6.36:1 (see global.css's token comment) —
+ * clears the full 4.5:1 normal-text floor, not just the lenient 3:1
+ * non-text one. Both prior accents this exact pattern used fell short
+ * of even that lenient floor or barely cleared it (Guard Yellow
+ * ~1.76:1, Guard Olive ~3.11:1/~4% margin) — this one has real margin
+ * to spare, at either threshold.
  */
 const SERVICES = [
   {
@@ -86,7 +81,7 @@ const SERVICES = [
   <Divider class="mt-6" />
   {
     SERVICES.map(({ number, name, description, Icon }) => (
-      <details class="group border-b border-hairline border-l-2 border-l-transparent transition-colors duration-200 ease-out open:border-l-guard-yellow">
+      <details class="group border-b border-hairline border-l-2 border-l-transparent transition-colors duration-200 ease-out open:border-l-guard-green-secondary">
         <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-6 pl-4 [&::-webkit-details-marker]:hidden">
           <span class="flex items-center gap-6">
             <span class="text-caption text-stone w-6 shrink-0">{number}</span>
@@ -98,7 +93,7 @@ const SERVICES = [
           </span>
         </summary>
         <div class="flex flex-col gap-4 pb-8 pl-16 sm:flex-row sm:items-start sm:gap-8">
-          <Icon class="size-10 shrink-0 text-guard-yellow" />
+          <Icon class="size-10 shrink-0 text-guard-green-secondary" />
           <p class="text-body text-stone max-w-2xl">{description}</p>
         </div>
       </details>

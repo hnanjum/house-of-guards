@@ -5,19 +5,17 @@
  * arrow.
  *
  * `tone="ink"` (default) — for a link sitting on a Paper background.
- * Text is always Ink (never the accent colour — at 14px, Guard Yellow
- * text on Paper only measures ~1.76:1, well under the 4.5:1 AA floor
- * for normal text, and under the 3:1 non-text floor too). Active/hover
- * state is a 2px Guard Yellow underline instead — a non-text accent.
- * FLAGGED, not silently compliant: this pattern (a bare accent-
- * coloured mark directly on Paper) worked for the previous accent,
- * Guard Olive (~3.11:1, just clearing the 3:1 non-text-contrast
- * floor) — it does NOT work for Guard Yellow, which measures the same
- * ~1.76:1 here as everywhere else it touches Paper directly, under
- * even that lenient floor. Kept anyway per explicit instruction to
- * replace this exact use with Yellow; `aria-current="page"` below is
- * still present as an independent, always-correct signal for screen
- * readers regardless of how the visual mark performs. A transparent
+ * Text is always Ink (never the accent colour for running text, on
+ * general principle — this link's own text-colour choice is
+ * independent of whichever accent is current). Active/hover state is
+ * a 2px Guard Green Secondary underline instead — a non-text accent.
+ * Genuinely compliant this time, not just kept-despite-a-gap: this
+ * fill's own bare-mark-on-Paper contrast is ~6.36:1 (see global.css's
+ * token comment for why that's the same number as the white-on-fill
+ * pairing, not a coincidence) — clears the FULL 4.5:1 normal-text
+ * floor, not just the lenient 3:1 non-text one. Both the previous
+ * accents this underline has used (Guard Yellow ~1.76:1, Guard Olive
+ * ~3.11:1) fell short of that; this one doesn't. A transparent
  * underline sits there at rest so nothing shifts layout when it
  * appears.
  *
@@ -41,8 +39,8 @@ const isActive = currentPath === linkPath;
 
 const toneClasses = {
   ink: isActive
-    ? "text-ink border-guard-yellow"
-    : "text-ink border-transparent hover:border-guard-yellow",
+    ? "text-ink border-guard-green-secondary"
+    : "text-ink border-transparent hover:border-guard-green-secondary",
   paper: isActive ? "text-paper border-transparent" : "text-paper hover:text-paper/70 border-transparent",
 };
 ---
