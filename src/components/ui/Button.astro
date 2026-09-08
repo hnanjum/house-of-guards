@@ -2,34 +2,57 @@
 /**
  * The one button primitive for the whole site. Sharp corners, no arrow
  * glyphs ever — affordance comes from weight/colour/border, not a
- * chevron appended to the label. Sized for a header/inline CTA (not a
- * standalone hero button) — `px-5 py-2.5` at `text-caption` (14px), a
- * step down from the original `px-6 py-3`.
+ * chevron appended to the label. `px-5 py-2.5`, a step down from the
+ * original `px-6 py-3`. Text size/weight is per-variant now (was a
+ * shared `text-caption` in `base`) — see `primary` below for why.
  *
- * `primary` — solid Guard Olive fill, Ink text (~6.24:1, passes AA;
- * Guard Olive is too light to carry white text at ~3.11:1, well under
- * the 4.5:1 AA floor). Hover is a diagonal shine sweep (a translucent
- * white band crossing the button once via `::after`), NOT a colour
- * change — the button's own fill/text stay Guard Olive/Ink at every
- * state, still AA. Pure CSS (`hover:`/`focus-visible:` driven
- * transform, no JS): the band sits off-screen at `-translate-x-full`
- * and slides to `translate-x-full` on interaction. `motion-reduce:`
- * removes the sweep element entirely and substitutes a plain,
- * non-animated `brightness-95` on hover instead, per
- * prefers-reduced-motion.
+ * `primary` — solid Guard Olive fill, white/Paper text, genuinely
+ * bold (`font-bold`, a real distinct outline on this variable font —
+ * weight 700 is within Montserrat's own 100–900 axis, not a browser-
+ * synthesised fake bold). White-on-Olive is only ~3.11:1 — fails the
+ * 4.5:1 AA floor for ordinary text, which is why an earlier pass here
+ * used Ink instead. But WCAG's *large-text* AA floor is a looser 3:1,
+ * available once text is genuinely bold at ≥14pt (18.67px) or regular
+ * at ≥18pt (24px) — and 3.11 ≥ 3.0. The button's text size was bumped
+ * from `text-caption` (14px — nowhere near either large-text floor,
+ * bold or not) to `text-body-lg` (20px) specifically to legitimately
+ * qualify: 20px clears the 18.67px bold-text threshold with real
+ * margin (not the bare minimum — the mobile info-bar fix earlier this
+ * session is a fresh reminder that a razor-thin size margin is a real
+ * risk, not just a theoretical one), reusing an existing named
+ * type-scale step rather than improvising a one-off arbitrary size.
+ * Hover is a diagonal shine sweep (a translucent white band crossing
+ * the button once via `::after`), NOT a colour change — the button's
+ * own fill/text stay Guard Olive/white at every state, still AA-large.
+ * Pure CSS (`hover:`/`focus-visible:` driven transform, no JS): the
+ * band sits off-screen at `-translate-x-full` and slides to
+ * `translate-x-full` on interaction. `motion-reduce:` removes the
+ * sweep element entirely and substitutes a plain, non-animated
+ * `brightness-95` on hover instead, per prefers-reduced-motion.
+ * KNOWN TRADE-OFF, flagged rather than silently accepted: 20px/bold is
+ * visibly larger than this variant's own previous 14px/500, undoing
+ * some of the earlier "make it feel proportionate to the nav text"
+ * work — it's still the smallest size that's honestly AA-compliant
+ * with white text at this fill colour, so the choice here was between
+ * "a bit bigger than ideal" and "not actually accessible," not a free
+ * lunch. Worth a real look at each of its 3 live call sites (header,
+ * hero, closing CTA) — the header is the tightest context and the
+ * most likely to look oversized now.
  *
- * `secondary` — solid Ink fill, white text. What used to be the
- * primary treatment, now the quieter second choice, for a page with
- * more than one action where only one should read as the main CTA.
+ * `secondary` — solid Ink fill, white text, `text-caption` (14px —
+ * unaffected by the above, Ink-on-white easily passes AA at any size).
+ * What used to be the primary treatment, now the quieter second
+ * choice, for a page with more than one action where only one should
+ * read as the main CTA.
  *
- * `outline-light` — white border + white text, transparent fill. For
- * a CTA sitting ON a Guard Green Deep / Footer Grey background, where
- * Ink text would fail contrast. Hover fills solid white, text becomes
- * Ink (not Guard Olive — Olive-on-white is only ~3.11:1, under the
- * 4.5:1 AA floor for this size of text). This one keeps its colour-
- * shift hover — it's load-bearing (the only way this variant reads on
- * a dark background), not decorative, so it's out of scope for the
- * shine-sweep swap above.
+ * `outline-light` — white border + white text, transparent fill,
+ * `text-caption`. For a CTA sitting ON a Guard Green Deep / Footer
+ * Grey background, where Ink text would fail contrast. Hover fills
+ * solid white, text becomes Ink (not Guard Olive — Olive-on-white is
+ * only ~3.11:1, and this text is 14px, not large — under the 4.5:1 AA
+ * floor for this size). This one keeps its colour-shift hover — it's
+ * load-bearing (the only way this variant reads on a dark background),
+ * not decorative, so it's out of scope for the shine-sweep swap above.
  */
 interface Props {
   href?: string;
@@ -40,20 +63,19 @@ interface Props {
 
 const { href, variant = "primary", type = "button", class: className } = Astro.props;
 
-const base =
-  "inline-flex items-center justify-center rounded-none px-5 py-2.5 text-caption transition-colors duration-200 ease-out";
+const base = "inline-flex items-center justify-center rounded-none px-5 py-2.5 transition-colors duration-200 ease-out";
 
 const variants = {
   primary:
-    "relative isolate overflow-hidden bg-guard-olive text-ink " +
+    "relative isolate overflow-hidden bg-guard-olive text-paper text-body-lg font-bold " +
     "motion-reduce:hover:brightness-95 " +
     "after:pointer-events-none after:absolute after:inset-0 after:content-[''] " +
     "after:bg-[linear-gradient(115deg,transparent_35%,rgba(255,255,255,0.5)_50%,transparent_65%)] " +
     "after:-translate-x-full after:transition-transform after:duration-700 after:ease-out " +
     "hover:after:translate-x-full focus-visible:after:translate-x-full " +
     "motion-reduce:after:hidden",
-  secondary: "bg-ink text-paper hover:bg-guard-green-deep",
-  "outline-light": "border border-paper bg-transparent text-paper hover:bg-paper hover:text-ink",
+  secondary: "text-caption bg-ink text-paper hover:bg-guard-green-deep",
+  "outline-light": "text-caption border border-paper bg-transparent text-paper hover:bg-paper hover:text-ink",
 };
 
 const classes = [base, variants[variant], className].filter(Boolean).join(" ");
