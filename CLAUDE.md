@@ -19,6 +19,33 @@ Brand register: **discreet, disciplined, high-trust, understated
 authority** — a private security consultancy or a bespoke law firm, not
 a generic template. Existing tagline: "Security Built on Trust."
 
+## Open issue — check this first
+
+**Cloudflare Workers Builds appears stuck/delayed for this repo as of
+PR #14's merge (`771fa592e95f7cd8c8b1e5542e868b8a384d86f0`).** All
+three GitHub App check-suites on that commit (`vercel`,
+`cloudflare-workers-and-pages`, `claude`) sat at `status: "queued"`
+with zero check-runs across two separate checks, ~20 minutes apart —
+not slow-but-progressing, genuinely stuck at zero both times.
+Confirmed via direct `curl` against the live site (not just GitHub's
+own status) that the deployed page still served PR #13's markup
+(`sm:block` present) well after the merge — so this wasn't a GitHub UI
+lag, the build genuinely never ran. All three unrelated apps stalling
+simultaneously points at a GitHub webhook-dispatch problem for that
+push, not something wrong with the code or with Cloudflare's build
+queue specifically. **Per the user's own direction, PR #15 (mobile
+StatStrip dividers + the Tailwind `@source` fix below) was pushed but
+deliberately NOT auto-merged** — left open for the user to merge
+themselves given the deploy uncertainty. **If a future session finds
+more PRs piling up unmerged/undeployed**: check
+`gh api repos/hnanjum/house-of-guards/commits/<sha>/check-runs` for the
+latest merge commit first; if it's now completing normally, resume the
+usual merge → poll → curl-verify flow. If still stuck at zero
+check-runs, don't keep silently re-polling — say so plainly and point
+the user at the Cloudflare dashboard (Workers & Pages →
+house-of-guards → Deployments), which isn't something this session can
+see into.
+
 ## Design system
 
 **Colour** — defined once, in `src/styles/global.css`'s `@theme` block.
@@ -271,13 +298,176 @@ row state; opening a row is what earns it.
   close relative of one already checked (see the Guard Green Secondary
   token note above for a concrete case: the two accents before it both
   needed Ink text and both left the default focus ring safe; this one
-  needs the opposite on both counts).
+  needs the opposite on both counts). The same discipline applies to
+  SIZE changes too, not just colour swaps — WCAG's "large text"
+  exemption (only needing 3:1, not 4.5:1) depends on the actual
+  rendered size/weight; a heading that qualified at 28px can silently
+  drop out of that exemption once reduced to 20px/normal-weight,
+  switching it to the stricter floor. Re-derive which threshold
+  applies after any size change, don't assume a previously-confirmed
+  classification still holds (this happened for real on StatStrip's
+  own label — still passed either way, but the margin genuinely
+  shrank and needed re-checking, not re-asserting).
+- **Compiled-CSS/HTML-artifact inspection (`grep`-ing the built
+  `dist/` output) is NOT sufficient to catch real layout/rendering
+  bugs — it only proves a class compiled to the right declaration, not
+  that the declaration does anything once real ancestor context is
+  involved.** Confirmed the hard way on StatStrip: `Divider.astro`'s
+  vertical variant depends on `self-stretch` (`align-self:stretch`),
+  which only has any effect when the element's IMMEDIATE parent is a
+  flex or grid container — a wrapper using `display:block` (e.g.
+  `hidden shrink-0 sm:block`) gives it nothing to stretch against, so
+  the divider (empty, no explicit height) renders at 0px. Every PR
+  that shipped this bug had `dist/index.html`/`dist/_astro/*.css`
+  correctly showing the class present and compiling to the right
+  colour/opacity rule — that was never the problem, and no amount of
+  re-checking compiled text would have caught it. Only a real render
+  did, once the user reported it. **Any wrapper around
+  `<Divider orientation="vertical">` must be a real flex/grid
+  container (`sm:flex`, never `sm:block`) for it to render at all.**
+  More generally: for any change involving flex/grid child alignment,
+  sizing, or stretching that depends on what the PARENT is (not just
+  what class is on the element itself), do an actual rendered check
+  before considering it verified — build a standalone static HTML
+  harness from the real `astro build` output (real compiled section +
+  real compiled CSS, no dev server involved), serve it via a throwaway
+  scratch `node` `http` server on a random port (NOT `astro dev`/
+  `astro preview` — this still respects the "no local dev server"
+  rule above, since it never touches the project's own tooling), and
+  view it through the available browser tooling — a screenshot AND a
+  `getBoundingClientRect()`/computed-style measurement, not a glance.
+  Tear the scratch server down and delete the harness file before
+  committing either way.
+- **Dead CSS can be generated from a doc COMMENT, not just from
+  markup** — Tailwind's JIT scanner does plain-text matching across
+  entire source files, comments included, not comment-aware parsing.
+  A backtick-quoted, class-shaped string mentioned in a comment purely
+  for historical/comparison reference (e.g. documenting an OLD value
+  a component used to have) generates a genuine, permanent CSS rule if
+  that exact class isn't used anywhere else in the codebase — hit
+  three separate times across the Hero/StatStrip rebuilds (`sm:text-
+  h1`, a stale `bg-guard-green-deep/18` mention, a stale `size-8`
+  mention, a stale `sm:block` mention). **Standing check on this whole
+  component family now**: before shipping any change to Hero,
+  StatStrip, or their icon files, list every backtick-quoted token in
+  the touched doc comments and cross-check each against real markup
+  usage — reword to prose (break the contiguous class-shaped string
+  apart) if the token is genuinely orphaned. A token that's still used
+  ELSEWHERE in the codebase (even if not in the file being edited) is
+  safe to mention as-is.
+- **Custom line icons: rasterize and actually look before shipping the
+  geometry, every time** — a `sharp`-based script rendering the SVG to
+  PNG at the real deployed display size AND a magnified size,
+  individually and composited into a row with its siblings. This
+  caught two separate ambiguous/illegible icon drafts in this
+  project's history (the original `Phone.astro` reading as "two
+  connected dots," and an early StatStrip "24/7" icon — a clock face
+  with two overlapping circles as an infinity motif — reading as a
+  target or a face). Never assume a hand-drawn shape reads correctly
+  from the path coordinates alone.
+- **This project's 8-step named type scale is not monotonically
+  weighted by size** — `text-caption` (14px) is weight 500, genuinely
+  HEAVIER than `text-body-lg` (20px, weight 400), despite being
+  smaller. Don't assume stepping two different elements down the scale
+  independently preserves their relative boldness — check the actual
+  bundled weight of each landing step, not just its size, when the
+  weight relationship matters for visual hierarchy.
 
 ## Recent history
 
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number is on `origin/main`.
+
+- **PR #15 — StatStrip dividers extended to mobile; a permanent fix
+  for dead-CSS-from-CLAUDE.md.** Follow-up to PR #14's own divider
+  fix, per direct instruction: mobile now gets a real horizontal
+  `<hr>` divider between every pair of stacked items too (previously a
+  deliberate "no divider, gap-only" mobile treatment) — spacing on
+  mobile now comes entirely from the divider's own `my-8` margin, not
+  a flex `gap`, so the base row dropped `gap-10`/`gap-0` in favour of
+  an explicit `gap-0` and the divider's margin does the work at every
+  breakpoint uniformly. No `self-stretch` involved here (unlike the
+  vertical variant PR #14 fixed) — a plain block `<hr>` needs nothing
+  from its parent's display type, so this one carried no equivalent
+  risk. Verified via the same static-harness-plus-`getBoundingClient
+  Rect()` method PR #14's own bug demanded: confirmed 2 real, visible
+  `<hr>`s at 375px (327px wide, correctly positioned between items,
+  vertical dividers correctly `display:none`), and confirmed the
+  desktop vertical dividers still stretch to the full 132px row height
+  at 1280px with zero regression from the mobile change.
+
+  Also found and permanently fixed a related, structural instance of
+  the same "dead CSS from a doc comment" class of bug documented
+  above: Tailwind v4's default content scanner covers every plausible
+  source file in the project, including `CLAUDE.md` itself — this
+  file's own history prose (deliberately keeping backtick-quoted
+  *former* class names like `bg-guard-green-deep/18` as a record of
+  what changed and why) was regenerating that class as a genuinely
+  dead, unused rule in every single build, confirmed present in the
+  compiled bundle with zero real call sites anywhere under `src/`.
+  Fixed once, permanently, rather than continuing to word around it
+  forever: added `@source not "../../CLAUDE.md";` and
+  `@source not "../../*.md";` right after the `@import "tailwindcss"`
+  line in `global.css`. Confirmed the dead rule is gone from the
+  compiled CSS post-fix and nothing else in the bundle changed size or
+  content. This means CLAUDE.md is now free to keep quoting old/
+  removed class names as historical record without ever regenerating
+  dead output again — worth remembering if a *different* root-level
+  `.md` file is ever added and genuinely needs scanning for some
+  reason (it won't be, under the current glob).
+
+  **Deliberately left open, not auto-merged** — see "Open issue"
+  above for why; the user is merging PRs themselves for now given the
+  Cloudflare Workers Builds stall.
+
+- **PR #7–#14 — Hero rebuilt from scratch, then StatStrip rebuilt
+  three times over.** Condensed summary; see this file's own earlier
+  revisions in `git log -p` for the full blow-by-blow if a specific
+  decision ever needs re-litigating.
+  - **Hero (#7–#10)**: replaced the old placeholder stock-forest photo
+    with a real officer photo (`src/assets/hero/hero-officer.png`,
+    committed into the repo, not read from a Downloads path at
+    runtime — 1672×941px, `object-[16%_22%]` derived from its real
+    geometry), reusing `Button.astro`'s existing variants rather than
+    forking new button markup. Then, across three follow-up rounds: a
+    full-image tint was added (green first, at 15–20% opacity, then
+    explicitly switched to black/near-black at 25–30% — `bg-ink/28`,
+    not a colour this project's `Ink` token needed a one-off exception
+    for), the headline was reduced one named tier, and the subhead was
+    reduced twice more on top of that (a genuine ambiguous "decrease
+    text size a bit more" request was clarified via AskUserQuestion to
+    mean the subhead specifically, not the headline). A visible
+    hue-transition "seam" between the black tint and the green
+    text-panel scrim at the panel's edge was flagged as a real,
+    disclosed risk at the time rather than silently smoothed over or
+    hidden — never independently confirmed resolved or still present
+    in a later look; worth a real glance if this section is revisited.
+  - **StatStrip (#11–#14)**: went through a genuine rebuild-not-restyle
+    cycle three times, each a legitimate new instruction rather than a
+    correction of the previous pass being "wrong": #11 introduced the
+    icon-led three-column layout, custom hand-drawn icons (shield/
+    checkmark permanently banned on this project), and wired
+    `initScrollReveal()` (`src/lib/scrollReveal.ts`) into `index.astro`
+    for the first time — it had existed unused in the codebase before
+    this. #12 added solid circular icon badges and switched to centred
+    alignment (documented at the time as a third sanctioned exception
+    to the left-alignment default). #13 reversed both of those
+    (left-aligned again on `sm:`+, centred only on the stacked mobile
+    layout per a later explicit follow-up; badges removed, icons now
+    plain on the solid fill) and replaced the captions with real
+    label+body pairs (24/7, SIA, Since 2023) — CLAUDE.md's own
+    left-vs-centre hard rule was reverted in the same commit so the
+    doc and the code stayed in agreement, matching the same principle
+    used everywhere else in this file. A new `Divider.astro` tone,
+    `paper-strong` (60% white, ~3.39:1 vs Guard Green Secondary — the
+    pre-existing `paper` tone's 35% only measured ~2.12:1, short of
+    WCAG 1.4.11's 3:1 non-text floor), was added specifically for this
+    fill. #14 fixed the real `self-stretch`/flex-parent bug that made
+    the vertical divider invisible (see the standing-conventions bullet
+    above for the full mechanism) and reduced both the label and body
+    text one tier each on user feedback that the first version of #13
+    read too large.
 
 - **PR #5 — Guard Green Secondary promoted, Guard Yellow retired.**
   Yellow "didn't work out visually." Green Secondary (`#366C00`) had
@@ -352,8 +542,11 @@ log` alone. Newest first; each PR number is on `origin/main`.
 ## Current status
 
 **Built**: project infrastructure (tokens, fonts, primitives, Wrangler/
-Cloudflare config) and the full homepage (header, hero with its Muster
-load-in animation, stat strip, services index, mission band, sectors
+Cloudflare config) and the full homepage (header, hero — now a real
+officer photo with a black tint overlay and a green text-panel scrim,
+see PR #7–#10 — stat strip — icon-led, three columns, solid Guard
+Green Secondary fill, dividers between every pair of items at every
+breakpoint, see PR #11–#15 — services index, mission band, sectors
 strip, closing CTA, footer).
 
 **Not started**: the interior pages — About, Careers, Our Policies,

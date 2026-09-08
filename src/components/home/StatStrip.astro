@@ -91,12 +91,22 @@ import Growth from "../../icons/stats/Growth.astro";
  * harness built from the real compiled output, viewed directly), not
  * compiled-artifact inspection alone.
  *
- * Only shown between columns on `sm:`+. Mobile has NO divider at
- * all — a deliberate, disclosed choice, not an oversight: this exact
- * "gap-only, no divider" treatment is what the very first version of
- * this component (before any of its later redesigns) already used for
- * its own mobile stacking, and generous `gap-10` reads cleanly as
- * three distinct stacked blocks without needing a rule between them.
+ * A divider between every pair of columns at every breakpoint now —
+ * vertical (`Divider`'s `self-stretch` variant) on `sm:`+, horizontal
+ * (`Divider`'s plain `<hr>` variant, no equivalent gotcha since a
+ * block-level `<hr>` doesn't depend on its parent's display type) on
+ * mobile, per explicit follow-up instruction. Both share the same
+ * `tone="paper-strong"` colour/opacity. Spacing between stacked mobile
+ * items now comes entirely from the horizontal divider's own `my-8`
+ * margin, not a flex `gap` — the outer row's `gap-*` was dropped
+ * (down to `gap-0`, matching `sm:gap-0`'s existing value) so mobile
+ * and desktop share the same "spacing comes from the divider's own
+ * margin, not the container" mechanism, rather than mixing a flex gap
+ * AND a divider margin and risking doubled-up spacing. This reverses
+ * the previous pass's own "gap-only, no divider" mobile treatment
+ * (which had matched the very first version of this component) — not
+ * a case of that earlier reasoning being wrong, just superseded by a
+ * later, more specific instruction.
  *
  * ICONS — plain, no colour-fill badge behind them (removing the
  * previous pass's solid-circle treatment entirely). `size-9` (36px),
@@ -150,14 +160,19 @@ const FACTS = [
 
 <section class="on-dark bg-guard-green-secondary">
   <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12">
-    <div class="flex flex-col gap-10 sm:flex-row sm:items-stretch sm:gap-0">
+    <div class="flex flex-col gap-0 sm:flex-row sm:items-stretch sm:gap-0">
       {
         FACTS.map(({ label, body, Icon }, i) => (
           <>
             {i > 0 && (
-              <div class="hidden shrink-0 sm:flex">
-                <Divider orientation="vertical" tone="paper-strong" class="mx-8" />
-              </div>
+              <>
+                <div class="sm:hidden">
+                  <Divider orientation="horizontal" tone="paper-strong" class="my-8" />
+                </div>
+                <div class="hidden shrink-0 sm:flex">
+                  <Divider orientation="vertical" tone="paper-strong" class="mx-8" />
+                </div>
+              </>
             )}
             <div data-reveal class="flex flex-1 flex-col items-center text-center sm:items-start sm:text-left">
               <Icon class="text-paper mb-4 size-9" />

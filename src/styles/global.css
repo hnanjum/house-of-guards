@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+/* Tailwind v4's automatic content detection scans every plausible source
+   file in the project by default, INCLUDING markdown — which means
+   CLAUDE.md's own project-history prose (deliberately kept full of
+   backtick-quoted *former* class names, e.g. "switched from
+   `bg-guard-green-deep/18` to `bg-ink/28`") was regenerating a genuinely
+   dead, unused utility rule on every build purely because that string
+   still exists in the file as a historical record, not because anything
+   in src/ references it. Confirmed live: `.bg-guard-green-deep\/18{...}`
+   was present in the compiled CSS bundle with zero real call sites
+   anywhere under src/. Excluding CLAUDE.md (and any other root-level
+   .md) from the scan is the permanent fix — it means the doc file is
+   free to keep quoting old/removed class names as historical record
+   without ever having to word around Tailwind's scanner again. */
+@source not "../../CLAUDE.md";
+@source not "../../*.md";
+
 /* Self-hosted variable fonts — see src/styles/global.css §2 in README for
    why these specific packages/axis files were chosen. */
 @import "@fontsource-variable/fraunces/full.css"; /* wght + opsz + SOFT + WONK axes */
