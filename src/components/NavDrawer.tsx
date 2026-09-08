@@ -129,7 +129,16 @@ export default function NavDrawer() {
                 </button>
               </div>
 
-              {/* hover:border-guard-green-secondary — non-text accent on Paper, ~6.36:1, clears even the 4.5:1 normal-text floor (see global.css's Guard Green Secondary comment); same pairing as the desktop NavLink's own active/hover underline. */}
+              {/* hover:border-amber — mirrors the desktop NavLink's own
+                  active/hover underline exactly, kept in sync per the
+                  standing "hand-matched copies drift apart" note. Real,
+                  disclosed gap, not silently compliant: this bare mark
+                  on Paper measures ~2.15:1, which FAILS the 3:1 WCAG
+                  1.4.11 non-text floor — see global.css's Amber token
+                  comment and NavLink.astro's own comment for the full
+                  derivation. Shipped anyway per the explicit "Amber
+                  everywhere for consistency" instruction; not treated
+                  as compliant. */}
               <motion.ul
                 className="divide-hairline flex-1 divide-y overflow-y-auto"
                 variants={listVariants}
@@ -141,7 +150,7 @@ export default function NavDrawer() {
                     <a
                       href={link.href}
                       onClick={() => setOpen(false)}
-                      className="text-ink text-body block border-l-2 border-transparent px-6 py-4 transition-colors duration-200 ease-out hover:border-guard-green-secondary"
+                      className="text-ink text-body block border-l-2 border-transparent px-6 py-4 transition-colors duration-200 ease-out hover:border-amber"
                     >
                       {link.label}
                     </a>
@@ -149,11 +158,22 @@ export default function NavDrawer() {
                 ))}
               </motion.ul>
 
+              {/* Hand-matched copy of Button.astro's own `primary`
+                  variant — this is a React island, so it can't literally
+                  import the Astro component. Rebranded off Guard Green
+                  Secondary/white text to Amber/Ink, same fill+text pair
+                  Button.astro now uses (Ink on Amber ~9.05:1, AAA — see
+                  global.css's Amber token comment). Hover is a plain
+                  `brightness-90` darken rather than Button.astro's own
+                  diagonal shine-sweep — this was already a simplified
+                  hand-match before the rebrand (a colour-change hover,
+                  not the sweep), so it stays simplified now; porting
+                  the sweep itself wasn't part of this pass. */}
               <div className="px-6 py-6">
                 <a
                   href="/contact"
                   onClick={() => setOpen(false)}
-                  className="bg-guard-green-secondary text-paper hover:bg-guard-green-deep inline-flex w-full items-center justify-center rounded-none px-6 py-3 text-caption transition-colors duration-200 ease-out"
+                  className="bg-amber text-ink hover:brightness-90 inline-flex w-full items-center justify-center rounded-none px-6 py-3 text-caption transition-[filter] duration-200 ease-out"
                 >
                   Get a Quote
                 </a>
