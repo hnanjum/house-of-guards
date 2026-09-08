@@ -55,58 +55,96 @@ arbitrary bracket colour (`bg-[#0d0d0d]`) anywhere outside this file —
 every component reaches for a named token class (`bg-ink`, `text-stone`,
 `border-hairline`, etc.).
 
+**SCOPE OF THE CURRENT PALETTE — read this before touching any colour
+class anywhere on this site.** As of the Electric-Blue/Magenta/Amber
+rebrand, this project runs TWO colour systems side by side, split by
+SECTION, not by preference:
+- **Header, Hero, StatStrip, and `ServicesGrid.astro`** use the new
+  four-colour system below (Electric Blue, Magenta, Amber, Cyan-Blue).
+  Guard Green Secondary and Guard Green Deep are RETIRED from these
+  four sections specifically — neither appears anywhere in
+  `Header.astro`, `Hero.astro`, `StatStrip.astro`, or
+  `ServicesGrid.astro` any more, confirmed via a full repo grep before
+  each PR describing itself as done.
+- **`MissionBand.astro` and `ClosingCta.astro`** still use Guard Green
+  Deep (Mission Band's own full-bleed fill) and Guard Green Secondary
+  (Closing CTA's phone-link hover decoration) UNCHANGED — both
+  sections are pending a SEPARATE future redesign and were explicitly
+  out of scope for the rebrand. Both Guard Green tokens are kept
+  defined in `global.css` (not deleted) purely so those two references
+  don't break — this is NOT an oversight or a partial rollout, it's a
+  deliberate, disclosed boundary. Don't "finish the job" by touching
+  Mission Band or Closing CTA without a real instruction to redesign
+  them, and don't delete either Guard Green token while those two
+  sections still reference it.
+- `Button.astro`'s `secondary` variant (Ink fill, hover to Guard Green
+  Deep) also still references Guard Green Deep — it has zero real call
+  sites anywhere in the codebase today, so it's dormant, not rendered
+  inside any of the four rebranded sections; left as-is rather than
+  repointed, since it isn't Mission Band/Closing CTA but also isn't one
+  of the four sections' own visible surfaces.
+
 | Token | Hex | Role |
 |---|---|---|
 | `ink` | `#0D0D0D` | Near-black text, `secondary` button fill, icon strokes, the default focus ring |
 | `paper` | `#FFFFFF` | The default background everywhere; also the text colour on every dark fill below |
-| `guard-green-secondary` | `#366C00` | **The accent** — `primary` button fill, header info-bar background, header active-nav-link underline, stat strip background, ServicesIndex icon/open-state border, Hero/ClosingCta phone-link hover decoration. White/Paper text/icon on it: ~6.36:1 (AA, real margin). Ink on it: ~3.06:1 — fails AA normal-text outright, so every fill using this accent pairs it with white, the *opposite* of the two accents before it (both needed Ink). As a bare mark directly on Paper (underline/icon/border), this fill measures the same ~6.36:1 — genuinely compliant even at the 4.5:1 normal-text floor, not just the lenient 3:1 one; neither retired accent managed that. See `global.css`'s own token comment for the full write-up, including why the bare-mark number is provably the same as the fill number, not assumed to be |
-| `guard-green-deep` | `#081F18` | An independent dark, near-black-green surface — the fallback wherever the current accent's own fill can't carry the text colour it needs (the mission-band pull-quote, `primary`/`secondary` button hover) |
+| `electric-blue` | `#2563EB` | **Primary block/background colour** (Header/Hero/StatStrip/ServicesGrid only) — Header's info-bar fill, StatStrip's fill, Hero's text-panel scrim (translucent, 85%), ServicesGrid's Manned Guarding/Overnight Security cards and Corporate Security's icon stroke. White/Paper on the opaque fill: ~5.17:1 (AA). Ink on it: ~3.76:1 — clears the 3:1 non-text floor but fails 4.5:1, so text/icons stay white. As an icon-stroke mark on a light card: ~5.17:1 vs Paper, ~4.74:1 vs Surface Alt — both clear 3:1 with real margin. See `global.css`'s own token comment for the full derivation, including Hero's own two-step translucent-panel composite (~4.53:1, a genuine but thin pass, flagged in that file) |
+| `magenta` | `#A5195C` | **Secondary block/background colour** (ServicesGrid only) — Close Protection's card fill, CCTV Monitoring's and Construction Site Security's icon stroke. White on the fill: ~7.26:1 (AAA, the strongest fill pairing in this rebrand). Ink on it: ~2.68:1 — fails even the lenient 3:1 floor outright, so this fill never carries Ink. As an icon-stroke mark on a light card: ~7.26:1 vs Paper, ~6.66:1 vs Surface Alt |
+| `amber` | `#F59E0B` | **The sole button/CTA colour, sitewide, no exceptions** — `Button.astro`'s `primary` variant, `NavDrawer.tsx`'s hand-matched CTA, and (as a bare non-text mark) the header nav's active-link underline. Ink on this fill: ~9.05:1 (AAA) — buttons therefore use INK text, a genuine reversal from Guard Green Secondary's own white-text pairing. White on it: ~2.15:1, fails even 3:1. **Bare-mark contrast (the nav underline directly on Paper) is ~2.15:1 — a real, disclosed, UNRESOLVED failure of the 3:1 WCAG 1.4.11 floor**, shipped anyway per explicit instruction to keep the underline consistent with the button colour; see `NavLink.astro`'s own comment |
+| `cyan-blue` | `#0EA5E9` | **Rare accent only — never a section/card background fill.** Not applied anywhere in Header/Hero/StatStrip/ServicesGrid as of this rebrand (no per-section spec called for it); defined and fully contrast-checked so it's ready the moment a hover state or icon detail needs it. White on this fill: ~2.77:1 — fails even 3:1, so white is never a safe foreground here, including as a bare mark on Paper (same number, symmetric). Ink on it: ~7.01:1 (AAA) — the only safe foreground for this token |
 | `stone` | `#6E6E6E` | Secondary text on Paper only (captions, meta, credential lines). ~4.6:1 on white — 14px and above only |
 | `hairline` | `#E4E4E4` | Borders/rules/seams on Paper. Perfectly neutral (R=G=B) — never a warm greige |
-| `footer-grey` | `#2A2A2A` | The footer's own dark neutral. Distinct from `ink` and both greens on purpose, so the footer reads as its own zone rather than a third green band or a slide into black |
-| `services-accent-yellow` | `#FFB606` | **NOT a general-purpose accent — read `global.css`'s own token comment before touching this.** Scoped to exactly one place, `ServicesGrid.astro`'s alternating-card checkerboard, by direct instruction. Same hex as the long-retired `guard-yellow` (coincidence, not a revival — Yellow was retired sitewide for a real reason, see PR #4/#5 below, and that decision stands everywhere else). Ink text/icon on this fill: ~11.06:1 (AAA). White on it: ~1.76:1 — fails even the lenient 3:1 floor, so yellow cards use Ink, the opposite pairing from their green neighbours |
+| `footer-grey` | `#2A2A2A` | The footer's own dark neutral. Distinct from `ink` and every accent tried on purpose, so the footer reads as its own zone rather than sliding into whatever the current accent happens to be |
+| `surface-alt` | `#F5F5F5` | A light, neutral surface for a background that needs to read as visually distinct from Paper without becoming a bold accent band — ServicesGrid's light/non-filled cards (Corporate Security, CCTV Monitoring, Construction Site Security). Ink on it: ~17.8:1 (AAA) |
+| `guard-green-secondary` | `#366C00` | **RETIRED from Header/Hero/StatStrip/ServicesGrid.** Still live, unchanged, for `ClosingCta.astro`'s own phone-link hover decoration only. White/Paper on it: ~6.36:1 (AA). Ink on it: ~3.06:1 (fails 4.5:1) |
+| `guard-green-deep` | `#081F18` | **RETIRED from Header/Hero/StatStrip/ServicesGrid.** Still live, unchanged, for `MissionBand.astro`'s full-bleed fill and `Button.astro`'s dormant `secondary`-variant hover. White text on it: ~17.2:1 (AAA) |
 
 All colour-on-background pairings above have been checked against WCAG
-AA by actual relative-luminance calculation (not eyeballed) — white
-text on `guard-green-deep`/`footer-grey` lands at 17–14:1 (AAA); white
-on `guard-green-secondary` lands at ~6.36:1 (AA). If a new pairing is
-ever introduced, verify it the same way before shipping it, don't
-assume — this accent has already broken TWO assumptions that held for
-its predecessors: (1) both retired accents (Guard Yellow, Guard Olive)
-needed Ink text on their own fills; this one needs white, Ink actively
-fails on it (~3.06:1). (2) both retired accents' default Ink focus
-ring stayed comfortably safe on their own fill; on this one it doesn't
-(~3.06:1, too thin to trust) — see the `.on-dark` note below. Don't
-assume a pattern that worked for one accent colour carries over to the
-next one — re-verify per colour, every time, including things that
-"obviously" wouldn't change.
+AA by actual relative-luminance calculation (not eyeballed). If a new
+pairing is ever introduced, verify it the same way before shipping it,
+don't assume — this rebrand's own two new block colours (Electric
+Blue, Magenta) split their foreground requirement the SAME way Guard
+Green Secondary did (both need white, Ink fails), but Amber flips back
+to the Guard Yellow/Guard Olive pattern (Ink needed, white fails) —
+neither pattern is a rule, both were re-derived per colour, not
+inherited. Don't assume a pattern that worked for one accent colour
+carries over to the next one — re-verify per colour, every time,
+including things that "obviously" wouldn't change.
 
 **Retired tokens, fully removed (not deprecated-in-place)**: `guard-green`
 (`#0F3D2E`), `guard-olive` (`#8A9A2E`), `guard-olive-bright` (`#A7AF4A`),
-`guard-yellow` (`#FFB606`) have all been replaced by later accents and
-no longer exist as tokens — confirmed via a full repo grep before each
-removal that nothing referenced the class names any more, so they were
-deleted outright rather than left as deprecated-but-present. If any of
-these names turn up in a future change request, they're gone — check
-`git log` on `global.css` for what actually replaced them and when,
-don't assume they're still defined somewhere.
+`guard-yellow` (`#FFB606`), and, as of the Electric-Blue/Magenta/Amber
+rebrand, `services-accent-yellow` (`#FFB606`, the scoped ServicesGrid-
+only token PR #16 introduced) have all been replaced or fully removed
+and no longer exist as tokens — confirmed via a full repo grep before
+each removal that nothing referenced the class names any more, so they
+were deleted outright rather than left as deprecated-but-present. If
+any of these names turn up in a future change request, they're gone —
+check `git log` on `global.css` for what actually replaced them and
+when, don't assume they're still defined somewhere. `guard-green-secondary`
+and `guard-green-deep` are the one exception to "retired tokens get
+deleted" — see the SCOPE note above for why they're kept defined.
 
 **A real trap already hit once, and the fix it led to**: the original
 default focus ring colour was the accent itself (then Guard Green) —
 invisible against a same-coloured fill. The default `:focus-visible`
 ring is now **Ink** instead — safe against Paper (~19.44:1) always,
 and safe against most accent fills tried since (Guard Yellow ~11.06:1,
-Guard Olive ~6.24:1), but **not** the current one: Ink on Guard Green
-Secondary is only ~3.06:1, too thin to trust. `.on-dark` (swaps the
-ring to white) is reserved for genuinely *dark* fills — currently the
-Footer, StatStrip, and the header info bar (the last two carry it
-specifically because of this accent's own math; neither did under the
-two lighter accents that came before it). Check this per accent, not
-by habit — a fill light enough to make `.on-dark` actively wrong
-(Guard Yellow, white-on-it was ~1.76:1) can be swapped for one dark
-enough to make it required, and the two prior accents both happened to
-land on the "doesn't need it" side, which could easily read as a rule
-rather than a coincidence if this note didn't call it out.
+Guard Olive ~6.24:1, and — this rebrand's own re-confirmation — Amber
+~9.05:1), but not every one: Ink on Guard Green Secondary was only
+~3.06:1 (too thin to trust, retired from these sections anyway now),
+and Ink on the new Electric Blue is ~3.76:1 (clears 3:1 but thin).
+`.on-dark` (swaps the ring to white) is reserved for genuinely *dark*
+fills — currently the Footer, Header's info bar, StatStrip, and
+ServicesGrid's Electric-Blue/Magenta cards (defensively, since none has
+a focusable element today). Amber does NOT carry `.on-dark` anywhere —
+its own ~9.05:1 Ink ring is already comfortably safe, matching the
+Guard Yellow/Olive pattern rather than Guard Green Secondary/Electric
+Blue's. Check this per accent, not by habit — a fill light enough to
+make `.on-dark` actively wrong (Guard Yellow, Amber) can sit right next
+to one dark enough to require it (Electric Blue, Magenta) in the SAME
+rebrand, which is exactly why this needs re-checking per colour rather
+than assumed from whatever the previous accent needed.
 
 **Type** — two typefaces, both self-hosted via `@fontsource`/
 `@fontsource-variable`, **never** the Google Fonts CDN:
@@ -139,21 +177,37 @@ generic-looking version of this site. Treat them as load-bearing, not
 stylistic preference:
 
 - **No cream/off-white backgrounds** (nothing near `#F5F1E8`), **no
-  gold/amber fill colours**, **no blue**, **no purple/terracotta**. The
-  background is pure white; the only GENERAL-PURPOSE accent hues in the
-  system are the two greens above and the one dedicated footer grey.
-  **One narrow, explicit, scoped exception**: `ServicesGrid.astro`'s
-  alternating checkerboard uses `--color-services-accent-yellow`
-  (`#FFB606`) on every second card, per direct instruction — see that
-  token's own long comment in `global.css` for the full reasoning. The
-  RULE's actual intent (no second general-purpose accent hue loose in
-  the system, available for any future component to reach for) is
-  still fully intact — this token is deliberately named/scoped/
-  documented so it can't be mistaken for one, and isn't used anywhere
-  outside that one component. Don't read this exception as the rule
-  being quietly abandoned, and don't reach for that token — or any new
-  amber/gold value — anywhere else without the same explicit,
-  scoped-on-purpose treatment.
+  purple/terracotta**. Originally this bullet also banned gold/amber
+  fill colours and blue outright — **that half of the rule is now
+  SUPERSEDED, by direct explicit instruction, for exactly four
+  sections: Header, Hero, StatStrip, and `ServicesGrid.astro`.** Those
+  four now run a real four-colour system (Electric Blue, Magenta,
+  Amber, Cyan-Blue — see the colour table above) that includes both a
+  blue and an amber as genuine, deliberate, sitewide-for-buttons fill
+  colours. This is NOT the rule quietly eroding — it's a real,
+  disclosed, dated boundary: the ORIGINAL rule's actual intent (no
+  ungoverned colour sprawl, no component reaching for an arbitrary hex
+  outside the token system) is still fully honoured, just satisfied a
+  different way now — every new hue is a real, named, WCAG-checked
+  token in `global.css`, not a bracket value or a one-off. **The rule
+  STILL FULLY APPLIES, unchanged, everywhere else on the site** —
+  `MissionBand.astro`, `ClosingCta.astro`, `SectorsStrip.astro`, the
+  Footer, and every future page/section — no blue, no gold/amber fill,
+  no cream, no purple/terracotta, until a similarly explicit
+  instruction extends the new palette there. Don't reach for Electric
+  Blue/Magenta/Amber/Cyan-Blue outside the four named sections (Amber's
+  own button/CTA use is the one deliberate exception — see
+  `Button.astro`'s own note — since a button/CTA can appear inside any
+  section, including the still-Guard-Green ones, and it stays Amber
+  regardless of which section it's rendered in) without a real decision
+  extending this boundary, not an assumption that "the rebrand" now
+  covers the whole site.
+  ServicesGrid's own now-retired `--color-services-accent-yellow`
+  token (`#FFB606`, the scoped one-component exception this bullet
+  used to describe) has been fully removed from `global.css` — that
+  specific exception no longer exists; ServicesGrid now draws from the
+  same four-colour system as the rest of the rebranded sections, not a
+  fifth scoped-only hue.
 - **No tracked-out ALL-CAPS eyebrow labels above headings** ("WHAT WE
   DO", "OUR MISSION"). The one sanctioned exception to letter-tracking
   anywhere on the site is the site wordmark itself (`text-wordmark`) —
@@ -245,9 +299,13 @@ rendered by `ServicesGrid.astro` (the accordion these were originally
 built for, `ServicesIndex.astro`, is gone — see Recent history). Shared
 stroke language across all six: `viewBox="0 0 40 40"`,
 `stroke-linecap="square"`, `stroke-linejoin="miter"`, `fill="none"`,
-`stroke="currentColor"` (colour is set by whatever wraps them —
-`text-paper`/`text-ink` per card, switched with the checkerboard fill;
-see `ServicesGrid.astro`'s own comment).
+`stroke="currentColor"` (colour is set by whatever wraps them — since
+the Electric-Blue/Magenta rebrand this is a genuine THREE-way switch,
+not two: `text-paper` on a filled (Electric Blue/Magenta) card, or an
+explicit per-card accent class — `text-electric-blue`/`text-magenta` —
+applied directly to the icon on a light card, where the surrounding
+text stays plain `text-ink`; see `ServicesGrid.astro`'s own comment for
+the full per-card mapping).
 
 **`stroke-width` is now `"2"`, not this family's original `"1.25"`** —
 bumped when these six were rebuilt for `ServicesGrid.astro`'s bolder,
@@ -293,28 +351,38 @@ treatment for these icons without a real reason to.
   should ever hardcode a colour, font-size, or font-weight — see
   "Design system" above.
 - **`Button.astro`** (`src/components/ui/`) has three variants:
-  `primary` (Guard Green Secondary fill, white text — the sitewide
-  default, plus a subtle diagonal shine-sweep on hover/focus, with a
-  `motion-reduce` fallback to a plain brightness shift), `secondary`
-  (Ink fill, white text — for a page with more than one action, where
-  only one should read as primary), `outline-light` (white border/text,
+  `primary` (**Amber fill, Ink text** — the sitewide default, rebranded
+  off Guard Green Secondary's own white-text pairing, see the colour
+  table above — plus a subtle diagonal shine-sweep on hover/focus, with
+  a `motion-reduce` fallback to a plain brightness shift), `secondary`
+  (Ink fill, white text, hover to Guard Green Deep — for a page with
+  more than one action, where only one should read as primary; this
+  variant has zero real call sites anywhere in the codebase and was
+  deliberately NOT touched by the rebrand as a result — see
+  `Button.astro`'s own comment), `outline-light` (white border/text,
   transparent fill — for a CTA sitting on a Guard Green Secondary /
   Guard Green Deep / Footer Grey background, where Ink or the accent's
-  own colour as text would fail contrast). Sharp corners always
-  (`rounded-none` is explicit, not an accident of unstyled defaults).
-  Never add an arrow. **Every site that renders the primary CTA must
-  stay in sync** — header, hero, closing CTA, and `NavDrawer.tsx`'s own
-  hand-matched mobile CTA (a React island, so it can't literally import
-  `Button.astro`) have drifted apart once already (see Recent history
-  below) after a colour/style change landed in `Button.astro` but was
-  never propagated to `NavDrawer.tsx`. Check `NavDrawer.tsx` by hand
-  any time `Button.astro`'s `primary` variant changes.
+  own colour as text would fail contrast; also unaffected by the
+  rebrand — its border/text stay literal white regardless of which dark
+  fill it sits on). Sharp corners always (`rounded-none` is explicit,
+  not an accident of unstyled defaults). Never add an arrow. **Every
+  site that renders the primary CTA must stay in sync** — header, hero,
+  closing CTA, and `NavDrawer.tsx`'s own hand-matched mobile CTA (a
+  React island, so it can't literally import `Button.astro`) have
+  drifted apart once already (see Recent history below) after a
+  colour/style change landed in `Button.astro` but was never propagated
+  to `NavDrawer.tsx`. Check `NavDrawer.tsx` by hand any time
+  `Button.astro`'s `primary` variant changes — done again for the Amber
+  rebrand, both now share the same Amber fill/Ink text pairing.
 - **`NavLink.astro`** and **`Divider.astro`** both have a `tone="paper"`
   variant for use on dark/bold backgrounds — `tone="ink"`/`tone
-  ="hairline"` (the defaults) assume a Paper background and use Guard
-  Green for hover/emphasis, which doesn't read against a dark surface.
-  Use `tone="paper"` on anything sitting in the header, footer, or a
-  bold-fill section.
+  ="hairline"` (the defaults) assume a Paper background and use Amber
+  (rebranded off Guard Green Secondary) for hover/emphasis, which
+  doesn't read against a dark surface. **`tone="ink"`'s Amber underline
+  is a real, disclosed, unresolved WCAG gap** (~2.15:1 as a bare mark on
+  Paper, fails the 3:1 non-text floor — see the colour table above) —
+  known, not silently compliant. Use `tone="paper"` on anything sitting
+  in the header, footer, or a bold-fill section.
 - **`SectionHeading.astro`** is left-aligned by default, has no eyebrow
   slot (see hard rules), and takes an optional `description` slot for a
   plain sentence-case supporting line below the heading — a legitimate,
@@ -442,6 +510,86 @@ treatment for these icons without a real reason to.
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number is on `origin/main`.
+
+- **PR #17 — Electric Blue / Magenta / Amber / Cyan-Blue rebrand,
+  SCOPED to exactly four sections: Header, Hero, StatStrip, and
+  `ServicesGrid.astro`.** Guard Green Secondary and Guard Green Deep
+  are retired from all four (confirmed via a full repo grep before
+  calling this done — see the Design system section's own new SCOPE
+  note above for the full boundary statement, not repeated here).
+  `MissionBand.astro` and `ClosingCta.astro` were explicitly, directly
+  instructed to be left untouched — both still run the original Guard
+  Green palette, pending a separate future redesign; both Guard Green
+  tokens stay defined in `global.css` (not deleted) purely because
+  those two sections still reference them.
+
+  **Per-section treatment, all contrast computed fresh, not assumed**
+  (full numbers in each token's own `global.css` comment and each
+  component's own updated doc block — condensed here):
+  - **Header** — info-bar fill Electric Blue (white text/icons,
+    ~5.17:1, down from Guard Green Secondary's own ~6.36:1 but still
+    real AA margin), `.on-dark` kept (Ink ring ~3.76:1, thin). Active
+    nav-link underline Amber, matching the button colour — a real,
+    disclosed, UNRESOLVED WCAG gap (~2.15:1 as a bare mark on Paper,
+    fails 3:1), shipped per explicit instruction, not silently treated
+    as compliant. `NavDrawer.tsx`'s hand-matched CTA and its own
+    link-hover border both moved to Amber alongside it, per the
+    standing "keep hand-matched copies in sync" note — this repo's own
+    documented drift risk, closed proactively rather than waited on.
+  - **Hero** — text-panel scrim Electric Blue at 85% opacity
+    (unchanged mechanism, new colour). Re-derived contrast from
+    scratch, not carried forward from the old ~12.72:1 figure:
+    **~4.53:1** — a genuine PASS but a razor-thin one, flagged
+    prominently in `Hero.astro`'s own comment as a real regression in
+    safety margin, not silently accepted as equivalent. A 90%-opacity
+    alternative (~4.74:1, real headroom) was computed and is ready to
+    apply if a wider margin is wanted, but wasn't shipped speculatively
+    since it wasn't asked for.
+  - **StatStrip** — fill Electric Blue (white text/icons, same ~5.17:1
+    as Header's info bar, `.on-dark` kept). `Divider`'s
+    `tone="paper-strong"` was RECALIBRATED, not left at its old value —
+    60% opacity (tuned for Guard Green Secondary) only reaches ~2.85:1
+    against Electric Blue, under the 3:1 floor; now 70%, ~3.35:1. Since
+    this tone has exactly one real call site (confirmed via grep), the
+    shared token was recalibrated in place rather than forked into a
+    second variant.
+  - **ServicesGrid** — moved off the old `index % 2` checkerboard onto
+    a fixed, PER-SERVICE fill assignment (Manned Guarding/Overnight
+    Security: Electric Blue fill; Close Protection: Magenta fill;
+    Corporate Security/CCTV Monitoring/Construction Site Security:
+    light `surface-alt` cards, Ink text, icon stroked in Electric Blue
+    or Magenta per card). Icon GEOMETRY unchanged from PR #16 — only
+    light-card icon stroke colour changed, so the mandatory
+    rasterise-and-inspect process wasn't re-run (that check is for new
+    shapes, not a colour-only edit already verified via WCAG maths).
+    Body text reduced one named type-scale tier (`text-body` 17px →
+    `text-caption` 14px), same discipline already used on Hero/
+    StatStrip — surfaces the same weight quirk StatStrip's own history
+    already documents (14px/500 is technically heavier than 17px/400).
+    The scoped-only `--color-services-accent-yellow` token PR #16
+    introduced is fully REMOVED from `global.css`, not just
+    unreferenced — confirmed via grep before deleting.
+
+  **The two standing hard rules PR #16 already carved a scoped
+  exception into** ("no gold/amber fill colours"/"no blue", and the
+  card-grid rule) are updated again in this same commit so code and
+  doc agree — see the Hard rules section's own updated bullet above for
+  the full "superseded for these four sections, still fully in force
+  everywhere else" reasoning, not repeated here.
+
+  A real `astro check` (0 errors, 35 files, only pre-existing unrelated
+  `ContactForm.tsx` hints) and a clean `astro build` were run before
+  calling this done, plus the dead-CSS-from-comments audit this file's
+  own standing conventions require for every file touched — confirmed
+  every new backtick-quoted token in a touched `.astro`/`.tsx` file is
+  either real, still-rendered markup or genuinely not shaped like a
+  Tailwind utility class, and confirmed via the compiled `dist/`
+  output that zero dead rules were generated by any of it (including
+  one caught and fixed during this same pass: `Cyan-Blue`'s own first
+  documented contrast numbers were computed wrong by hand and corrected
+  before shipping — see that token's own `global.css` comment for the
+  concrete "verify the math, not just trust the method" reminder this
+  left behind).
 
 - **PR #16 — `ServicesIndex.astro`'s accordion replaced outright by
   `ServicesGrid.astro`, a real card grid — a deliberate, explicit
@@ -687,13 +835,22 @@ log` alone. Newest first; each PR number is on `origin/main`.
 ## Current status
 
 **Built**: project infrastructure (tokens, fonts, primitives, Wrangler/
-Cloudflare config) and the full homepage (header, hero — now a real
-officer photo with a black tint overlay and a green text-panel scrim,
-see PR #7–#10 — stat strip — icon-led, three columns, solid Guard
-Green Secondary fill, dividers between every pair of items at every
-breakpoint, see PR #11–#15 — services grid, a six-card checkerboard
-replacing the old numbered accordion, see PR #16 — mission band,
-sectors strip, closing CTA, footer).
+Cloudflare config) and the full homepage (header, hero — a real officer
+photo with a black tint overlay and an Electric-Blue text-panel scrim
+(rebranded off Guard Green Deep), see PR #7–#10 and the Electric-Blue/
+Magenta/Amber rebrand entry below — stat strip — icon-led, three
+columns, solid Electric Blue fill (rebranded off Guard Green
+Secondary), dividers between every pair of items at every breakpoint,
+see PR #11–#15 and the rebrand entry — services grid, a six-card mixed
+fill/light layout (Electric Blue, Magenta, and light `surface-alt`
+cards, rebranded off the original Guard-Green/Yellow checkerboard), see
+PR #16 and the rebrand entry — mission band, sectors strip, closing
+CTA, footer, all still on the original Guard Green palette, pending a
+separate future redesign). Header, Hero, StatStrip, and ServicesGrid
+now run a genuinely different colour system (Electric Blue, Magenta,
+Amber, Cyan-Blue) from the rest of the site (Guard Green Secondary/
+Deep) — see the Design system section above for the exact scope
+boundary, and don't assume the two ever need to match.
 
 **Not started**: the interior pages — About, Careers, Our Policies,
 Gallery, Contact. All still need building.

@@ -41,49 +41,201 @@
   --color-ink: #0d0d0d; /* near-black text, secondary button fill, icon strokes */
   --color-paper: #ffffff; /* the default background; also the text colour on every dark fill below */
 
-  /* GUARD GREEN SECONDARY — the current primary accent, promoted from
-     a reserved/unapplied token to full use, replacing Guard Yellow
-     entirely (Yellow is retired — didn't work out visually; removed
-     outright below once nothing referenced it any more, same as the
-     Olive tokens before it). A dark, saturated forest-olive green —
-     distinct from Guard Green Deep below and the retired plain Guard
-     Green (#0F3D2E).
-     Real numbers — this token's relative luminance (~0.115) is much
-     LOWER (darker) than any of its predecessors (Yellow ~0.547, Olive
-     ~0.287, Olive Bright ~0.394), which flips which foreground colour
-     is safe compared to every accent tried before it:
-       - White/Paper on this fill: ~6.36:1 — passes AA (4.5:1) with
-         real margin, ~9% short of AAA (7:1). This is the one to use —
-         every button/fill site pairs this accent with white text now,
-         not the Ink pattern Yellow and Olive both needed.
-       - Ink on this fill: ~3.06:1 — fails the 4.5:1 AA floor for
-         normal text outright, and only barely clears the 3:1 non-text
-         floor (a ~2% margin — too thin to trust). Confirms Ink is the
-         wrong foreground here, the opposite of every prior accent.
-       - This fill as a bare mark (underline/icon/border) ON Paper —
-         checked as its own real question, not assumed identical to
-         the white-on-fill number just because both involve white:
-         WCAG contrast is symmetric in the two colours being compared
-         (lighter luminance vs darker luminance), regardless of which
-         one is nominally "foreground" — swapping which colour plays
-         text vs. background doesn't change which two colours are
-         being compared, so this pairing genuinely IS the same ~6.36:1
-         computed above, confirmed by re-deriving it from the formula
-         rather than asserted from the other number. Unlike Guard
-         Yellow (1.76:1, failed even the lenient 3:1 non-text floor)
-         and Guard Olive (3.11:1, only just cleared that same lenient
-         floor), this fill clears the FULL 4.5:1 normal-text floor even
-         as a bare mark directly on Paper — genuinely no "fill-only"
-         limitation this time. Every bare-mark use (NavLink's active
-         underline, the Hero/ClosingCta phone-link hover decoration) is
-         a real, compliant pairing now, not a flagged gap. Also the
-         fill for every "green" card in ServicesGrid's checkerboard —
-         see that component's own doc comment; ServicesIndex (the old
-         accordion this fill's icon/open-state border used to belong
-         to) was fully retired when ServicesGrid replaced it. */
+  /* FOUR-COLOUR REBRAND (Header / Hero / StatStrip / ServicesGrid ONLY)
+     — Electric Blue, Magenta, Amber, Cyan-Blue. Guard Green Secondary
+     and Guard Green Deep (both kept below, unchanged in value) are
+     retired from these four sections specifically — neither is
+     referenced anywhere in Header.astro, Hero.astro, StatStrip.astro,
+     or ServicesGrid.astro any more. They are NOT retired sitewide:
+     MissionBand.astro (bare Guard Green Deep fill) and ClosingCta.astro
+     (a Guard-Green-Secondary phone-link hover decoration) still use
+     them, unchanged, on purpose — both sections are pending a separate
+     future redesign and were explicitly out of scope for this pass.
+     Don't delete either token while those two sections still reference
+     it; do treat every OTHER site of `guard-green-secondary`/
+     `guard-green-deep` as a bug if one turns up (there shouldn't be
+     any left). */
+
+  /* ELECTRIC BLUE — the new primary block/background colour. Header's
+     info bar, StatStrip's fill, and half of ServicesGrid's checkerboard
+     (Manned Guarding, Overnight Security) all use this as a solid,
+     OPAQUE fill; Hero's text-panel scrim uses it translucent (85%) over
+     the hero photograph. Real numbers, both contexts checked
+     separately since an opaque fill and a translucent overlay-on-photo
+     are genuinely different pairings, not one number covering both:
+       - Relative luminance, opaque: L≈0.1531 — notably LIGHTER than
+         Guard Green Secondary's own L≈0.115 was, even though both read
+         as "a dark saturated accent" at a glance. This is why every
+         number below is different from the old accent's, not just a
+         relabelling.
+       - White/Paper on the opaque fill: ~5.17:1 — passes AA (4.5:1)
+         with real, comfortable margin (~15%), but is NOTABLY LOWER
+         than Guard Green Secondary's own ~6.36:1 — don't assume the
+         old headroom carried over. Still the correct foreground: Ink
+         on this fill is ~3.76:1, clears the 3:1 non-text/UI floor with
+         a real (if more moderate) ~25% margin but fails the 4.5:1
+         normal-text floor outright, so every run of TEXT on an opaque
+         Electric Blue fill (Header's phone/address line, StatStrip's
+         label + body) stays white/Paper, same pairing convention as
+         before, just a different, slightly tighter number.
+       - Default Ink focus ring on the opaque fill: ~3.76:1 (the same
+         Ink-on-fill number above, since a `:focus-visible` outline is
+         itself a non-text UI mark) — clears 3:1 but with a thinner
+         margin than is comfortable to trust blind. `.on-dark` (ring
+         swaps to Paper, ~5.17:1) stays applied everywhere this fill is
+         opaque (Header's info bar, StatStrip) for the stronger margin,
+         matching the same "swap to on-dark whenever the default ring's
+         margin is thin" precedent Guard Green Secondary itself set —
+         re-confirmed fresh here, not assumed to still be needed just
+         because it was needed before.
+       - Hero's translucent (85% opacity) text-panel scrim is a
+         DIFFERENT, two-step composite — see Hero.astro's own updated
+         comment for the full worst-case derivation. Short version:
+         ~4.53:1 against white headline/subhead text — a genuine pass
+         but a MUCH thinner margin than this fill's opaque numbers
+         above, flagged prominently in that file rather than restated
+         here.
+     Used as a light-card ICON STROKE colour too (ServicesGrid's
+     Corporate Security card, `text-electric-blue` on the icon only,
+     Ink everywhere else on that card) — checked as its own pairing
+     against both light surfaces, not assumed from the white-on-fill
+     number above (this is the reverse pairing, a mid-tone mark on a
+     LIGHT background, a different comparison even though it's the same
+     two hues): Electric Blue vs Paper ≈5.17:1 (the same value as
+     white-on-fill above — WCAG contrast is symmetric in the two
+     colours compared, confirmed by re-deriving rather than assumed,
+     same reasoning Guard Green Secondary's own token comment already
+     established), Electric Blue vs Surface Alt ≈4.74:1. Both clear the
+     3:1 non-text/graphical-object floor (WCAG 1.4.11 — this is an
+     icon, not running text) with real margin. */
+  --color-electric-blue: #2563eb;
+
+  /* MAGENTA — the new secondary block/background colour. Half of
+     ServicesGrid's checkerboard (Close Protection, CCTV Monitoring
+     as an icon stroke, Construction Site Security as an icon stroke)
+     — Close Protection is the only card that uses this as a solid
+     FILL; the other two use it only as a light-card icon stroke.
+     Real numbers, computed fresh, not assumed to pattern-match
+     Electric Blue just because both are "new accent" colours:
+       - Relative luminance: L≈0.0947 — darker than both Electric Blue
+         (0.1531) and the old Guard Green Secondary (0.115).
+       - White/Paper on this fill: ~7.26:1 — clears AA with real margin
+         and clears AAA (7:1) too, the strongest fill pairing in this
+         whole rebrand. Ink on this fill: ~2.68:1 — fails even the
+         lenient 3:1 non-text floor outright, so Close Protection's
+         card uses white text/icon, never Ink, and would need `.on-dark`
+         wherever a focus ring could land on this fill directly (the
+         card itself has no focusable element today, so this is
+         defensive/future-proofing, matching the same habit the retired
+         green checkerboard cards already had).
+       - As a light-card icon stroke (CCTV Monitoring, Construction
+         Site Security): Magenta vs Paper ≈7.26:1, Magenta vs Surface
+         Alt ≈6.66:1 — both clear the 3:1 non-text floor with real
+         margin, checked as the reverse pairing rather than assumed
+         identical to the white-on-fill number (same discipline as
+         Electric Blue's own icon-stroke note above). */
+  --color-magenta: #a5195c;
+
+  /* AMBER — the sole button/CTA colour, sitewide, no exceptions
+     (`Button.astro`'s `primary` variant, `NavDrawer.tsx`'s hand-matched
+     mobile CTA, and — as a bare non-text mark, not a fill — the header
+     nav's active-link underline). Real numbers:
+       - Relative luminance: L≈0.4392 — much LIGHTER than any of
+         Electric Blue, Magenta, or the retired Guard Green Secondary,
+         closer in weight-class to the long-retired Guard Yellow
+         (L≈0.5473) than to either of this rebrand's own block colours.
+         This flips the required foreground colour back to the
+         Yellow/Olive pattern, the OPPOSITE of Electric Blue/Magenta
+         above: white on this fill is ~2.15:1 (fails even the lenient
+         3:1 floor outright), Ink on this fill is ~9.06:1 (AAA, real
+         margin). Every button using this fill — `Button.astro`'s
+         `primary` variant, `NavDrawer.tsx`'s CTA — therefore uses INK
+         text now, not the white/Paper pairing every accent since Guard
+         Green Secondary has used. Checked, not assumed: this is a
+         genuine reversal from the immediately-previous accent, the
+         same "never assume a foreground pattern carries over" lesson
+         this file has already flagged twice before (Guard Green
+         Secondary itself reversed Guard Yellow/Olive's own Ink
+         pattern; this reverses it back).
+       - Default Ink focus ring on this fill: the same ~9.06:1 as
+         Ink-on-fill above (it's the identical pairing) — comfortably
+         safe, no `.on-dark` needed anywhere this fill is used as a
+         button, matching the pattern Guard Yellow/Olive both set
+         (light fills don't need the ring swapped) rather than Electric
+         Blue/Magenta's own (which do).
+       - AS A BARE MARK ON PAPER (the header nav's active-link
+         underline specifically — NOT a filled button) — checked as
+         its own real, different question, per this file's own
+         standing "bare-mark contrast is not automatically the fill
+         number" discipline (see Guard Green Secondary's own note
+         above for why that discipline exists): Amber vs Paper ≈2.15:1
+         — FAILS the 3:1 WCAG 1.4.11 non-text/UI floor outright, not a
+         thin-margin pass. This is a REAL, FLAGGED, UNRESOLVED
+         accessibility gap, shipped anyway per the explicit instruction
+         to use Amber for the underline "to stay consistent with
+         buttons everywhere else" — it is NOT being silently treated as
+         compliant. See `NavLink.astro`'s own comment and the PR
+         description for the same flag; revisit if a compliant
+         treatment (a darker amber variant reserved for bare marks
+         only, or a non-colour affordance like weight/thickness) is
+         ever wanted here. */
+  --color-amber: #f59e0b;
+
+  /* CYAN-BLUE — a rare accent only (hover states, a small icon detail,
+     at most one outline-button variant), never a section or card
+     background fill, per explicit instruction. NOT applied anywhere in
+     Header/Hero/StatStrip/ServicesGrid in this pass — none of the four
+     sections' own per-element specs called for it, so it's defined and
+     fully checked here, ready for the next pass that actually needs a
+     hover state or icon detail, rather than reached for as an inline
+     arbitrary value at that point. Real numbers, computed fresh (an
+     earlier draft of this comment had these WRONG — corrected before
+     shipping, worth remembering as a concrete reminder to double-check
+     hand-computed contrast math, not just trust it because the method
+     is right): relative luminance L≈0.3289.
+     White/Paper on this fill: ~2.77:1 — FAILS even the lenient 3:1
+     non-text/UI floor outright, not a thin-margin pass. This rules out
+     white as this token's foreground in every context — a plain
+     colour-only mark (a border, a thin underline) directly on Paper
+     ALSO fails at this same ~2.77:1 (bare-mark contrast against Paper
+     is the same number as the fill pairing — see Guard Green
+     Secondary's own note above for why that's true, not assumed).
+     Ink on this fill: ~7.01:1 (AAA, real margin) — the only safe
+     foreground for this token anywhere: Ink text/icon on a solid
+     Cyan-Blue fill, or Cyan-Blue itself used only as a mark against a
+     surface where Cyan-Blue vs THAT surface's own luminance clears
+     3:1 (re-check per surface when this is actually used, don't assume
+     Paper's own failing number generalises to every future
+     background). In practice this means Cyan-Blue is usable as a small
+     icon detail or hover state ONLY when paired with Ink, or layered
+     on something other than a plain Paper background — never as a bare
+     colour-only accent directly on white. */
+  --color-cyan-blue: #0ea5e9;
+
+  /* GUARD GREEN SECONDARY — RETIRED from Header, Hero, StatStrip, and
+     ServicesGrid as of this rebrand (see the four-colour note above).
+     Still live, unchanged, for ClosingCta.astro's own phone-link hover
+     decoration only — kept defined here purely so that one reference
+     doesn't break; do not reach for this token in any new work inside
+     the four rebranded sections. Original numbers (still accurate,
+     nothing about the token itself changed): white/Paper on this fill
+     ~6.36:1 (AA), Ink on this fill ~3.06:1 (fails 4.5:1 outright), this
+     fill as a bare mark on Paper is the same ~6.36:1 as the fill
+     pairing (contrast is symmetric in the two colours compared). */
   --color-guard-green-secondary: #366c00;
 
-  --color-guard-green-deep: #081f18; /* an independent dark, near-black-green surface — the fallback for anywhere the current accent (Guard Green Secondary)'s own fill can't carry the text colour it needs: the mission-band pull-quote's own text stays legible some other way (see MissionBand.astro), and it's still the primary/secondary button hover colour. White text on it measures ~17.2:1 (AAA) */
+  /* GUARD GREEN DEEP — RETIRED from Header, Hero, StatStrip, and
+     ServicesGrid as of this rebrand. Still live, unchanged, for
+     MissionBand.astro's full-bleed fill and as `secondary` Button
+     variant's own hover colour (that variant is currently unused
+     anywhere in the codebase, so this reference is dormant, not
+     actively rendered, but is left as-is rather than repointed at a
+     new-palette colour — it isn't Mission Band/Closing CTA, but it
+     also isn't one of the four rebranded sections' own visible
+     surfaces, and repointing an unused variant's hover colour wasn't
+     part of this pass's scope). White text on it measures ~17.2:1
+     (AAA). */
+  --color-guard-green-deep: #081f18;
   --color-stone: #6e6e6e; /* secondary text on Paper only: captions, meta, credential lines. ~4.6:1 on paper — 14px+ only */
   --color-hairline: #e4e4e4; /* borders, rules, dividers, seams on Paper. Perfectly neutral (R=G=B) — never a warm greige */
   --color-footer-grey: #2a2a2a; /* the footer's own dark neutral — distinct from Ink and both greens so the footer reads as its own zone, not a third band or a slide into black. White text ~14.4:1 (AAA) */
@@ -115,37 +267,16 @@
      3:1 floor) with even more margin to spare. */
   --color-surface-alt: #f5f5f5;
 
-  /* SCOPED, NON-ACCENT TOKEN — read this before touching it. This is
-     `#FFB606`, the SAME hex as the long-retired `guard-yellow` token
-     (see CLAUDE.md's own "Retired tokens" note and its Recent-history
-     PR #4/#5 entries — that token no longer exists anywhere in this
-     file) — a deliberate coincidence, not a
-     revival. Guard Yellow was retired sitewide because it "didn't work
-     out visually" as a primary accent; this token is NOT that decision
-     being reversed. It exists for exactly one place — the alternating
-     checkerboard fill in `ServicesGrid.astro` (every second card) — by
-     explicit instruction, with an explicit instruction NOT to reuse it
-     as a second general-purpose accent anywhere else in the system.
-     Named `services-accent-yellow`, not `guard-yellow` or `accent-2` or
-     anything that reads as a returning sitewide colour, specifically so
-     a future session grepping for "accent" or skimming this file's own
-     colour table doesn't mistake it for one. If a second use for this
-     exact hex is ever genuinely wanted elsewhere, that's a real decision
-     to make explicitly (and probably rename this token when it's made),
-     not something to infer from this token already existing.
-     Real WCAG numbers, computed fresh — NOT assumed to inherit Guard
-     Yellow's old retired numbers just because the hex is identical
-     (the calculation doesn't care about a token's history, but it's
-     worth confirming rather than trusting memory): relative luminance
-     L≈0.5473. Ink on this fill: ~11.06:1 (AAA, real margin). White on
-     this fill: ~1.76:1 — fails even the lenient 3:1 non-text floor.
-     ServicesGrid's yellow cards use Ink text/icons/focus-ring as a
-     result — the opposite pairing from its green neighbour cards,
-     which is exactly why this can't be folded into a single shared
-     "on-dark" treatment across the whole checkerboard; see that
-     component's own doc comment for how the two are switched per
-     card. */
-  --color-services-accent-yellow: #ffb606;
+  /* --color-services-accent-yellow (#FFB606) — RETIRED and fully
+     REMOVED (not deprecated-in-place), matching this file's own
+     standing "retired tokens are deleted outright" convention.
+     ServicesGrid.astro's checkerboard is rebuilt onto the new Electric
+     Blue / Magenta palette below and no longer references this hex at
+     all — confirmed via a full repo grep before deleting, same
+     discipline already applied to `guard-green`/`guard-olive`/
+     `guard-olive-bright`/`guard-yellow`. If this exact name turns up in
+     a future change request, it's gone; check `git log` on this file
+     for what replaced it, don't assume it's still defined somewhere. */
 
   /* Font families. Referenced directly by the composed type-scale
      utilities below, and also usable standalone (e.g. `font-display`
@@ -290,21 +421,43 @@ select {
 /* An Ink focus ring is invisible (or, worse, just barely legible) on
    a dark fill. `.on-dark` swaps the ring to white for itself and
    everything inside it, for whichever sections are genuinely dark
-   enough to need it — checked per accent colour, not assumed.
-   The last two accents tried (Guard Yellow, Guard Olive) were BOTH
-   light enough that the default Ink ring stayed comfortably clear of
-   the 3:1 floor on its own (~11.06:1 / ~6.24:1 respectively) — for
-   those, `.on-dark` would have made things worse (white-on-Yellow was
-   only ~1.76:1). The current accent, Guard Green Secondary, is the
-   opposite case: Ink on it is only ~3.06:1 — barely above the 3:1
-   floor, the same "too thin to trust" margin already flagged
-   elsewhere in this file — while white on it is ~6.36:1, a real,
-   comfortable margin. So sections filled with Guard Green Secondary
-   (StatStrip, the info bar) DO carry `.on-dark` now, alongside the
-   Footer — don't assume the previous "the accent never needs
-   `.on-dark`" pattern just carried over; it flipped because this
-   accent is darker than either of its predecessors, not because of a
-   general rule. */
+   enough to need it — checked per accent colour, not assumed, every
+   time a fill changes.
+   Guard Yellow and Guard Olive (both long retired) were light enough
+   that the default Ink ring stayed comfortably clear of the 3:1 floor
+   on its own (~11.06:1 / ~6.24:1) — `.on-dark` would have made things
+   WORSE on either (white-on-Yellow was only ~1.76:1). Guard Green
+   Secondary (retired from Header/Hero/StatStrip/ServicesGrid this
+   pass, still live for ClosingCta) was the opposite case: Ink on it
+   only ~3.06:1, too thin to trust, white ~6.36:1 comfortable — so it
+   carried `.on-dark`.
+   This rebrand's own two block colours split the same way Guard
+   Yellow/Olive vs Guard Green Secondary did, but NOT along the same
+   fault line — re-checked fresh per colour, not inferred from either
+   precedent:
+     - Electric Blue (Header's info bar, StatStrip): Ink ~3.76:1 —
+       clears 3:1 but with a thinner margin than is comfortable to
+       trust blind; Paper ~5.17:1, the stronger margin. Keeps
+       `.on-dark`, same conclusion as Guard Green Secondary reached,
+       reached independently rather than assumed to still hold just
+       because the previous accent needed it too.
+     - Magenta (ServicesGrid's Close Protection fill): Ink ~2.68:1,
+       fails the 3:1 floor outright; Paper ~7.26:1. `.on-dark` is
+       applied to Magenta cards defensively (the card itself has no
+       focusable element today, matching the same habit the retired
+       green checkerboard cards already had) — not optional if a
+       focusable element is ever added inside one.
+     - Amber (every button/CTA fill, sitewide) is the ONE colour in
+       this rebrand that lands back on the Guard Yellow/Olive side:
+       Ink on it is ~9.05:1, comfortably safe — no `.on-dark` needed
+       anywhere it's used as a button fill. White on Amber is only
+       ~2.15:1, which is exactly why Amber buttons use Ink text, not
+       the white/Paper pairing every fill above needs.
+   Don't assume any of the four new colours pattern-matches another
+   just because they shipped in the same rebrand — Electric Blue and
+   Magenta both need `.on-dark`, Amber flatly doesn't, and Cyan-Blue
+   (not yet used anywhere) would need it the moment it's ever used as
+   anything but an Ink-paired mark, per its own token comment above. */
 .on-dark :focus-visible,
 .on-dark:focus-visible {
   outline-color: var(--color-paper);

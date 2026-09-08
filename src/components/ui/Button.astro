@@ -5,33 +5,51 @@
  * chevron appended to the label. `px-5 py-2.5` at `text-caption` (14px),
  * a step down from the original `px-6 py-3`.
  *
- * `primary` — solid Guard Green Secondary fill, white/Paper text (the
- * inverse of the previous accent's own pairing — Guard Yellow, and
- * Guard Olive before it, both needed Ink text; this accent is dark
- * enough that white is the correct choice instead, and Ink actually
- * fails here). Real numbers (see global.css's own token comment for
- * the full write-up): white-on-this-fill is ~6.36:1 (AA, real margin).
- * Ink-on-this-fill is only ~3.06:1 — fails the 4.5:1 AA floor for
- * normal text outright. Hover is a diagonal shine sweep (a translucent
- * white band crossing the button once via `::after`), NOT a colour
- * change — the button's own fill/text stay Guard Green Secondary/
- * white at every state, still AA. Pure CSS (`hover:`/`focus-visible:`
- * driven transform, no JS): the band sits off-screen at
- * `-translate-x-full` and slides to `translate-x-full` on interaction.
- * `motion-reduce:` removes the sweep element entirely and substitutes
- * a plain, non-animated `brightness-95` on hover instead, per
- * prefers-reduced-motion.
+ * `primary` — solid Amber fill, INK text (rebranded off Guard Green
+ * Secondary's own white-text pairing — read this before assuming the
+ * old pairing carries over). Real numbers (see global.css's own Amber
+ * token comment for the full write-up, not repeated here): Ink on this
+ * fill is ~9.05:1 (AAA, real margin) — white on it is only ~2.15:1 and
+ * fails even the lenient 3:1 non-text floor outright. This is a
+ * genuine REVERSAL from every accent since Guard Yellow/Guard Olive
+ * (both of which also needed Ink; Guard Green Secondary was the one
+ * exception, needing white) — checked fresh, not assumed from either
+ * pattern. Hover is a diagonal shine sweep (a translucent white band
+ * crossing the button once via `::after`), NOT a colour change — the
+ * button's own fill/text stay Amber/Ink at every state, still AAA.
+ * Pure CSS (`hover:`/`focus-visible:` driven transform, no JS): the
+ * band sits off-screen at `-translate-x-full` and slides to
+ * `translate-x-full` on interaction. `motion-reduce:` removes the
+ * sweep element entirely and substitutes a plain, non-animated
+ * `brightness-95` on hover instead, per prefers-reduced-motion — this
+ * mechanism is colour-agnostic and needed no change for the new fill.
+ * No `.on-dark` needed on or around this variant: the default Ink
+ * focus ring is already ~9.05:1 on Amber, comfortably safe on its own.
  *
- * `secondary` — solid Ink fill, white text. What used to be the
- * primary treatment, now the quieter second choice, for a page with
- * more than one action where only one should read as the main CTA.
+ * `secondary` — solid Ink fill, white text, hover to Guard Green Deep.
+ * What used to be the primary treatment, now the quieter second
+ * choice, for a page with more than one action where only one should
+ * read as the main CTA. NOT TOUCHED by the Electric-Blue/Magenta/
+ * Amber rebrand — this variant has zero real call sites anywhere in
+ * the codebase today (confirmed via a full repo grep before leaving it
+ * as-is), so it isn't rendered inside any of the four rebranded
+ * sections, and its Guard-Green-Deep hover colour is exactly the token
+ * the rebrand's own scope explicitly preserves for later (Mission
+ * Band/Closing CTA, pending a separate future redesign). If this
+ * variant is ever actually used somewhere in-scope, its hover colour
+ * needs a real decision at that point, not an assumption this note
+ * already settled it.
  *
  * `outline-light` — white border + white text, transparent fill. For
  * a CTA sitting ON a Guard Green Deep / Footer Grey background, where
  * Ink text would fail contrast. Hover fills solid white, text becomes
  * Ink. This one keeps its colour-shift hover — it's load-bearing (the
  * only way this variant reads on a dark background), not decorative,
- * so it's out of scope for the shine-sweep swap above.
+ * so it's out of scope for the shine-sweep swap above. Also not
+ * repointed at Electric Blue/Magenta by this rebrand — its own border/
+ * text stay literal white regardless of which dark fill it sits on, so
+ * there's no accent-colour reference inside this variant to update at
+ * all.
  */
 interface Props {
   href?: string;
@@ -47,7 +65,7 @@ const base =
 
 const variants = {
   primary:
-    "relative isolate overflow-hidden bg-guard-green-secondary text-paper " +
+    "relative isolate overflow-hidden bg-amber text-ink " +
     "motion-reduce:hover:brightness-95 " +
     "after:pointer-events-none after:absolute after:inset-0 after:content-[''] " +
     "after:bg-[linear-gradient(115deg,transparent_35%,rgba(255,255,255,0.5)_50%,transparent_65%)] " +

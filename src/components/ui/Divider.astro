@@ -11,19 +11,26 @@
  * token would barely register. This is white at reduced opacity, not
  * a new colour token.
  *
- * `tone="paper-strong"` — a translucent white line at 60% opacity, for
- * a Guard Green Secondary background specifically (StatStrip). Real,
- * checked reason this needs a HIGHER opacity than `tone="paper"`
- * rather than reusing that same 35% value unchanged: Guard Green
- * Secondary (`#366c00`, L≈0.115) is meaningfully lighter/more
- * saturated than Guard Green Deep or Footer Grey, the two fills
- * `tone="paper"` was actually calibrated against — at 35% opacity the
- * line-to-fill contrast on Guard Green Secondary is only ~2.12:1,
- * under the 3:1 WCAG 1.4.11 non-text/UI-component floor (the line
- * would read as too faint to reliably notice). 60% clears that floor
- * with real margin, ~3.39:1 — checked via the same relative-luminance
- * math as every other colour pairing in this project, not guessed or
- * assumed to inherit `tone="paper"`'s own number unchanged.
+ * `tone="paper-strong"` — a translucent white line, for a bold
+ * accent-fill background specifically (StatStrip only — the sole real
+ * call site). RECALIBRATED for the Electric-Blue rebrand, not carried
+ * forward unchanged: this was originally 60% opacity, tuned against
+ * the retired Guard Green Secondary fill (L≈0.115) — checked fresh
+ * against Electric Blue (L≈0.1531, meaningfully LIGHTER despite both
+ * reading as "a dark saturated accent" at a glance) rather than
+ * assumed to still clear the same floor, and it doesn't: at 60%
+ * opacity the line-to-fill contrast on Electric Blue is only ~2.85:1
+ * — UNDER the 3:1 WCAG 1.4.11 non-text/UI-component floor, a real
+ * regression from the old ~3.39:1 pass. Opacity is now **70%**,
+ * clearing that floor with real margin again, ~3.35:1 — computed via
+ * the same relative-luminance math as every other pairing in this
+ * project, not guessed. Since this tone has exactly one real call
+ * site (StatStrip, confirmed via a repo grep before changing the
+ * shared value rather than forking a second tone) it was safe to
+ * recalibrate the token in place instead of adding a parallel
+ * `paper-strong-blue` variant — re-verify this same 70% value again,
+ * the same way, before ever reusing `paper-strong` against a THIRD
+ * fill.
  *
  * `tone="ink"` — a translucent Ink line at 25% opacity. Currently
  * UNUSED anywhere in this codebase (kept as an available option, not
@@ -45,7 +52,7 @@ const { orientation = "horizontal", tone = "hairline", class: className } = Astr
 const colorClass = {
   hairline: { border: "border-hairline", bg: "bg-hairline" },
   paper: { border: "border-paper/35", bg: "bg-paper/35" },
-  "paper-strong": { border: "border-paper/60", bg: "bg-paper/60" },
+  "paper-strong": { border: "border-paper/70", bg: "bg-paper/70" },
   ink: { border: "border-ink/25", bg: "bg-ink/25" },
 }[tone];
 ---

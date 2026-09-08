@@ -6,19 +6,26 @@ import Location from "../icons/Location.astro";
 import NavDrawer from "./NavDrawer.tsx";
 
 /**
- * Site header. Two bars: a solid Guard Green Secondary info bar, then
- * a Paper/white sticky main nav.
+ * Site header. Two bars: a solid Electric Blue info bar, then a
+ * Paper/white sticky main nav.
  *
- * 1. Info bar — solid Guard Green Secondary fill, white/Paper text/
- *    icons (~6.36:1, AA — see the token's own comment in global.css
- *    for the full number, including why Ink is the wrong choice this
- *    time, the opposite of every prior accent this bar has used).
+ * 1. Info bar — solid Electric Blue fill (rebranded off Guard Green
+ *    Secondary — see global.css's own Electric Blue token comment for
+ *    the full derivation, not repeated here), white/Paper text/icons.
+ *    Real number, re-checked fresh rather than assumed to inherit
+ *    Guard Green Secondary's own ~6.36:1 unchanged: white on Electric
+ *    Blue is ~5.17:1 — still clears AA (4.5:1) with real margin, but
+ *    NOTABLY LOWER than the previous fill's own headroom, worth
+ *    knowing if this bar's text is ever resized down. Ink on this
+ *    fill is ~3.76:1 — clears the 3:1 non-text floor but fails 4.5:1
+ *    outright, so text/icons stay white/Paper here, same choice as
+ *    before, just a tighter number behind it.
  *    Superseded, kept only as history: earlier passes here used first
- *    a Paper background with Stone text (~4.6:1, AA), then two
- *    since-retired lighter accents ("Guard Olive Bright" ~8.21:1 AAA
- *    with Ink text, then Guard Yellow ~11.06:1 AAA with Ink text) —
- *    none of that reasoning applies any more now the fill is dark
- *    enough to need white text instead.
+ *    a Paper background with Stone text (~4.6:1, AA), then three
+ *    since-retired accents ("Guard Olive Bright" ~8.21:1 AAA with Ink
+ *    text, Guard Yellow ~11.06:1 AAA with Ink text, then Guard Green
+ *    Secondary ~6.36:1 AA with white text) — none of that reasoning
+ *    applies any more now the fill is Electric Blue.
  *    Always a single row (`flex flex-nowrap`, never stacks) — phone +
  *    address sit on one line at every width, centered on mobile
  *    (`justify-center`, where there's no wordmark/nav alongside it to
@@ -97,14 +104,19 @@ import NavDrawer from "./NavDrawer.tsx";
  *    those was the fix.
  *
  * The main nav bar (Paper) still needs no `on-dark` — the default Ink
- * focus ring is already safe there. The info bar DOES carry `on-dark`
- * now (a real, checked-not-assumed addition): Ink ring on Guard Green
- * Secondary is only ~3.06:1, too thin to trust, so the phone link's
- * own focus ring (rendered directly against this bar's own fill, not
- * offset onto Paper — it lives inside the coloured bar itself) needs
- * the white swap to reach a safe ~6.36:1. Neither prior accent this
- * bar used (Guard Yellow, Guard Olive) needed this — both kept the
- * default Ink ring comfortably safe on their own.
+ * focus ring is already safe there. The info bar keeps `on-dark`
+ * across the rebrand (re-checked fresh against Electric Blue, not
+ * assumed to still be needed just because Guard Green Secondary
+ * needed it): Ink ring on Electric Blue is ~3.76:1 — clears the 3:1
+ * floor but with a thinner margin than is comfortable to trust blind,
+ * so the phone link's own focus ring (rendered directly against this
+ * bar's own fill, not offset onto Paper — it lives inside the
+ * coloured bar itself) still gets the white swap, reaching a
+ * comfortably-margined ~5.17:1 instead. Neither of the two accents
+ * this bar used before Guard Green Secondary (Guard Yellow, Guard
+ * Olive) needed this — both kept the default Ink ring comfortably
+ * safe on their own; Electric Blue doesn't, same conclusion as the
+ * fill it replaced, reached independently rather than inherited.
  *
  * `lg` (1024px) is the nav↔hamburger breakpoint, same as before. Read
  * literally, "desktop/tablet" could mean showing the full six-link nav
@@ -122,7 +134,7 @@ import NavDrawer from "./NavDrawer.tsx";
 ---
 
 <header>
-  <div class="on-dark bg-guard-green-secondary">
+  <div class="on-dark bg-electric-blue">
     <div
       class="mx-auto flex flex-nowrap items-center justify-center gap-3 px-gutter py-2 sm:justify-start sm:gap-8 sm:py-2.5 md:px-12"
     >

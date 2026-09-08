@@ -8,16 +8,28 @@
  * Text is always Ink (never the accent colour for running text, on
  * general principle — this link's own text-colour choice is
  * independent of whichever accent is current). Active/hover state is
- * a 2px Guard Green Secondary underline instead — a non-text accent.
- * Genuinely compliant this time, not just kept-despite-a-gap: this
- * fill's own bare-mark-on-Paper contrast is ~6.36:1 (see global.css's
- * token comment for why that's the same number as the white-on-fill
- * pairing, not a coincidence) — clears the FULL 4.5:1 normal-text
- * floor, not just the lenient 3:1 non-text one. Both the previous
- * accents this underline has used (Guard Yellow ~1.76:1, Guard Olive
- * ~3.11:1) fell short of that; this one doesn't. A transparent
- * underline sits there at rest so nothing shifts layout when it
- * appears.
+ * a 2px Amber underline instead — a non-text accent, matching the
+ * site's own button/CTA colour for consistency (per explicit
+ * instruction) rather than reusing whichever block colour a given
+ * section happens to be filled with.
+ *
+ * REAL, FLAGGED, UNRESOLVED CONTRAST GAP — read before assuming this
+ * is compliant. Amber's bare-mark-on-Paper contrast is ~2.15:1 (see
+ * global.css's own Amber token comment for the full derivation) —
+ * this FAILS the 3:1 WCAG 1.4.11 non-text/UI floor outright, not a
+ * thin-margin pass. Every accent this underline has used before this
+ * one was checked and passed (Guard Green Secondary ~6.36:1, clearing
+ * even the full 4.5:1 text floor; Guard Yellow ~1.76:1 and Guard Olive
+ * ~3.11:1 both failed too, for what it's worth, so this isn't
+ * unprecedented for this exact underline — but it IS a real
+ * regression from the immediately-previous, fully-compliant pairing).
+ * Shipped anyway, on direct instruction to use Amber here "to stay
+ * consistent with buttons everywhere else" — this is a known,
+ * disclosed gap, not something silently treated as passing. Revisit
+ * with either a darker amber reserved for bare marks only, or a
+ * non-colour affordance (weight, thickness) if this needs to actually
+ * clear WCAG. A transparent underline sits there at rest so nothing
+ * shifts layout when it appears.
  *
  * `tone="paper"` — for a link sitting on a Footer Grey / Guard Green
  * Deep background, where dark text would be nearly invisible. White
@@ -38,9 +50,7 @@ const linkPath = href.replace(/\/$/, "") || "/";
 const isActive = currentPath === linkPath;
 
 const toneClasses = {
-  ink: isActive
-    ? "text-ink border-guard-green-secondary"
-    : "text-ink border-transparent hover:border-guard-green-secondary",
+  ink: isActive ? "text-ink border-amber" : "text-ink border-transparent hover:border-amber",
   paper: isActive ? "text-paper border-transparent" : "text-paper hover:text-paper/70 border-transparent",
 };
 ---

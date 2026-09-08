@@ -44,25 +44,26 @@ import Growth from "../../icons/stats/Growth.astro";
  * the label reads as the more prominent element regardless of the
  * minor weight difference.
  *
- * BACKGROUND — solid Guard Green Secondary, `on-dark` (the default
- * Ink focus ring is only ~3.06:1 on this fill, too thin — same
- * reasoning already documented for the header info bar/Hero's text
- * panel). White text throughout. Contrast RESTATED for both text
- * roles, RE-CHECKED after the size reduction above rather than
- * assumed to still qualify for the same WCAG threshold it did before:
- * white (L=1.0) vs Guard Green Secondary (L≈0.115) is the same
- * ~6.36:1 colour-pair contrast regardless of size, BUT the size
- * reduction actually changed which threshold applies — the ORIGINAL
- * 28px label cleared WCAG's "large text" bar (≥24px, needs only 3:1);
- * the NEW 20px/400-weight label does NOT qualify as large text
- * (needs ≥24px normal, or ≥18.66px at 700+ weight — 20px/400 clears
- * neither), so it now needs the full 4.5:1 normal-text floor, same as
- * the 14px body always did. 6.36:1 still clears 4.5:1 with real
- * margin for both, so nothing regressed — but the MARGIN shrank for
- * the label specifically, and re-deriving this rather than assuming
- * the old "large text" classification still held is exactly the kind
- * of thing that's easy to get wrong by carrying a number forward
- * without re-checking its own precondition.
+ * BACKGROUND — solid Electric Blue (rebranded off Guard Green
+ * Secondary — see global.css's own Electric Blue token comment for
+ * the full derivation), `on-dark` (kept: the default Ink focus ring is
+ * ~3.76:1 on this fill, clearing 3:1 but with a thinner margin than is
+ * comfortable to trust blind — same conclusion Guard Green Secondary
+ * reached at its own ~3.06:1, re-derived fresh here rather than
+ * assumed to still apply). White text throughout. Contrast RESTATED
+ * for both text roles, RE-CHECKED after the colour swap rather than
+ * assumed to inherit the old fill's own number: white (L=1.0) vs
+ * Electric Blue (L≈0.1531) is ~5.17:1 — LOWER than Guard Green
+ * Secondary's own ~6.36:1 (Electric Blue's luminance is meaningfully
+ * higher despite both reading as "a dark saturated accent"), but still
+ * clears the full 4.5:1 normal-text floor with real margin (~15%) for
+ * both the label and the body. The size-driven threshold question this
+ * section already flagged once (does the 20px/400-weight label qualify
+ * for WCAG's lenient "large text" 3:1 floor, or does it need the full
+ * 4.5:1 normal-text one) is unaffected by the colour swap — it still
+ * doesn't qualify as large text (needs ≥24px normal, or ≥18.66px at
+ * 700+ weight; 20px/400 clears neither) and still needs 4.5:1, which
+ * 5.17:1 still clears, just with a smaller margin than before.
  *
  * DIVIDER — a new `tone="paper-strong"` variant added to
  * `Divider.astro` in a previous pass, specifically for this fill (see
@@ -90,6 +91,13 @@ import Growth from "../../icons/stats/Growth.astro";
  * Re-verified this time via an actual rendered check (a static HTML
  * harness built from the real compiled output, viewed directly), not
  * compiled-artifact inspection alone.
+ *
+ * `tone="paper-strong"` was RECALIBRATED for this rebrand — 60%
+ * opacity (its original value, tuned against Guard Green Secondary)
+ * only reaches ~2.85:1 against Electric Blue, under the 3:1 floor; now
+ * 70%, ~3.35:1. See `Divider.astro`'s own token comment for the full
+ * derivation — not re-derived here, this section is just the one real
+ * call site that needed the number to still hold after the fill swap.
  *
  * A divider between every pair of columns at every breakpoint now —
  * vertical (`Divider`'s `self-stretch` variant) on `sm:`+, horizontal
@@ -158,7 +166,7 @@ const FACTS = [
 ];
 ---
 
-<section class="on-dark bg-guard-green-secondary">
+<section class="on-dark bg-electric-blue">
   <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12">
     <div class="flex flex-col gap-0 sm:flex-row sm:items-stretch sm:gap-0">
       {

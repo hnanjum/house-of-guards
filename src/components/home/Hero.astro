@@ -59,8 +59,11 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
  * FULL-IMAGE TINT — a second, separate `bg-ink/28` layer sitting
  * between `<Image>` and the text panel, covering the ENTIRE section
  * (not just behind the text) for a moodier, more premium feel —
- * independent of the text-panel scrim below it, which keeps its own
- * colour (Guard Green Deep) unchanged. Ink (`#0d0d0d`, rgb(13,13,13))
+ * independent of the text-panel scrim below it, which now carries the
+ * rebrand's own Electric Blue rather than Guard Green Deep (see TEXT-
+ * PANEL SCRIM below) but is otherwise unchanged by this pass — this
+ * tint layer itself uses Ink, not one of the four new colours, and
+ * wasn't touched. Ink (`#0d0d0d`, rgb(13,13,13))
  * was used rather than a new raw `#000000` specifically because it's
  * ALREADY a genuinely neutral near-black — R=G=B, zero hue, checked
  * before reusing it rather than assumed — so this stays inside the
@@ -73,51 +76,71 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
  * content wrapper already paints above the image and below the text,
  * which is all this layer needs to do.
  *
- * TEXT-PANEL SCRIM — a FLAT, uniform-opacity `bg-guard-green-deep/85`
- * panel behind the text, not a percentage-based gradient. A gradient's
- * safe-contrast zone depends on exactly where it sits relative to the
- * text, which in turn depends on the panel's real rendered height —
- * unknowable without a live render. A flat panel's contrast is the
- * same at every pixel behind the text regardless of exact dimensions,
- * which matters given nothing here can be visually verified before
- * shipping.
+ * TEXT-PANEL SCRIM — a FLAT, uniform-opacity Electric-Blue-at-85%
+ * panel behind the text (rebranded off Guard Green Deep), not a
+ * percentage-based gradient. A gradient's safe-contrast zone depends
+ * on exactly where it sits relative to the text, which in turn depends
+ * on the panel's real rendered height — unknowable without a live
+ * render. A flat panel's contrast is the same at every pixel behind
+ * the text regardless of exact dimensions, which matters given nothing
+ * here can be visually verified before shipping.
  *
  * Real WCAG math, worst case (the underlying photo assumed PURE WHITE
  * #FFFFFF, the most extreme case it could ever show through), and
- * RE-DERIVED FROM SCRATCH for this pass — the tint and scrim are now
- * two DIFFERENT colours (Ink, Guard Green Deep), so the same-colour
- * "just add the alphas" shortcut used for the previous green-on-green
- * version no longer applies; this needed genuine two-step alpha
- * compositing (photo → Ink at 28% → Guard Green Deep at 85% on top),
- * not a reused formula: rgb(13,13,13)@28% over white →
- * rgb(187,187,187), then rgb(8,31,24)@85% over THAT →
- * rgb(34.9,54.4,48.5) → white-text contrast ≈ **12.72:1** (AAA) —
- * higher than both the original single-layer figure (10.9:1) and the
- * prior green-on-green two-layer figure (12.0:1). `outline-light`'s
- * white border/text and the default-safe-focus-ring question
- * (`on-dark` swaps the ring to Paper — needed here for the same
- * reason it's needed on StatStrip/the header info bar: this combined
- * panel is far too dark for the default Ink ring) both sit on this
- * same combined panel, so the same 12.72:1 covers them too.
- * Button.astro's `primary` variant is unaffected either way — its own
- * opaque fill sits on top of both layers regardless.
+ * RE-DERIVED FROM SCRATCH for this pass — do NOT assume the previous
+ * ~12.72:1 figure carries over just because the compositing MECHANISM
+ * (photo → Ink tint → an 85%-opacity scrim on top) is unchanged; the
+ * scrim's own colour changed, which is exactly the kind of thing this
+ * project's own standing rule says to re-derive rather than carry
+ * forward: rgb(13,13,13)@28% over white → rgb(187,187,187), then
+ * Electric Blue rgb(37,99,235)@85% over THAT → rgb(59.5,112.2,227.8)
+ * → white-text contrast ≈ **4.53:1**.
  *
- * FLAGGED, NOT SILENTLY SHIPPED — a real seam risk at the panel's own
- * edge, worth a live check: the previous (green tint + green scrim)
- * version had ONE hue everywhere, so the panel boundary was purely a
- * brightness step (lightly-tinted photo outside, much darker green
- * panel inside) — cohesive. This version's tint-only worst case
- * (outside the panel) is a NEUTRAL grey, rgb(187,187,187) — zero hue —
- * while the panel itself is still a saturated dark green. That's a
- * genuine HUE shift at the boundary on top of the usual brightness
- * step, which risks reading as a differently-coloured rectangle
- * pasted onto the image rather than a natural darkening. Not fixed
- * here — the brief was explicit that the scrim keeps its own colour
- * and the two layers stay separate — but check this specific edge
- * live before considering it finished; if it reads as a visible seam,
- * the two most likely fixes are matching the scrim to Ink instead of
- * Guard Green Deep, or a soft edge blend, neither of which is
- * implemented speculatively here.
+ * FLAG, NOT SILENTLY SHIPPED — this is a genuine PASS (clears the
+ * 4.5:1 AA floor) but by a razor-thin margin, a real, disclosed
+ * REGRESSION from the previous figure (12.72:1 → 4.53:1), not a wash.
+ * The number itself is mathematically sound — it's already the
+ * worst-case derivation (a lighter underlying photo colour than pure
+ * white would only make the panel darker and the margin bigger, never
+ * smaller) — but 4.53:1 leaves almost no room for anything else that
+ * could nudge real-world contrast down even slightly (a slightly
+ * different browser colour-management pass, a headline/subhead font
+ * that renders a hair lighter than assumed). This did NOT get the
+ * "too thin to trust, swap something" treatment this codebase gives
+ * comparably thin margins elsewhere (e.g. Guard Green Secondary's own
+ * ~3.06:1 focus-ring case) because doing so would mean changing the
+ * panel's own opacity beyond what this pass was asked to touch — flag
+ * it here instead, plainly, for a real decision: if a wider safety
+ * margin is wanted, bumping the scrim from 85% to 90% opacity lifts
+ * this to ~4.74:1 with real headroom, checked and ready to apply, not
+ * shipped speculatively. `outline-light`'s white border/text and the
+ * default-safe-focus-ring question (`on-dark` swaps the ring to Paper
+ * — kept here for the same reason StatStrip/the header info bar keep
+ * it against Electric Blue: Ink-on-this-panel is ~4.29:1, which clears
+ * the 3:1 UI floor on its own with real margin this time, unlike
+ * Guard Green Secondary's old ~3.06:1, but Paper's own ~4.53:1 is
+ * still the stronger of the two, so `.on-dark` stays rather than being
+ * removed) both sit on this same combined panel, so the same 4.53:1
+ * covers them too. Button.astro's `primary` variant is unaffected
+ * either way — its own opaque Amber fill sits on top of both layers
+ * regardless, and its own Ink-on-Amber ~9.05:1 has nothing to do with
+ * the panel underneath it.
+ *
+ * SEAM RISK — the same disclosed, unresolved risk this section
+ * flagged before the rebrand, re-checked rather than assumed to have
+ * resolved itself just because the scrim's hue changed: the tint-only
+ * worst case (outside the panel) is a NEUTRAL grey, rgb(187,187,187)
+ * — zero hue — while the panel itself is a saturated Electric Blue.
+ * That's still a genuine HUE shift at the boundary on top of the usual
+ * brightness step (a blue rectangle now, rather than a green one, but
+ * the same category of risk), which still risks reading as a
+ * differently-coloured rectangle pasted onto the image rather than a
+ * natural darkening. Not fixed here — the brief kept the same
+ * constraint as before, that the scrim carries its own colour and the
+ * two layers stay separate — but check this specific edge live before
+ * considering it finished; the two most likely fixes, if it reads as a
+ * visible seam, are matching the scrim to Ink instead of Electric
+ * Blue, or a soft edge blend, neither implemented speculatively here.
  *
  * HEADER LEGIBILITY — the tint only affects the hero `<section>`
  * itself. `Header.astro`'s info bar and main nav are separate, fully
@@ -188,7 +211,7 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
 
   <div class="relative z-10 flex h-full flex-col justify-end lg:mx-auto lg:max-w-7xl lg:flex-row lg:items-center lg:justify-end lg:px-12">
     <div
-      class="on-dark bg-guard-green-deep/85 w-full px-6 py-8 sm:px-10 sm:py-10 lg:w-auto lg:max-w-lg lg:px-10 lg:py-12"
+      class="on-dark bg-electric-blue/85 w-full px-6 py-8 sm:px-10 sm:py-10 lg:w-auto lg:max-w-lg lg:px-10 lg:py-12"
     >
       <h1 data-hero-reveal class="text-h3 text-paper sm:text-h2">
         Security You Can Rely On, Every Hour of the Week

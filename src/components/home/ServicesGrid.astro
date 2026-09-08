@@ -41,42 +41,79 @@ import OvernightSecurity from "../../icons/services/OvernightSecurity.astro";
  * dividers — the cards sit truly edge-to-edge (like `SectorsStrip`'s
  * own edge-to-edge photo grid), since the colour change between
  * adjacent cards IS the visual seam here; a gap or hairline would
- * dilute the checkerboard read rather than reinforce it. CSS Grid's
+ * dilute the read rather than reinforce it. CSS Grid's
  * own default `align-items: stretch` equalises every card in a row to
  * the tallest card's height automatically — no fixed/min height was
  * set on any card, so this stays fully content-driven like every
  * other section on the site.
  *
- * CHECKERBOARD — plain `index % 2` alternation. With an ODD column
- * count (3) this genuinely produces a true checkerboard, not stripes:
- * row one is Green/Yellow/Green (indices 0,1,2), row two starts at
- * index 3 (odd → Yellow) giving Yellow/Green/Yellow — each row is
- * offset by one colour from the row above it, the actual checkerboard
- * property, which falls out of the odd column count for free rather
- * than needing any row/column-aware math.
+ * FILL ASSIGNMENT — REBUILT for the Electric-Blue/Magenta rebrand, and
+ * a genuinely different mechanism from the retired version: the old
+ * `index % 2` alternation is gone entirely, replaced by a fixed,
+ * PER-SERVICE assignment (a `fill` field on each `SERVICES` entry,
+ * plus an `iconAccent` field for the light cards only) given directly
+ * by explicit instruction, not derived from card position at all.
+ * Don't reintroduce a parity/position-based rule here without a real
+ * reason — the six fills below are pinned to specific SERVICE NAMES,
+ * not slots, so reordering `SERVICES` would silently break the
+ * intended assignment if the fill still came from `index % 2`.
+ * Resulting layout (row one: Corporate Security, Close Protection,
+ * CCTV Monitoring; row two: Manned Guarding, Construction Site
+ * Security, Overnight Security, at `lg:`'s 3-column width): light /
+ * Magenta / light, then Electric Blue / light / Electric Blue — a
+ * deliberate mixed fill/light pattern, not a strict alternating
+ * checkerboard (the old version's own "falls out of the odd column
+ * count for free" property doesn't apply to a fixed, name-keyed
+ * assignment, and wasn't asked for here).
  *
- * COLOUR + CONTRAST, both computed, not assumed to mirror the other:
- * - GREEN cards (`on-dark bg-guard-green-secondary text-paper`) reuse
- *   the already-established StatStrip/header-info-bar pairing exactly
- *   — white text/icon on Guard Green Secondary, ~6.36:1 (AA, real
- *   margin), `.on-dark` for the focus ring per the same fill's own
- *   documented reasoning in `global.css`.
- * - YELLOW cards use a new, DELIBERATELY SCOPED-ONLY token,
- *   `--color-services-accent-yellow` (`#ffb606`, `global.css`) — see
- *   that token's own comment for the full "why a new token instead of
- *   an arbitrary bracket colour, and why it's explicitly NOT a
- *   returning global accent" reasoning; not repeated here. Computed
- *   fresh (not assumed from the retired `guard-yellow` token's old
- *   numbers, even though the hex is identical): Ink text/icon on this
- *   fill measures ~11.06:1 (AAA, real margin) — White measures ~1.76:1
- *   and fails even the lenient 3:1 non-text floor outright. Yellow
- *   cards therefore use plain Ink (the sitewide default — no `.on-
- *   dark`, no override needed; the default Ink focus ring is already
- *   safe at this same ~11.06:1). This is the OPPOSITE pairing from the
- *   green cards' own, which is exactly why the checkerboard can't share
- *   one blanket text-colour class across the whole grid — colour is
- *   switched per card below, keyed off the same `isGreen` boolean that
- *   drives the fill itself, so the two can never drift out of sync.
+ * COLOUR + CONTRAST, all three treatments computed independently, not
+ * assumed to mirror one another just because two of them share a hue:
+ * - ELECTRIC BLUE cards (Manned Guarding, Overnight Security —
+ *   `on-dark bg-electric-blue text-paper`) — white text/icon on
+ *   Electric Blue, ~5.17:1 (AA, real margin — see global.css's own
+ *   Electric Blue token comment for the full derivation, including why
+ *   this is LOWER than the retired green fill's own ~6.36:1 despite
+ *   both reading as "a dark accent"). `.on-dark` for the focus ring,
+ *   same reasoning as StatStrip/the header info bar.
+ * - MAGENTA cards (Close Protection — `on-dark bg-magenta text-paper`)
+ *   — white text/icon on Magenta, ~7.26:1 (AAA, the strongest fill
+ *   pairing in this whole rebrand). `.on-dark` applied defensively
+ *   (no card has a focusable element today, matching the same habit
+ *   the retired green cards already had).
+ * - LIGHT cards (Corporate Security, CCTV Monitoring, Construction
+ *   Site Security — `bg-surface-alt text-ink`, no `.on-dark`, the
+ *   sitewide default Ink focus ring is already safe here) reuse
+ *   `--color-surface-alt` — the token global.css itself already
+ *   documents as built for exactly this ("a section background that
+ *   needs to read as visually distinct from Paper without becoming a
+ *   bold accent band"), not Paper itself, so a light card still reads
+ *   as its own distinct card against the section's own white
+ *   background, and never two flush together (checked against the
+ *   real layout above: every light card in this specific six-service
+ *   arrangement sits between two coloured neighbours on every side it
+ *   touches, so this isn't load-bearing for THIS layout, but it's the
+ *   correct choice regardless of arrangement, not a lucky accident of
+ *   this one). Ink text/icon on Surface Alt: ~17.8:1 (AAA, trivial
+ *   margin). Each light card's ICON (not its text) carries its own
+ *   accent stroke colour, keyed by `iconAccent` — Electric Blue
+ *   (Corporate Security) or Magenta (CCTV Monitoring, Construction
+ *   Site Security) — checked as the REVERSE pairing (a mid-tone mark
+ *   on a light surface, not the fill-on-dark question above): Electric
+ *   Blue vs Surface Alt ≈4.74:1, Magenta vs Surface Alt ≈6.66:1, both
+ *   clearing the 3:1 WCAG 1.4.11 non-text/graphical-object floor (an
+ *   icon isn't running text) with real margin. The retired scoped-only
+ *   `--color-services-accent-yellow` token is gone from `global.css`
+ *   entirely, not just unreferenced here — confirmed via a full repo
+ *   grep before deleting it, matching this project's "retired tokens
+ *   are removed outright" convention.
+ *
+ * The old `services-accent-yellow`/`guard-green-secondary` two-way
+ * text-colour switch (`isGreen ? ... : ...`) is now a genuine THREE-way
+ * switch (`FILL_CLASS[fill]`, plus a separate `ICON_ACCENT_CLASS`
+ * lookup for the light-card icons only) — both keyed directly off each
+ * `SERVICES` entry's own `fill`/`iconAccent` fields, so fill and
+ * text/icon colour can never drift out of sync the same way the old
+ * `isGreen` boolean already guaranteed for its own two-way version.
  *
  * ALIGNMENT — left-aligned card content throughout (`SectionHeading`'s
  * own left-aligned default, `items-start text-left` on every card) —
@@ -84,30 +121,45 @@ import OvernightSecurity from "../../icons/services/OvernightSecurity.astro";
  * alignment exceptions (`MissionBand`, `ClosingCta`), matching the
  * hard rule directly.
  *
- * ICONS — six new bespoke SVGs replacing the retired accordion set's
- * own geometry outright (same six file paths under `src/icons/
- * services/`, new concepts/paths inside) — `stroke-width="2"` (bumped
- * from this icon family's 1.25 baseline; see any one icon's own
- * comment for why) since they now sit directly on a bold solid card
- * fill at a larger display size, not Ink/Green-on-Paper inside a
- * compact accordion row. `size-12` (48px) here — noticeably larger
- * than StatStrip's own `size-9` (36px) sibling icons, a deliberate
- * "icon leads the card" hierarchy for a six-way grid where the icon is
- * the first, largest thing a reader's eye lands on, not a supporting
- * detail beside a bigger headline the way StatStrip's numbers are.
- * Every icon was rasterised (real 48px display size AND magnified,
- * individually and composited into a row alongside its five siblings,
- * on both real card fills) and visually inspected before shipping —
- * this caught and fixed two real problems, not zero: a first Manned
- * Guarding draft (one larger toe-circle sitting flush against the
- * sole ellipse) read as a figure-8/snowman rather than a footprint,
- * and a first Overnight Security crescent, once its own geometry bug
- * was separately fixed, briefly shipped with a hand-transcribed sweep-
- * flag typo that rendered as a near-solid blob rather than a crescent
- * — see each icon's own file for its own fuller account. Colour
- * inherits via `currentColor` from each card's own `text-paper`/
- * `text-ink` wrapper — no colour prop threaded through the icons
- * themselves.
+ * BODY TEXT — reduced one named tier per explicit instruction:
+ * `text-body` (17px) → `text-caption` (14px), the same "read the
+ * current class, step down exactly one tier on the 8-step scale"
+ * discipline already used on Hero and StatStrip. Worth flagging the
+ * same weight quirk StatStrip's own comment already documents for this
+ * exact scale, since it applies here too: `text-caption` (14px) is
+ * weight 500, genuinely HEAVIER than `text-body` (17px, weight 400) —
+ * so this card's body copy reads a touch BOLDER at its new, smaller
+ * size than it did before, not lighter. Not corrected by hand-
+ * overriding the step's own bundled weight (this system's type scale
+ * is deliberately one bundled family+size+weight unit per named step,
+ * not freely recombinable) — accepted as-is, matching the precedent
+ * StatStrip's own comment already set for this identical situation.
+ *
+ * ICONS — six bespoke SVGs, GEOMETRY UNCHANGED from PR #16 (same six
+ * file paths under `src/icons/services/`, same paths inside, same
+ * `stroke-width="2"`, same `size-12`/48px — see PR #16's own
+ * CLAUDE.md entry for the full rasterise-and-inspect history on the
+ * SHAPES themselves, not repeated here since nothing about the shapes
+ * changed). ONLY the light cards' icon colour changed (Ink → Electric
+ * Blue/Magenta stroke, per `iconAccent` above); coloured-fill cards'
+ * icons are unchanged (still `currentColor`, inheriting `text-paper`
+ * from the card wrapper, same as before). Deliberately NOT re-run
+ * through the mandatory rasterise-and-look process this codebase
+ * requires before shipping new icon GEOMETRY — that check exists to
+ * catch an ambiguous/illegible SHAPE, and no shape changed here, only
+ * a stroke colour already verified against its new background via the
+ * WCAG maths above. Re-run the rasterise check if this is ever touched
+ * again in a way that changes geometry, not for a colour-only edit
+ * like this one. Colour inherits via `currentColor` from each card's
+ * own wrapper (`text-paper` for a filled card, `text-ink` for a light
+ * card's heading/body) OR, for a light card's icon specifically, an
+ * explicit accent class applied directly to the `<Icon>` element
+ * itself, overriding the wrapper's own `text-ink` for that one child
+ * — the icon and the heading/body need genuinely different colours on
+ * a light card, which the old two-way (green/yellow) version never had
+ * to handle. No colour prop is threaded through the icon components
+ * themselves either way, same as before — the override is a plain
+ * Tailwind class on the rendered `<Icon class={...} />` call.
  *
  * MOTION — `data-services-reveal` + `initServicesGridReveal()`
  * (`src/lib/servicesGridReveal.ts`, wired into `index.astro`'s own
@@ -119,38 +171,67 @@ import OvernightSecurity from "../../icons/services/OvernightSecurity.astro";
  * fallback (a plain, instant full-opacity/flat/full-scale state, no
  * animation, matching every other entry point on this site).
  */
-const SERVICES = [
-  {
-    name: "Corporate Security",
-    body: "Front-of-house officers, access control and CCTV oversight that reflect the standards of your organisation.",
-    Icon: CorporateSecurity,
-  },
-  {
-    name: "Close Protection",
-    body: "Discreet personal protection for individuals, families and visiting guests, at home and in transit.",
-    Icon: CloseProtection,
-  },
-  {
-    name: "CCTV Monitoring",
-    body: "Round-the-clock camera monitoring with rapid escalation the moment something looks wrong.",
-    Icon: CctvMonitoring,
-  },
-  {
-    name: "Manned Guarding",
-    body: "Highly trained, SIA licensed guards providing a visible presence from crowd control to mobile patrol.",
-    Icon: MannedGuarding,
-  },
-  {
-    name: "Construction Site Security",
-    body: "Protecting plant, materials and part-built structures on sites that are a magnet for thieves.",
-    Icon: ConstructionSecurity,
-  },
-  {
-    name: "Overnight Security",
-    body: "Dedicated night cover for premises that are most vulnerable once the working day ends.",
-    Icon: OvernightSecurity,
-  },
-];
+type Fill = "electric-blue" | "magenta" | "light";
+type IconAccent = "electric-blue" | "magenta";
+
+const SERVICES: { name: string; body: string; Icon: typeof CorporateSecurity; fill: Fill; iconAccent?: IconAccent }[] =
+  [
+    {
+      name: "Corporate Security",
+      body: "Front-of-house officers, access control and CCTV oversight that reflect the standards of your organisation.",
+      Icon: CorporateSecurity,
+      fill: "light",
+      iconAccent: "electric-blue",
+    },
+    {
+      name: "Close Protection",
+      body: "Discreet personal protection for individuals, families and visiting guests, at home and in transit.",
+      Icon: CloseProtection,
+      fill: "magenta",
+    },
+    {
+      name: "CCTV Monitoring",
+      body: "Round-the-clock camera monitoring with rapid escalation the moment something looks wrong.",
+      Icon: CctvMonitoring,
+      fill: "light",
+      iconAccent: "magenta",
+    },
+    {
+      name: "Manned Guarding",
+      body: "Highly trained, SIA licensed guards providing a visible presence from crowd control to mobile patrol.",
+      Icon: MannedGuarding,
+      fill: "electric-blue",
+    },
+    {
+      name: "Construction Site Security",
+      body: "Protecting plant, materials and part-built structures on sites that are a magnet for thieves.",
+      Icon: ConstructionSecurity,
+      fill: "light",
+      iconAccent: "magenta",
+    },
+    {
+      name: "Overnight Security",
+      body: "Dedicated night cover for premises that are most vulnerable once the working day ends.",
+      Icon: OvernightSecurity,
+      fill: "electric-blue",
+    },
+  ];
+
+// Keyed off each SERVICES entry's own `fill`, never derived from index —
+// see this file's own FILL ASSIGNMENT comment above for why.
+const FILL_CLASS: Record<Fill, string> = {
+  "electric-blue": "on-dark bg-electric-blue text-paper",
+  magenta: "on-dark bg-magenta text-paper",
+  light: "bg-surface-alt text-ink",
+};
+
+// Only consulted for `fill: "light"` cards — a filled card's icon
+// inherits `text-paper` from the card wrapper above and needs no
+// override.
+const ICON_ACCENT_CLASS: Record<IconAccent, string> = {
+  "electric-blue": "text-electric-blue",
+  magenta: "text-magenta",
+};
 ---
 
 <section class="bg-paper">
@@ -159,22 +240,13 @@ const SERVICES = [
 
     <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       {
-        SERVICES.map(({ name, body, Icon }, i) => {
-          const isGreen = i % 2 === 0;
-          return (
-            <div
-              data-services-reveal
-              class:list={[
-                "flex flex-col items-start p-8 text-left sm:p-10",
-                isGreen ? "on-dark bg-guard-green-secondary text-paper" : "bg-services-accent-yellow text-ink",
-              ]}
-            >
-              <Icon class="mb-6 size-12" />
-              <h3 class="text-h3 mb-3">{name}</h3>
-              <p class="text-body">{body}</p>
-            </div>
-          );
-        })
+        SERVICES.map(({ name, body, Icon, fill, iconAccent }) => (
+          <div data-services-reveal class:list={["flex flex-col items-start p-8 text-left sm:p-10", FILL_CLASS[fill]]}>
+            <Icon class:list={["mb-6 size-12", fill === "light" && iconAccent && ICON_ACCENT_CLASS[iconAccent]]} />
+            <h3 class="text-h3 mb-3">{name}</h3>
+            <p class="text-caption">{body}</p>
+          </div>
+        ))
       }
     </div>
   </div>
