@@ -16,54 +16,87 @@ import Growth from "../../icons/stats/Growth.astro";
  * body paragraph below it — not icon+single-caption like every
  * earlier version of this component.
  *
- * ALIGNMENT — back to LEFT-aligned, reverting the previous pass's
- * "third sanctioned centred-alignment exception." CLAUDE.md's own
+ * ALIGNMENT — LEFT-aligned on `sm:`+ (reverting the previous pass's
+ * "third sanctioned centred-alignment exception" — CLAUDE.md's own
  * hard-rule bullet is reverted in the same commit back to "exactly
- * two" (MissionBand, ClosingCta) — code and rules document agree
- * again, same principle as before, just the other direction.
+ * two," MissionBand/ClosingCta, so code and rules document agree
+ * again). CENTRED below `sm:` — a real, later, explicit follow-up
+ * instruction specific to the stacked mobile layout, not a re-opening
+ * of the left-vs-centre question this component's own history already
+ * went back and forth on for the desktop row. `items-center text-
+ * center sm:items-start sm:text-left` on each column.
+ *
+ * TEXT SIZE — both the label and the body were reduced one named tier
+ * per direct follow-up feedback that the first version of this pass
+ * read too large: label `text-h3` (28px) → `text-body-lg` (20px);
+ * body `text-body` (17px) → `text-caption` (14px). Same "read the
+ * current class, step down one tier on the 8-step scale" discipline
+ * already used twice on the Hero. One real, disclosed quirk this
+ * surfaced: `text-caption`'s own weight (500) is actually HEAVIER than
+ * `text-body-lg`'s (400) — the two type-scale steps aren't
+ * monotonically weighted by size — so the BODY text is technically a
+ * touch bolder than the LABEL above it now, the opposite of the
+ * intended emphasis. Not fixed by hand-overriding either step's own
+ * bundled weight (this project's type scale is deliberately one
+ * bundled family+size+weight unit per named step, not freely
+ * recombinable) — accepted as-is, since the real size gap (20px vs
+ * 14px, ~43% larger) still dominates the visual hierarchy enough that
+ * the label reads as the more prominent element regardless of the
+ * minor weight difference.
  *
  * BACKGROUND — solid Guard Green Secondary, `on-dark` (the default
  * Ink focus ring is only ~3.06:1 on this fill, too thin — same
  * reasoning already documented for the header info bar/Hero's text
  * panel). White text throughout. Contrast RESTATED for both text
- * roles rather than assumed to be one number that covers both: white
- * (L=1.0) vs Guard Green Secondary (L≈0.115) is the same ~6.36:1
- * colour-pair contrast regardless of what's drawn in it, BUT the two
- * text roles here are checked against DIFFERENT WCAG thresholds,
- * which is the part that doesn't carry over automatically — the
- * `text-h3` label (28px) qualifies as WCAG "large text" (≥24px),
- * which only needs 3:1, so 6.36:1 clears it with very wide margin;
- * the `text-body` sentence (17px, well under the large-text cutoff)
- * needs the full 4.5:1 normal-text floor, and 6.36:1 still clears
- * that comfortably too — both pass, against genuinely different bars,
- * not the same bar restated twice.
+ * roles, RE-CHECKED after the size reduction above rather than
+ * assumed to still qualify for the same WCAG threshold it did before:
+ * white (L=1.0) vs Guard Green Secondary (L≈0.115) is the same
+ * ~6.36:1 colour-pair contrast regardless of size, BUT the size
+ * reduction actually changed which threshold applies — the ORIGINAL
+ * 28px label cleared WCAG's "large text" bar (≥24px, needs only 3:1);
+ * the NEW 20px/400-weight label does NOT qualify as large text
+ * (needs ≥24px normal, or ≥18.66px at 700+ weight — 20px/400 clears
+ * neither), so it now needs the full 4.5:1 normal-text floor, same as
+ * the 14px body always did. 6.36:1 still clears 4.5:1 with real
+ * margin for both, so nothing regressed — but the MARGIN shrank for
+ * the label specifically, and re-deriving this rather than assuming
+ * the old "large text" classification still held is exactly the kind
+ * of thing that's easy to get wrong by carrying a number forward
+ * without re-checking its own precondition.
  *
  * DIVIDER — a new `tone="paper-strong"` variant added to
- * `Divider.astro` in this same PR specifically for this fill. The
- * existing `tone="paper"` (35% white) was calibrated for Guard Green
- * Deep/Footer Grey, both notably darker than Guard Green Secondary —
- * checked, not assumed to carry over: at 35% opacity the line-to-fill
- * contrast on THIS green is only ~2.12:1 (under the 3:1 WCAG 1.4.11
- * floor for a UI separator) — confirmed visually too, via a real
- * rasterised swatch comparison, where the 35% line was genuinely hard
- * to see against the fill. `paper-strong` (60%) reaches ~3.39:1, and
- * the same rasterised swatch check showed it clearly, comfortably
- * visible. (A user-supplied reference screenshot of a differently-
- * themed site confirmed the general direction — a thin, visible-but-
- * understated single line — independently matches what the contrast
- * math had already settled on; the icon-in-a-decorative-ring styling
- * in that same reference was NOT adopted, since the explicit written
- * brief for this pass called for plain icons directly on the fill,
- * no badge/ring behind them.)
+ * `Divider.astro` in a previous pass, specifically for this fill (see
+ * that component's own comment for the 35%-vs-60%-opacity contrast
+ * math). A REAL BUG in how it was wired up here was found and fixed
+ * in this pass, not just a contrast/visibility tuning issue: the
+ * divider wrapper used a plain `display:block` display value at the
+ * `sm:` breakpoint (not flex) — and `Divider`'s own vertical variant
+ * relies on `self-stretch` (`align-self:stretch`) to fill whatever
+ * height its container settles at. `align-self` only has any effect
+ * when the element's IMMEDIATE parent is a flex or grid container —
+ * a plain `display:block` wrapper gives it nothing to stretch
+ * against, so the divider (an empty div with no content and no
+ * explicit height) rendered at its own natural `height:auto`, which
+ * for an empty block is 0px — genuinely invisible, not merely
+ * low-contrast. This is a rendering/layout defect that no amount of
+ * compiled-CSS-class or compiled-HTML-string inspection could have
+ * caught (both correctly showed the class was present and compiled to
+ * the right colour/opacity rule — the bug was purely in what the
+ * layout actually DID with it, only visible in a real render). Fixed
+ * by changing the wrapper to `sm:flex` — now a real flex container in
+ * its own right, so its child's `self-stretch` has something to
+ * stretch against, and the wrapper itself is already being stretched
+ * to the full row height by the OUTER row's own `sm:items-stretch`.
+ * Re-verified this time via an actual rendered check (a static HTML
+ * harness built from the real compiled output, viewed directly), not
+ * compiled-artifact inspection alone.
  *
- * Only shown between columns on `sm:`+ (vertical rule, `Divider`'s
- * own `self-stretch` matches whatever height the row settles at).
- * Mobile has NO divider at all — a deliberate, disclosed choice, not
- * an oversight: this exact "gap-only, no divider" treatment is what
- * the very first version of this component (before any of its later
- * redesigns) already used for its own mobile stacking, and generous
- * `gap-10` reads cleanly as three distinct stacked blocks without
- * needing a rule between them.
+ * Only shown between columns on `sm:`+. Mobile has NO divider at
+ * all — a deliberate, disclosed choice, not an oversight: this exact
+ * "gap-only, no divider" treatment is what the very first version of
+ * this component (before any of its later redesigns) already used for
+ * its own mobile stacking, and generous `gap-10` reads cleanly as
+ * three distinct stacked blocks without needing a rule between them.
  *
  * ICONS — plain, no colour-fill badge behind them (removing the
  * previous pass's solid-circle treatment entirely). `size-9` (36px),
@@ -122,14 +155,14 @@ const FACTS = [
         FACTS.map(({ label, body, Icon }, i) => (
           <>
             {i > 0 && (
-              <div class="hidden shrink-0 sm:block">
+              <div class="hidden shrink-0 sm:flex">
                 <Divider orientation="vertical" tone="paper-strong" class="mx-8" />
               </div>
             )}
-            <div data-reveal class="flex-1">
+            <div data-reveal class="flex flex-1 flex-col items-center text-center sm:items-start sm:text-left">
               <Icon class="text-paper mb-4 size-9" />
-              <h3 class="text-h3 text-paper mb-2">{label}</h3>
-              <p class="text-body text-paper max-w-xs">{body}</p>
+              <h3 class="text-body-lg text-paper mb-2">{label}</h3>
+              <p class="text-caption text-paper max-w-xs">{body}</p>
             </div>
           </>
         ))
