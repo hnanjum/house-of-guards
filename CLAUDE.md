@@ -222,13 +222,16 @@ stylistic preference:
   purple/terracotta, until a similarly explicit instruction extends the
   new palette there. **A SECOND, narrower exception was added on
   PR #23**: `SectorsGrid.astro` also draws on Electric Blue and Magenta,
-  but only as a solid fill on TWO of its six swapping CONTENT PANELS
-  (Corporate → Magenta, Events → Electric Blue, as of PR #25 — moved
-  there from the tab bar itself, which PR #23 had originally coloured;
-  see that component's own PANEL FILL comment) — every other part of
-  this section (the tab bar, four of six panels) stays on the plain
-  Ink/Paper/Amber palette same as the rest of the un-rebranded site.
-  Don't reach for Electric Blue/Magenta/Amber/Cyan-Blue outside the
+  but only as a solid fill on FOUR of its six swapping CONTENT PANELS
+  (as of PR #28's fixed tab-order sequence: Retail → Magenta,
+  Distribution → Electric Blue, Corporate → plain, Events → Electric
+  Blue, Healthcare → Magenta, Education → plain — up from PR #25's own
+  Corporate/Events-only pairing; colour moved there from the tab bar
+  itself, which PR #23 had originally coloured; see that component's own
+  PANEL FILL comment) — every other part of this section (the tab bar,
+  the two still-plain panels) stays on the plain Ink/Paper/Amber palette
+  same as the rest of the un-rebranded site. Don't reach for Electric
+  Blue/Magenta/Amber/Cyan-Blue outside the
   four named sections plus this one narrow SectorsGrid carve-out
   (Amber's own button/CTA use is the one further deliberate exception —
   see
@@ -717,27 +720,31 @@ treatment for these icons without a real reason to.
 
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
-log` alone. Newest first; each PR number is on `origin/main` — WITH TWO
-CURRENT EXCEPTIONS: **PR #28 and PR #29 are NOT YET MERGED as of this
-entry** (both open, awaiting review — per this project's own standing
-"open a PR, don't merge it yourself" convention; two open at once
-because they're genuinely independent changes from the same session,
-each verified and opened as its own PR off a fresh `main` rather than
-bundled or stacked on one another). Everything they describe lives only
-on their own branches until the user merges them; don't assume either's
-code is live on `main` just because it's documented here — this
-specifically means PR #29's own entry below is the first one whose
-`SectorsGrid.astro` references describe PR #25's shipped state (the
-last version actually merged to `main` as of this branch), not PR
-#28's still-unmerged reassignment, even though both entries sit in the
-same file. (PR #27, flagged as unmerged-as-of-its-own-entry in an
-earlier revision of this paragraph, is now confirmed merged — checked
-live via `gh pr list` at the start of this session, not assumed from
-this file's own stale text. This "the previous entry's own unmerged-
-flag has gone stale" pattern keeps recurring across sessions — PR
-#23/#24/#25/#26 all hit it too, further down this log; check `gh pr
-list` fresh every time rather than trusting this paragraph's own PR
-number.)
+log` alone. Newest first; each PR number is on `origin/main` — WITH ONE
+CURRENT EXCEPTION: **PR #29 is NOT YET MERGED as of this entry** (open,
+awaiting review — per this project's own standing "open a PR, don't
+merge it yourself" convention). Everything it describes lives only on
+its own branch until the user merges it; don't assume its code is live
+on `main` just because it's documented here. **PR #29's entry sits
+ABOVE PR #28's below even though #28's own code landed on `main`
+first** — both were opened from the same session as two genuinely
+independent changes (per explicit instruction to treat them that way),
+#28 merged quickly while #29 was still being verified, and this file's
+own newest-first ordering tracks each PR's OWN recency, not merge
+order — don't read the position below as implying #29 predates #28.
+(PR #28 was originally flagged here, alongside #29, as "both open, not
+yet merged" — now confirmed merged; the user merged it directly and
+asked for this branch to be rebased onto the resulting `main` and this
+exact CLAUDE.md conflict resolved keeping BOTH PRs' own additions
+rather than either overwriting the other, which is what produced the
+current shape of this whole section. PR #27, flagged as unmerged-as-
+of-its-own-entry in an earlier revision of this paragraph, is also
+confirmed merged — checked live via `gh pr list` fresh at the start of
+that session, not assumed from this file's own text. This "the
+previous entry's own unmerged-flag has gone stale" pattern keeps
+recurring across sessions — PR #23/#24/#25/#26 all hit it too, further
+down this log; check `gh pr list` fresh every time rather than trusting
+this paragraph's own PR number.)
 
 - **PR #29 — "Standards We Refuse to Drop": a NEW homepage carousel
   section, not a conversion of an existing one, despite the original
@@ -890,6 +897,61 @@ number.)
   no-op), `bg-paper/5`, `bg-paper/3`, `border-paper/15` all genuinely
   compiled, checked directly rather than assumed from the source class
   string alone.
+
+- **PR #28 — `SectorsGrid.astro`'s content-panel fill sequence reassigned
+  from PR #25's own Corporate/Events-only pairing to a fixed FOUR-of-six
+  sequence, in tab order: Retail → Magenta, Distribution → Electric Blue,
+  Corporate → plain (Surface Alt), Events → Electric Blue, Healthcare →
+  Magenta, Education → plain (Surface Alt). Per direct instruction — a
+  fixed positional sequence, not a per-sector thematic pick the way
+  Corporate/Events' own original colours were reasoned about (Magenta for
+  Close Protection's "premium/discreet" register, Electric Blue for
+  Manned Guarding's "visible presence" register). No new thematic
+  justification was invented for Retail/Distribution/Healthcare's own
+  colours — flagged plainly in `SectorsGrid.astro`'s own updated PANEL
+  FILL comment rather than backfilled with a story that wasn't given.
+
+  **Zero new colour math** — per explicit instruction, this reuses
+  `PANEL_FILL_CLASS`'s existing `bg-electric-blue text-paper` /
+  `bg-magenta text-paper` classes and the already-verified `.on-dark`
+  EXCLUSION verbatim (deliberately excluded on every coloured panel,
+  same as PR #25's own reasoning — each panel contains a real focusable
+  `Button`, whose ring must stay the default Ink pairing, ~9.05:1 against
+  Amber; `.on-dark` would silently force it to Paper, which fails
+  outright against Amber at ~2.15:1). Only the `Sector[]` array's own
+  `fill` property changed on four entries (added on Retail/Healthcare,
+  removed from Corporate, left unchanged on Events/Education/
+  Distribution — Distribution's `fill: "electric-blue"` is newly added,
+  the other five were either already correct or already absent).
+
+  **Default-tab-on-load check, done before calling this finished, not
+  skipped** — `DEFAULT_SLUG` is Retail (`SECTORS[0].slug`), so this is
+  the first time the INITIALLY-VISIBLE panel on page load carries a
+  fill, not a plain background. Traced both motion modules that touch
+  this panel before/after page load, not assumed safe: `sectorsGridTabs
+  .ts`'s crossfade only ever tweens `opacity`/`y` and toggles `hidden` —
+  it never reads or sets a background colour, and the panel's fill class
+  is a static, server-rendered Tailwind class that exists in the markup
+  before either module runs. `sectorsGridReveal.ts`'s own scroll entrance
+  (the one-time fade+scale on `[data-sector-panel]:not([hidden])`, i.e.
+  whichever panel is active on load) is the same story — `opacity: 0 → 1,
+  scale: 0.97 → 1`, no colour read/write anywhere in the tween. A CSS
+  `opacity` fade animates a filled background exactly the same way it
+  animates a plain one; neither module's progressive-enhancement fallback
+  (the no-JS/JS-fails static markup) depends on which colour is present
+  either. **No issue found** — documented in `SectorsGrid.astro`'s own
+  new DEFAULT-TAB-ON-LOAD CHECK comment so a future session doesn't have
+  to re-derive this from scratch if the sequence is ever touched again.
+
+  `astro check`: 0 errors. A clean `astro build` + direct `dist/`
+  inspection confirmed, in the compiled output: Retail's and Healthcare's
+  panels now carry `bg-magenta text-paper`, Distribution's and Events'
+  carry `bg-electric-blue text-paper`, Corporate's and Education's carry
+  `bg-surface-alt text-ink`, every "Learn more" button still identical
+  (`bg-amber text-ink`) regardless of panel background, and — per this
+  project's own standing dead-CSS-from-doc-comments discipline, run
+  again on both touched files — no new orphaned Tailwind-class-shaped
+  token was introduced by either file's own updated prose.
 
 - **PR #27 — corrects PR #26's own `toggleActions` decision, from
   "replay in both directions" to "play once on downward entry, never
@@ -2045,8 +2107,9 @@ two-column image+copy panel, centred Title-Case heading, a horizontal-
 scroll mobile tab bar, real House-of-Guards-branded officer photography
 (not placeholders), and its own scroll-triggered entrance motion),
 replacing the old plain photo-caption strip, see PR #22, PR #23's own
-revision-round entry, and PR #25's own re-revision moving the colour
-off the tabs and onto the content panel instead — "Standards We Refuse
+revision-round entry, PR #25's own re-revision moving the colour off
+the tabs and onto the content panel instead, and PR #28's own
+reassignment of the panel-fill sequence — "Standards We Refuse
 to Drop," a new dark-Ink carousel (8 cards, headline+body, no icon;
 native CSS scroll-snap, one/two/three visible at mobile/tablet/desktop,
 real Prev/Next arrow controls flanking the row on `md:`+ and stacked
@@ -2062,11 +2125,13 @@ future redesign). Header, Hero, StatStrip, ServicesGrid, and
 MissionBand all run the newer colour system (Electric Blue, Magenta,
 Amber, Cyan-Blue, though MissionBand itself only actually uses Amber)
 — SectorsGrid ALSO now draws on Electric Blue and Magenta, but (as of
-PR #25) as a real fill on two of its six swapping CONTENT PANELS, not
-its tabs — the tab bar itself is plain Ink/Amber only now, identical
-to every other section's underline convention, with no second
-tab-indicator vocabulary left at all (PR #23's own Paper-based
-coloured-tab scheme is fully deleted, not dormant) — plus Amber (its
+PR #28) as a real fill on FOUR of its six swapping CONTENT PANELS
+(Retail/Healthcare → Magenta, Distribution/Events → Electric Blue,
+Corporate/Education → plain), not its tabs — the tab bar itself is
+plain Ink/Amber only now, identical to every other section's underline
+convention, with no second tab-indicator vocabulary left at all (PR
+#23's own Paper-based coloured-tab scheme is fully deleted, not
+dormant) — plus Amber (its
 "Learn more" button, on every panel regardless of background, the
 sitewide convention); Cyan-Blue remains fully unused anywhere on the
 site, including here (see PR #22's own note on why it was spec'd for
