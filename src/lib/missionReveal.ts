@@ -57,7 +57,18 @@ import { gsap, ScrollTrigger, prefersReducedMotion } from "./smoothScroll";
  * (fully revealed, no clip, no animation) and every text element is set
  * straight to `opacity:1`/`y:0` — no ScrollTrigger registered for
  * either — the same instant-final-state fallback shape every other
- * entry point on this site already uses.
+ * entry point on this site already uses. Untouched by the REPLAY change
+ * below.
+ *
+ * REPLAY — both triggers use `toggleActions: "play reverse play
+ * reverse"` (were `"play none none none"`), same idiom as every other
+ * scroll reveal on this site — see `scrollReveal.ts`'s own note for the
+ * full derivation. Both the clip-path unveil and the staggered text
+ * cascade reverse cleanly: GSAP tweens `clip-path` and staggered
+ * `opacity`/`y` tweens both natively support playing backward from
+ * whatever progress they're currently at, so a quick scroll-past-then-
+ * back re-triggers the SAME unveil/cascade, not a jump-cut or a replay
+ * from a stale mid-animation state.
  */
 const IMAGE_SELECTOR = "[data-mission-image]";
 const TEXT_SELECTOR = "[data-mission-reveal]";
@@ -83,7 +94,7 @@ export function initMissionReveal(root: ParentNode = document) {
       scrollTrigger: {
         trigger: image,
         start: "top 80%",
-        toggleActions: "play none none none",
+        toggleActions: "play reverse play reverse",
       },
     });
   }
@@ -99,7 +110,7 @@ export function initMissionReveal(root: ParentNode = document) {
       scrollTrigger: {
         trigger: text[0],
         start: "top 80%",
-        toggleActions: "play none none none",
+        toggleActions: "play reverse play reverse",
       },
     });
   }

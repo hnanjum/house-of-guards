@@ -374,6 +374,65 @@ stylistic preference:
   that specific section — don't assume any of them is the "default"
   pattern a seventh section should just copy; read the specific
   section's own brief first.
+- **Every scroll-triggered reveal REPLAYS on every re-entry, in both
+  scroll directions** — `toggleActions: "play reverse play reverse"`
+  (was `"play none none none"`, a one-shot-per-page-load reveal),
+  applied uniformly across all FIVE real `ScrollTrigger` instances on
+  the site: `scrollReveal.ts` (StatStrip), `servicesGridReveal.ts`
+  (ServicesGrid, one per card), `missionReveal.ts` (MissionBand, TWO
+  triggers — image and text), and `sectorsGridReveal.ts` (SectorsGrid,
+  one trigger owning a shared timeline covering all three of its own
+  beats). Applied consistently — there is no scroll-triggered reveal on
+  the site left on the old one-shot behaviour. Two of the six motion
+  modules are correctly UNCHANGED, not overlooked: `heroMuster.ts` has
+  no `ScrollTrigger` at all (it's load-triggered, the hero is already
+  in view on load — nothing to replay against a scroll position), and
+  `sectorsGridTabs.ts`'s panel crossfade is click/keyboard-driven, not
+  scroll-driven, so it was never a candidate for this change either.
+  Confirmed via a full repo grep for `toggleActions` before and after —
+  exactly five real code occurrences, all updated, nothing missed.
+
+  **Real GSAP nuance worth understanding before touching any of these
+  again**: none of the five sets an explicit `end` (or `endTrigger`) on
+  its `ScrollTrigger`. Per ScrollTrigger's own documented default (and
+  confirmed by reading the installed `gsap` package's own source, not
+  assumed), an omitted `end` resolves to the BOTTOM OF THE WHOLE
+  SCROLLABLE PAGE, not this element's own bottom edge — so for a
+  section sitting mid-page (every one of these), the `onLeave`/
+  `onEnterBack` positions in the toggle string are practically inert;
+  a visitor would have to scroll all the way to the literal bottom of
+  the page while still past this element to ever fire them. The
+  positions that actually do the real work here are `onEnter` (crossing
+  `start` scrolling down → plays) and `onLeaveBack` (crossing `start`
+  scrolling back up → reverses) — which is exactly the "replay every
+  time it scrolls into view, either direction" behaviour that was
+  asked for, since neither depends on `end` at all. `reverse` was kept
+  at the `onLeave`/`onEnterBack` positions anyway (matching the
+  standard `"play reverse play reverse"` idiom) rather than swapped for
+  `none` there — harmless where they don't fire, and the correct
+  behaviour on the rare occasion a visitor does scroll to page-bottom
+  mid-reveal.
+
+  **Rapid back-and-forth scrolling across a trigger boundary was
+  checked, not assumed safe**: GSAP reverses an in-progress tween/
+  timeline from its CURRENT progress, it never restarts from 0 — so
+  scrolling quickly down-then-up-then-down across a `start` line just
+  makes the animation "chase" whichever direction is currently active,
+  settling smoothly via each module's own `power2.out`/`power3.out`
+  easing (no bounce/elastic anywhere on this site, so there's no
+  overshoot to look wrong mid-reversal either). `servicesGridReveal.ts`'s
+  own per-card `delay` (its column stagger) re-applies on every fresh
+  forward playthrough, including a replay — a deliberate, disclosed
+  consequence documented in that module's own comment, not a bug: it
+  reproduces the same staggered arrival every time the grid re-enters
+  view, not a degraded instant reappearance on the second and later
+  passes.
+
+  `prefers-reduced-motion` fallback behaviour is completely untouched
+  by this change — every module's reduced-motion branch still sets a
+  single static end-state with no `ScrollTrigger` registered at all, so
+  a reduced-motion visitor never sees a scroll-position-driven toggle
+  either direction, exactly as before.
 - **Framer Motion is scoped to exactly two React islands** —
   `NavDrawer.tsx` and `ContactForm.tsx` — and only for their own local
   interactive transitions (drawer slide, status-message fade). Never use
@@ -614,14 +673,111 @@ treatment for these icons without a real reason to.
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number is on `origin/main` — WITH ONE
-CURRENT EXCEPTION: **PR #25 is NOT YET MERGED as of this entry** (open,
+CURRENT EXCEPTION: **PR #26 is NOT YET MERGED as of this entry** (open,
 awaiting review — per this project's own standing "open a PR, don't
 merge it yourself" convention). Everything it describes lives only on
 its own branch until the user merges it; don't assume its code is live
-on `main` just because it's documented here. (PR #23 and PR #24, both
-flagged as unmerged-as-of-their-own-entry in earlier passes over this
-file, are now confirmed merged — checked live via `gh pr list` at the
-start of this session, not assumed from this file's own stale text.)
+on `main` just because it's documented here. (PR #25, flagged as
+unmerged-as-of-its-own-entry immediately below, is now confirmed
+merged — checked live via `gh pr list` at the start of this session,
+not assumed from this file's own stale text. Same for PR #23/#24
+before it — this "the previous entry's own unmerged-flag has gone
+stale" pattern keeps recurring across sessions; check `gh pr list`
+fresh every time rather than trusting this paragraph's own PR number.)
+
+- **PR #26 — every scroll-triggered reveal on the site now REPLAYS on
+  every re-entry, in both scroll directions, instead of playing once
+  per page load and staying played. `toggleActions: "play none none
+  none"` → `"play reverse play reverse"` on all FIVE real
+  `ScrollTrigger` instances on the site — `scrollReveal.ts` (StatStrip),
+  `servicesGridReveal.ts` (ServicesGrid, one per card), `missionReveal
+  .ts` (MissionBand, both its image and text triggers), and
+  `sectorsGridReveal.ts` (SectorsGrid, its one shared timeline covering
+  all three of its own beats). Applied consistently across every one —
+  no section left on the old one-shot behaviour. `heroMuster.ts`
+  (load-triggered, no `ScrollTrigger` at all) and `sectorsGridTabs.ts`
+  (click/keyboard-driven panel crossfade, also no `ScrollTrigger`) were
+  correctly left untouched, not overlooked — neither was ever a
+  scroll-triggered reveal to begin with. Confirmed via a full repo grep
+  for `toggleActions` both before and after: exactly five real code
+  occurrences existed, all five now updated, nothing missed.
+
+  **A real GSAP default worth understanding, found by reading the
+  installed `gsap` package's own `ScrollTrigger` source rather than
+  assumed**: none of the five triggers sets an explicit `end` (or
+  `endTrigger`). Per ScrollTrigger's own documented behaviour for that
+  case, `end` resolves to the bottom of the WHOLE SCROLLABLE PAGE, not
+  this element's own bottom edge — so for a section sitting mid-page
+  (every one of these), the `onLeave`/`onEnterBack` positions in the
+  toggle string are practically inert in ordinary browsing (a visitor
+  would have to scroll to the literal bottom of the page while still
+  past this element to ever fire them). The two positions doing the
+  real work are `onEnter` (crossing `start` scrolling down → play) and
+  `onLeaveBack` (crossing `start` scrolling back up → reverse) — which
+  is exactly the "replay on re-entry, either direction" behaviour that
+  was asked for, and neither depends on `end` at all. `reverse` was
+  kept at the other two positions anyway, matching the standard idiom,
+  rather than swapped for `none` there — harmless where they don't
+  fire, and the correct behaviour on the rare occasion a visitor really
+  does scroll to page-bottom mid-reveal. No `end`/`endTrigger` was
+  added to any of the five — this stayed a pure `toggleActions` value
+  change, not a rewrite of the trigger geometry, per explicit scope.
+
+  **Rapid back-and-forth scrolling across a trigger boundary was
+  checked, not assumed safe**: GSAP reverses an in-progress tween/
+  timeline from its CURRENT progress rather than restarting from 0, so
+  quick scrolling across a `start` line just makes the animation chase
+  whichever direction is current — no jank, no restart-from-zero, no
+  overshoot (`power2.out`/`power3.out` throughout every one of these
+  five, no bounce/elastic anywhere on this site to begin with).
+  `servicesGridReveal.ts`'s own per-card `delay` (its column stagger
+  offset) re-applies on every fresh forward playthrough, including a
+  replay — a deliberate, disclosed consequence, not a bug: it
+  reproduces the exact same staggered arrival every time the grid
+  re-enters view, not a degraded instant reappearance on the second and
+  later passes.
+
+  `prefers-reduced-motion` fallback behaviour is completely untouched —
+  every module's reduced-motion branch still sets one static end-state
+  with zero `ScrollTrigger` registered at all, so a reduced-motion
+  visitor never sees a scroll-position-driven toggle in either
+  direction, exactly as before this change.
+
+  `astro check`: 0 errors. A full `astro build` + direct `dist/`
+  inspection confirmed zero `"play none none none"` remaining anywhere
+  in the compiled bundle and exactly 5 `"play reverse play reverse"`
+  occurrences, matching every real `ScrollTrigger` on the site.
+
+  **A separate, related investigation from the same request — Lenis
+  smooth-scroll on touch devices — was reported back to the user, NOT
+  changed, in this same session.** Confirmed via reading `smoothScroll
+  .ts` and its one call site (`BaseLayout.astro`) directly, not
+  assumed: Lenis IS initialized on every device including touch/mobile
+  — the ONLY gate anywhere in this codebase is `prefersReducedMotion()`
+  inside `initSmoothScroll()` itself, no separate touch-device check
+  exists at either that function or its call site. What actually
+  differs on touch is `syncTouch`, a Lenis constructor option this
+  codebase never sets explicitly (`new Lenis({ autoRaf: false })` is
+  the whole config) — confirmed via the installed `lenis` package's own
+  source that this defaults to `false`, and that with it `false`, a
+  touch-drag gesture is deliberately let through to the browser's own
+  native scroll physics untouched (Lenis calls `event.preventDefault()`
+  only when `syncTouch` is true for that event) while Lenis still
+  passively listens to the resulting native `scroll` event to keep
+  `ScrollTrigger` in sync. So this is NOT "Lenis is disabled on
+  mobile" — every scroll reveal above, including the new replay
+  behaviour, functions correctly on touch, since native scrolling still
+  drives `ScrollTrigger` — it specifically means touch-drag gestures
+  don't get Lenis's own eased/lerped momentum feel layered on top of
+  native touch scrolling, only wheel/trackpad input does. This is the
+  library's own out-of-the-box default, never explicitly configured
+  either way by this codebase, and is standard, commonly-recommended
+  practice (layering a virtual-scroll lerp on top of native touch
+  physics usually feels laggier than the OS's own tuned momentum
+  scrolling, not smoother). Reported to the user as a real, genuine
+  UX tradeoff rather than a bug — no code changed here; a follow-up
+  PR only lands if/once the user confirms they actually want
+  `syncTouch: true` (or similar) forced on despite that tradeoff.
 
 - **PR #25 — reverses PART of PR #23's `SectorsGrid.astro` tab
   treatment, on live review feedback that the tab-fill styling itself
