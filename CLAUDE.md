@@ -374,6 +374,65 @@ stylistic preference:
   that specific section — don't assume any of them is the "default"
   pattern a seventh section should just copy; read the specific
   section's own brief first.
+- **Every scroll-triggered reveal REPLAYS on every re-entry, in both
+  scroll directions** — `toggleActions: "play reverse play reverse"`
+  (was `"play none none none"`, a one-shot-per-page-load reveal),
+  applied uniformly across all FIVE real `ScrollTrigger` instances on
+  the site: `scrollReveal.ts` (StatStrip), `servicesGridReveal.ts`
+  (ServicesGrid, one per card), `missionReveal.ts` (MissionBand, TWO
+  triggers — image and text), and `sectorsGridReveal.ts` (SectorsGrid,
+  one trigger owning a shared timeline covering all three of its own
+  beats). Applied consistently — there is no scroll-triggered reveal on
+  the site left on the old one-shot behaviour. Two of the six motion
+  modules are correctly UNCHANGED, not overlooked: `heroMuster.ts` has
+  no `ScrollTrigger` at all (it's load-triggered, the hero is already
+  in view on load — nothing to replay against a scroll position), and
+  `sectorsGridTabs.ts`'s panel crossfade is click/keyboard-driven, not
+  scroll-driven, so it was never a candidate for this change either.
+  Confirmed via a full repo grep for `toggleActions` before and after —
+  exactly five real code occurrences, all updated, nothing missed.
+
+  **Real GSAP nuance worth understanding before touching any of these
+  again**: none of the five sets an explicit `end` (or `endTrigger`) on
+  its `ScrollTrigger`. Per ScrollTrigger's own documented default (and
+  confirmed by reading the installed `gsap` package's own source, not
+  assumed), an omitted `end` resolves to the BOTTOM OF THE WHOLE
+  SCROLLABLE PAGE, not this element's own bottom edge — so for a
+  section sitting mid-page (every one of these), the `onLeave`/
+  `onEnterBack` positions in the toggle string are practically inert;
+  a visitor would have to scroll all the way to the literal bottom of
+  the page while still past this element to ever fire them. The
+  positions that actually do the real work here are `onEnter` (crossing
+  `start` scrolling down → plays) and `onLeaveBack` (crossing `start`
+  scrolling back up → reverses) — which is exactly the "replay every
+  time it scrolls into view, either direction" behaviour that was
+  asked for, since neither depends on `end` at all. `reverse` was kept
+  at the `onLeave`/`onEnterBack` positions anyway (matching the
+  standard `"play reverse play reverse"` idiom) rather than swapped for
+  `none` there — harmless where they don't fire, and the correct
+  behaviour on the rare occasion a visitor does scroll to page-bottom
+  mid-reveal.
+
+  **Rapid back-and-forth scrolling across a trigger boundary was
+  checked, not assumed safe**: GSAP reverses an in-progress tween/
+  timeline from its CURRENT progress, it never restarts from 0 — so
+  scrolling quickly down-then-up-then-down across a `start` line just
+  makes the animation "chase" whichever direction is currently active,
+  settling smoothly via each module's own `power2.out`/`power3.out`
+  easing (no bounce/elastic anywhere on this site, so there's no
+  overshoot to look wrong mid-reversal either). `servicesGridReveal.ts`'s
+  own per-card `delay` (its column stagger) re-applies on every fresh
+  forward playthrough, including a replay — a deliberate, disclosed
+  consequence documented in that module's own comment, not a bug: it
+  reproduces the same staggered arrival every time the grid re-enters
+  view, not a degraded instant reappearance on the second and later
+  passes.
+
+  `prefers-reduced-motion` fallback behaviour is completely untouched
+  by this change — every module's reduced-motion branch still sets a
+  single static end-state with no `ScrollTrigger` registered at all, so
+  a reduced-motion visitor never sees a scroll-position-driven toggle
+  either direction, exactly as before.
 - **Framer Motion is scoped to exactly two React islands** —
   `NavDrawer.tsx` and `ContactForm.tsx` — and only for their own local
   interactive transitions (drawer slide, status-message fade). Never use

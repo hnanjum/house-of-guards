@@ -70,6 +70,22 @@ import { gsap, ScrollTrigger, prefersReducedMotion } from "./smoothScroll";
  * `scaleX: 1`, tabs `opacity: 1, x: 0`, panel `opacity: 1, scale: 1`),
  * no `ScrollTrigger` registered at all — the same instant-final-state
  * fallback shape every other entry point on this site already uses.
+ * Untouched by the REPLAY change below.
+ *
+ * REPLAY — the shared timeline's own `ScrollTrigger` uses
+ * `toggleActions: "play reverse play reverse"` (was `"play none none
+ * none"`), same idiom as every other scroll reveal on this site — see
+ * `scrollReveal.ts`'s own note for the full derivation. Reversing a
+ * GSAP timeline plays every child tween (the line-draw, the tab
+ * cascade, the panel fade+scale) backward in place from wherever the
+ * timeline's own playhead currently sits, so this replays the WHOLE
+ * three-beat sequence in reverse, not just one piece of it. The mobile
+ * auto-nudge (`maybeNudgeTablist`, wired to this same trigger's
+ * `onEnter`) is DELIBERATELY NOT affected by this — `hasNudged` is
+ * still a true once-per-page-load flag, so `onEnter` firing again on a
+ * later replay just hits that early return and does nothing; the nudge
+ * stays a one-time discoverability cue, the reveal itself is what now
+ * replays.
  *
  * NICE-TO-HAVE, same module: a one-time auto-nudge on the mobile
  * horizontal-scroll tablist (`[data-sectors-tablist]`) — once, the
@@ -126,7 +142,7 @@ export function initSectorsGridReveal(root: ParentNode = document) {
     scrollTrigger: {
       trigger: line ?? tablist ?? panel!,
       start: "top 80%",
-      toggleActions: "play none none none",
+      toggleActions: "play reverse play reverse",
       onEnter: () => {
         if (tablist) maybeNudgeTablist(tablist);
       },
