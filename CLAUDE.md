@@ -217,12 +217,21 @@ stylistic preference:
   different way now — every new hue is a real, named, WCAG-checked
   token in `global.css`, not a bracket value or a one-off. **The rule
   STILL FULLY APPLIES, unchanged, everywhere else on the site** —
-  `MissionBand.astro`, `ClosingCta.astro`, `SectorsGrid.astro`, the
-  Footer, and every future page/section — no blue, no gold/amber fill,
-  no cream, no purple/terracotta, until a similarly explicit
-  instruction extends the new palette there. Don't reach for Electric
-  Blue/Magenta/Amber/Cyan-Blue outside the four named sections (Amber's
-  own button/CTA use is the one deliberate exception — see
+  `MissionBand.astro`, `ClosingCta.astro`, the Footer, and every future
+  page/section — no blue, no gold/amber fill, no cream, no
+  purple/terracotta, until a similarly explicit instruction extends the
+  new palette there. **A SECOND, narrower exception was added on
+  PR #23**: `SectorsGrid.astro` also draws on Electric Blue and Magenta,
+  but only as a solid fill on TWO of its six swapping CONTENT PANELS
+  (Corporate → Magenta, Events → Electric Blue, as of PR #25 — moved
+  there from the tab bar itself, which PR #23 had originally coloured;
+  see that component's own PANEL FILL comment) — every other part of
+  this section (the tab bar, four of six panels) stays on the plain
+  Ink/Paper/Amber palette same as the rest of the un-rebranded site.
+  Don't reach for Electric Blue/Magenta/Amber/Cyan-Blue outside the
+  four named sections plus this one narrow SectorsGrid carve-out
+  (Amber's own button/CTA use is the one further deliberate exception —
+  see
   `Button.astro`'s own note — since a button/CTA can appear inside any
   section, including the still-Guard-Green ones, and it stays Amber
   regardless of which section it's rendered in) without a real decision
@@ -605,11 +614,89 @@ treatment for these icons without a real reason to.
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number is on `origin/main` — WITH ONE
-CURRENT EXCEPTION: **PR #23 is NOT YET MERGED as of this entry** (open,
+CURRENT EXCEPTION: **PR #25 is NOT YET MERGED as of this entry** (open,
 awaiting review — per this project's own standing "open a PR, don't
 merge it yourself" convention). Everything it describes lives only on
 its own branch until the user merges it; don't assume its code is live
-on `main` just because it's documented here.
+on `main` just because it's documented here. (PR #23 and PR #24, both
+flagged as unmerged-as-of-their-own-entry in earlier passes over this
+file, are now confirmed merged — checked live via `gh pr list` at the
+start of this session, not assumed from this file's own stale text.)
+
+- **PR #25 — reverses PART of PR #23's `SectorsGrid.astro` tab
+  treatment, on live review feedback that the tab-fill styling itself
+  was wrong (not the underlying decision to give Corporate/Events
+  their own accent colour, which stays). Four changes:
+  1. **Tabs** — the whole Paper-based coloured-tab indicator PR #23
+     built (a second, per-fill class vocabulary in
+     `sectorsGridTabs.ts` — `FILL_ACTIVE_CLASSES`/
+     `FILL_INACTIVE_CLASSES`/`isFilled`, plus a `data-fill` attribute
+     on the tab `<button>` for it to key off) is deleted OUTRIGHT, not
+     left dormant. Every tab, including Corporate and Events, is now
+     visually identical — plain Ink text, the same
+     transparent/Ink-55%-hover/Amber-active `border-b-2` every other
+     tab (and `NavLink.astro`'s own underline) already uses.
+  2. **Content panel** — the SAME two sectors PR #23 had coloured
+     (Corporate → Magenta, Events → Electric Blue) now get a SOLID
+     fill on their own swapping content panel instead, white text,
+     reusing `ServicesGrid.astro`'s own already-verified fill/
+     foreground pairing DIRECTLY (white ~7.26:1 on Magenta, ~5.17:1 on
+     Electric Blue) rather than recomputing — same numbers, just moved
+     to a different element. Deliberately NOT `.on-dark` on this fill,
+     a real, necessary divergence from ServicesGrid's own version: this
+     panel contains a genuine focusable `Button` ("Learn more"), and
+     `.on-dark`'s `:focus-visible` descendant selector would have
+     silently forced that button's ring to Paper — which fails outright
+     against Amber (~2.15:1, below the 3:1 floor) — where the default
+     Ink ring (~9.05:1) is already safe and is what `Button.astro`'s
+     own comment documents it needing. ServicesGrid's own cards can
+     afford `.on-dark` purely defensively because they have no
+     focusable content at all; this panel genuinely can't. The other
+     four sectors keep their unchanged plain Surface Alt/Ink panel.
+     "Learn more" stays the unmodified Amber-fill/Ink-text `Button`
+     primary variant on every panel regardless of background — sitewide
+     convention, no exception here either.
+  3. **Centering** — `justify-center-safe` (Tailwind v4.1+'s
+     `justify-content: safe center`) on the tablist at every
+     breakpoint, replacing PR #23's own uncentred
+     `overflow-x-auto`/`sm:flex-wrap` row. Chosen specifically over
+     plain `justify-center`: per the CSS Box Alignment spec, a bare
+     `center` on an OVERFLOWING flex line can clip its own start
+     content out of scroll range in some engines — `safe center` is
+     the spec's own defined fallback, behaving like `flex-start`
+     (scrollable from position 0) whenever the row genuinely overflows
+     (below `sm:`) and like true centring whenever it doesn't (`sm:`+,
+     where all six tabs already fit on one line) — the "centre when it
+     fits, scroll normally when it doesn't" behaviour asked for, with
+     zero JS/media-query branching needed.
+  4. **Fade vs. active tab** — a real bug in PR #23's own mobile
+     edge-fade `mask-image` (see that PR's own entry below): nothing
+     stopped it sitting on top of the tab a visitor had just selected,
+     most visible on the first (Retail) and last (Education) tabs,
+     which sit right against the fade's own edges at rest. Fixed with a
+     new `ensureTabVisible()` in `sectorsGridTabs.ts`, called from
+     `activateSector` on EVERY activation (click or keyboard, not just
+     once on load the way PR #23's own one-time discoverability nudge
+     in `sectorsGridReveal.ts` is) — scrolls the newly-active tab fully
+     clear of the fade whenever the row is actually scrollable
+     (`scrollWidth > clientWidth`, a no-op at `sm:`+). Never skipped
+     under reduced motion (only its `behavior` — `"auto"`, not
+     `"smooth"` — changes), since keeping the active tab visible is a
+     correctness fix, not a decorative animation.
+
+  `astro check`: 0 errors. A full `astro build` + direct `dist/`
+  inspection (not just `astro check`) confirmed, in the FINAL compiled
+  output: all 6 tab buttons render with byte-identical classes except
+  active/inactive state, zero `data-fill` anywhere in the built HTML,
+  Corporate's panel carrying `bg-magenta text-paper` and Events'
+  carrying `bg-electric-blue text-paper` with the other four unchanged
+  at `bg-surface-alt text-ink`, every "Learn more" button identical
+  (`bg-amber text-ink`) regardless of its panel's background,
+  `justify-content:safe center` present, and `scrollIntoView`/the new
+  `ensureTabVisible` logic present in the compiled tab-switch JS
+  bundle. No dead-CSS audit was run beyond this — per explicit
+  instruction, this was a small, well-scoped revert-plus-fix, not a
+  repeat of PR #23's own broader sweep.
 
 - **PR #23 — a revision round on `SectorsGrid.astro` (PR #22's own
   section), from live review feedback given in the SAME session PR #22
@@ -1533,23 +1620,28 @@ Corporate, Events, Healthcare, Education — driving a shared, swapping
 two-column image+copy panel, centred Title-Case heading, a horizontal-
 scroll mobile tab bar, real House-of-Guards-branded officer photography
 (not placeholders), and its own scroll-triggered entrance motion),
-replacing the old plain photo-caption strip, see PR #22 and PR #23's own
-revision-round entry — closing CTA, footer, both still on the original
-Guard Green palette, pending a separate future redesign). Header, Hero,
-StatStrip, ServicesGrid, and MissionBand all run the newer colour
-system (Electric Blue, Magenta, Amber, Cyan-Blue, though MissionBand
-itself only actually uses Amber) — SectorsGrid ALSO now draws on
-Electric Blue and Magenta (two of its six tabs, as real fills — one
-each, added in PR #23), plus Amber (its button, the
-sitewide convention) and Ink/Paper (its own two-hue tab-indicator
-scheme, light vs. coloured tabs respectively); Cyan-Blue remains fully
-unused anywhere on the site, including here (see PR #22's own note on
-why it was spec'd for this section and then dropped) — ClosingCta is
-the only section left on Guard Green Secondary, and Guard
-Green Deep's only remaining reference anywhere is `Button.astro`'s own
-dormant `secondary` variant. See the Design system section above for
-the exact, current scope boundary — it has moved twice now, don't
-assume either older framing still holds.
+replacing the old plain photo-caption strip, see PR #22, PR #23's own
+revision-round entry, and PR #25's own re-revision moving the colour
+off the tabs and onto the content panel instead — closing CTA, footer,
+both still on the original Guard Green palette, pending a separate
+future redesign). Header, Hero, StatStrip, ServicesGrid, and
+MissionBand all run the newer colour system (Electric Blue, Magenta,
+Amber, Cyan-Blue, though MissionBand itself only actually uses Amber)
+— SectorsGrid ALSO now draws on Electric Blue and Magenta, but (as of
+PR #25) as a real fill on two of its six swapping CONTENT PANELS, not
+its tabs — the tab bar itself is plain Ink/Amber only now, identical
+to every other section's underline convention, with no second
+tab-indicator vocabulary left at all (PR #23's own Paper-based
+coloured-tab scheme is fully deleted, not dormant) — plus Amber (its
+"Learn more" button, on every panel regardless of background, the
+sitewide convention); Cyan-Blue remains fully unused anywhere on the
+site, including here (see PR #22's own note on why it was spec'd for
+this section and then dropped) — ClosingCta is the only section left
+on Guard Green Secondary, and Guard Green Deep's only remaining
+reference anywhere is `Button.astro`'s own dormant `secondary`
+variant. See the Design system section above for the exact, current
+scope boundary — it has moved twice now, don't assume either older
+framing still holds.
 
 **Not started**: the interior pages — About, Careers, Our Policies,
 Gallery, Contact, plus the six new `/sectors/<slug>` pages SectorsGrid's
