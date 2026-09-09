@@ -48,22 +48,26 @@ import { gsap, ScrollTrigger, prefersReducedMotion } from "./smoothScroll";
  * final flat/full-opacity/full-scale state with no animation and no
  * scroll trigger registered at all — a plain, instant appearance, the
  * same fallback shape `scrollReveal.ts`/`heroMuster.ts` both already
- * use. Untouched by the REPLAY change below — reduced motion always
- * means one static state, never a scroll-driven toggle.
+ * use. Unaffected by the REPLAY note below either way — reduced motion
+ * always means one static state, never a scroll-driven toggle.
  *
- * REPLAY — `toggleActions: "play reverse play reverse"` (was
- * `"play none none none"`), same idiom as every other scroll reveal on
- * the site — see `scrollReveal.ts`'s own note for the full derivation
- * (why `reverse` at the `onLeave` position is a correct-but-usually-
- * inert no-op given no `end` is set here either, and why rapid
- * back-and-forth scrolling doesn't jank). One extra wrinkle specific to
- * THIS module: each card's own `delay` (its column stagger offset)
- * applies again on every fresh forward playthrough — including a
- * REPLAY, not just the very first one — so scrolling back down to an
- * already-seen grid reproduces the exact same staggered arrival, not a
- * flat instant re-appearance. That's the intended, consistent effect,
- * not an oversight: it's the same "premium" cascade every time this
- * section re-enters view, not a degraded one-shot-only version of it.
+ * REPLAY — `toggleActions: "play none none none"`. PR #26 briefly
+ * shipped this as `"play reverse play reverse"` (replay on every
+ * re-entry, both directions) — REFINED here so scrolling back UP past
+ * an already-played card can never hide/reset it, only a fresh
+ * downward `onEnter` ever plays anything. Every position but `onEnter`
+ * is `none` — see `scrollReveal.ts`'s own note for the full traced
+ * sequence (down plays it, back up leaves it exactly as-is, a later
+ * `onEnter` on an already-complete tween is a genuine no-op, not a
+ * visible replay). One consequence specific to THIS module, corrected
+ * from PR #26's own now-stale claim: each card's own `delay` (its
+ * column stagger offset) only ever matters ONCE now, on the single real
+ * playthrough — there is no second playthrough for it to "re-apply" on,
+ * since nothing ever resets a card back to its pre-animation state
+ * once played. The staggered arrival still happens exactly once per
+ * card, on its own first scroll-down entry, same as before this
+ * refinement — it just never repeats after that, matching every other
+ * reveal on the site.
  */
 const STAGGER_STEP = 0.12;
 const COLUMNS = 3;
@@ -90,7 +94,7 @@ export function initServicesGridReveal(selector = "[data-services-reveal]", root
       scrollTrigger: {
         trigger: card,
         start: "top 88%",
-        toggleActions: "play reverse play reverse",
+        toggleActions: "play none none none",
       },
     });
   });

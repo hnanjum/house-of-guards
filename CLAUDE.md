@@ -374,65 +374,71 @@ stylistic preference:
   that specific section — don't assume any of them is the "default"
   pattern a seventh section should just copy; read the specific
   section's own brief first.
-- **Every scroll-triggered reveal REPLAYS on every re-entry, in both
-  scroll directions** — `toggleActions: "play reverse play reverse"`
-  (was `"play none none none"`, a one-shot-per-page-load reveal),
-  applied uniformly across all FIVE real `ScrollTrigger` instances on
-  the site: `scrollReveal.ts` (StatStrip), `servicesGridReveal.ts`
-  (ServicesGrid, one per card), `missionReveal.ts` (MissionBand, TWO
-  triggers — image and text), and `sectorsGridReveal.ts` (SectorsGrid,
-  one trigger owning a shared timeline covering all three of its own
-  beats). Applied consistently — there is no scroll-triggered reveal on
-  the site left on the old one-shot behaviour. Two of the six motion
-  modules are correctly UNCHANGED, not overlooked: `heroMuster.ts` has
-  no `ScrollTrigger` at all (it's load-triggered, the hero is already
-  in view on load — nothing to replay against a scroll position), and
+- **Every scroll-triggered reveal plays ONCE on downward entry and
+  never resets — NOT "both directions."** `toggleActions: "play none
+  none none"`, applied uniformly across all FIVE real `ScrollTrigger`
+  instances on the site: `scrollReveal.ts` (StatStrip),
+  `servicesGridReveal.ts` (ServicesGrid, one per card),
+  `missionReveal.ts` (MissionBand, TWO triggers — image and text), and
+  `sectorsGridReveal.ts` (SectorsGrid, one trigger owning a shared
+  timeline covering all three of its own beats). **This corrects PR
+  #26's own "REPLAYS on every re-entry, in both scroll directions"
+  language** (that PR briefly shipped `"play reverse play reverse"`) —
+  refined the same session by a follow-up PR, on direct feedback that
+  scrolling back UP past an already-played section must never hide/
+  reset it; only a fresh downward `onEnter` should ever animate
+  anything. Two of the six motion modules are correctly UNCHANGED,
+  not overlooked, by either PR: `heroMuster.ts` has no `ScrollTrigger`
+  at all (it's load-triggered, the hero is already in view on load —
+  nothing to trigger against a scroll position), and
   `sectorsGridTabs.ts`'s panel crossfade is click/keyboard-driven, not
-  scroll-driven, so it was never a candidate for this change either.
-  Confirmed via a full repo grep for `toggleActions` before and after —
-  exactly five real code occurrences, all updated, nothing missed.
+  scroll-driven, so it was never a candidate for either change. This
+  refinement's own `toggleActions` value is, worth stating plainly, the
+  literal SAME STRING this project used before PR #26 ever touched
+  it — functionally this is a full revert of PR #26's own behaviour
+  change back to strict one-shot-per-page-load, not a new third
+  behaviour, even though it landed as its own deliberate, documented
+  decision rather than a plain `git revert`. Confirmed via a full repo
+  grep for `toggleActions` before and after both PRs — exactly five
+  real code occurrences exist, all consistent, nothing missed.
 
-  **Real GSAP nuance worth understanding before touching any of these
-  again**: none of the five sets an explicit `end` (or `endTrigger`) on
-  its `ScrollTrigger`. Per ScrollTrigger's own documented default (and
-  confirmed by reading the installed `gsap` package's own source, not
-  assumed), an omitted `end` resolves to the BOTTOM OF THE WHOLE
-  SCROLLABLE PAGE, not this element's own bottom edge — so for a
-  section sitting mid-page (every one of these), the `onLeave`/
-  `onEnterBack` positions in the toggle string are practically inert;
-  a visitor would have to scroll all the way to the literal bottom of
-  the page while still past this element to ever fire them. The
-  positions that actually do the real work here are `onEnter` (crossing
-  `start` scrolling down → plays) and `onLeaveBack` (crossing `start`
-  scrolling back up → reverses) — which is exactly the "replay every
-  time it scrolls into view, either direction" behaviour that was
-  asked for, since neither depends on `end` at all. `reverse` was kept
-  at the `onLeave`/`onEnterBack` positions anyway (matching the
-  standard `"play reverse play reverse"` idiom) rather than swapped for
-  `none` there — harmless where they don't fire, and the correct
-  behaviour on the rare occasion a visitor does scroll to page-bottom
-  mid-reveal.
+  **Traced end to end against the real `toggleActions` string, not
+  just asserted to work**: scroll down past the trigger → `onEnter` →
+  `play` → animates in. Scroll back UP past it → `onLeaveBack` → the
+  action there is `none`, so the tween/timeline's progress is left
+  completely untouched — the element stays exactly as it settled
+  (visible, at its final state), it does NOT hide or reset. Scroll
+  down again → `onEnter` fires again (ScrollTrigger's own boundary-
+  crossing DETECTION is unconditional; only the ACTION taken at each
+  position depends on `toggleActions`) → `play` is invoked again, but
+  the tween/timeline is already at progress 1 with nothing left to
+  animate forward through, so this is a genuine no-op — no visible
+  second playthrough, the element simply remains in its already-played
+  state. `onLeave` and `onEnterBack` are also both `none` — neither
+  ever un-plays anything either, regardless of whether a visitor
+  scrolls all the way to page-bottom and back (see the now-superseded
+  paragraph this replaced, further down `git log` on this file, for
+  the `end`-defaults-to-page-bottom derivation; it no longer
+  materially matters here since every non-`onEnter` position is `none`
+  regardless of when/whether it fires).
 
   **Rapid back-and-forth scrolling across a trigger boundary was
-  checked, not assumed safe**: GSAP reverses an in-progress tween/
-  timeline from its CURRENT progress, it never restarts from 0 — so
-  scrolling quickly down-then-up-then-down across a `start` line just
-  makes the animation "chase" whichever direction is currently active,
-  settling smoothly via each module's own `power2.out`/`power3.out`
-  easing (no bounce/elastic anywhere on this site, so there's no
-  overshoot to look wrong mid-reversal either). `servicesGridReveal.ts`'s
-  own per-card `delay` (its column stagger) re-applies on every fresh
-  forward playthrough, including a replay — a deliberate, disclosed
-  consequence documented in that module's own comment, not a bug: it
-  reproduces the same staggered arrival every time the grid re-enters
-  view, not a degraded instant reappearance on the second and later
-  passes.
+  checked, not assumed safe, same as for PR #26's own version**: with
+  every non-`onEnter` action now `none`, there is nothing left FOR
+  rapid scrolling to interrupt or race — the tween only ever runs
+  forward, once, the first time `onEnter` fires with a fresh (not-yet-
+  played) target; every later boundary crossing in either direction is
+  inert. `servicesGridReveal.ts`'s own per-card `delay` (its column
+  stagger offset) therefore now only ever matters on that one real
+  playthrough — there's no second playthrough for it to "re-apply" on,
+  correcting that module's own PR #26-era comment, which described the
+  delay reapplying "on every replay."
 
-  `prefers-reduced-motion` fallback behaviour is completely untouched
-  by this change — every module's reduced-motion branch still sets a
-  single static end-state with no `ScrollTrigger` registered at all, so
-  a reduced-motion visitor never sees a scroll-position-driven toggle
-  either direction, exactly as before.
+  `prefers-reduced-motion` fallback behaviour is unaffected by either
+  PR — every module's reduced-motion branch still sets a single static
+  end-state with no `ScrollTrigger` registered at all, so a
+  reduced-motion visitor never sees a scroll-position-driven toggle in
+  any direction, exactly as before both changes.
 - **Framer Motion is scoped to exactly two React islands** —
   `NavDrawer.tsx` and `ContactForm.tsx` — and only for their own local
   interactive transitions (drawer slide, status-message fade). Never use
@@ -673,17 +679,80 @@ treatment for these icons without a real reason to.
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number is on `origin/main` — WITH ONE
-CURRENT EXCEPTION: **PR #26 is NOT YET MERGED as of this entry** (open,
+CURRENT EXCEPTION: **PR #27 is NOT YET MERGED as of this entry** (open,
 awaiting review — per this project's own standing "open a PR, don't
 merge it yourself" convention). Everything it describes lives only on
 its own branch until the user merges it; don't assume its code is live
-on `main` just because it's documented here. (PR #25, flagged as
+on `main` just because it's documented here. (PR #26, flagged as
 unmerged-as-of-its-own-entry immediately below, is now confirmed
 merged — checked live via `gh pr list` at the start of this session,
-not assumed from this file's own stale text. Same for PR #23/#24
-before it — this "the previous entry's own unmerged-flag has gone
-stale" pattern keeps recurring across sessions; check `gh pr list`
-fresh every time rather than trusting this paragraph's own PR number.)
+not assumed from this file's own stale text. This "the previous
+entry's own unmerged-flag has gone stale" pattern keeps recurring
+across sessions — PR #23/#24/#25 all hit it too, further down this
+log; check `gh pr list` fresh every time rather than trusting this
+paragraph's own PR number.)
+
+- **PR #27 — corrects PR #26's own `toggleActions` decision, from
+  "replay in both directions" to "play once on downward entry, never
+  reset while scrolling up." Same session, direct follow-up feedback:
+  the bidirectional replay PR #26 shipped made scrolling back UP past
+  an already-played section hide/reset it (via `onLeaveBack: reverse`)
+  — explicitly the WRONG behaviour; an element should only ever animate
+  in on a fresh downward entry, and must never disappear again once
+  played, regardless of scroll direction.
+
+  `toggleActions: "play reverse play reverse"` → `"play none none
+  none"` on the same five real `ScrollTrigger` instances PR #26 touched
+  — `scrollReveal.ts`, `servicesGridReveal.ts`, `missionReveal.ts`
+  (both its triggers), `sectorsGridReveal.ts`. Worth stating plainly,
+  not glossed over: this new value is the literal SAME STRING the
+  project used before PR #26 ever touched it, so — functionally — this
+  is a full revert of PR #26's own behaviour change back to strict
+  one-shot-per-page-load, landed as its own deliberate, documented
+  decision (with the reasoning for THIS choice recorded fresh, not just
+  "see PR #26") rather than a plain `git revert`.
+
+  Given the brief's own two named candidates (`"play none none none"`
+  for strictly-once, `"play none none reverse"` if it should still
+  reset when scrolled back up past the top so it can replay on the next
+  down-scroll) — the strictly-once form was the one that actually
+  matches the brief's own closing disambiguator ("elements should never
+  disappear/reset while scrolling upward past them, only ever animate
+  in on downward entry"): `"play none none reverse"` WOULD reset on
+  `onLeaveBack` (scrolling up past `start`), which is precisely "an
+  element disappearing while scrolling upward past it" — the thing
+  explicitly ruled out. `"play none none none"` is the only one of the
+  two that never resets in either direction, so it's the one that was
+  used.
+
+  **Traced end to end against the real string, not just asserted**:
+  scroll down past the trigger → `onEnter` → `play` → animates in.
+  Scroll back up past it → `onLeaveBack` → action `none` → the tween's
+  progress is left completely untouched, so the element stays exactly
+  as it settled (visible, at its final state) — it does not hide.
+  Scroll down again → `onEnter` fires again (ScrollTrigger's own
+  boundary-crossing detection always fires regardless of the configured
+  action; only what happens in response depends on `toggleActions`) →
+  `play` is invoked again, but the tween is already at progress 1 with
+  nothing left to animate forward through, so this is a genuine no-op —
+  no visible second playthrough, the element just stays in its
+  already-played state.
+
+  Same 5-real-occurrence grep-before-and-after discipline as PR #26's
+  own entry (`astro check`: 0 errors; a full `astro build` + `dist/`
+  inspection confirmed zero `"play reverse play reverse"` remaining in
+  the compiled bundle and exactly 5 `"play none none none"`
+  occurrences). `servicesGridReveal.ts`'s own PR #26-era comment
+  claiming its per-card `delay` "re-applies on every replay" was
+  corrected — there is no longer a second playthrough for it to
+  re-apply on, since nothing ever resets a card once it's played.
+  `prefers-reduced-motion` fallback is unaffected, same as PR #26's own
+  entry already noted — untouched by either PR.
+
+  See the Motion system section above for the corrected, current-state
+  description — this entry is kept as an accurate record of what PR #27
+  itself changed and why, not rewritten to just restate the Motion
+  system section's own already-current text.
 
 - **PR #26 — every scroll-triggered reveal on the site now REPLAYS on
   every re-entry, in both scroll directions, instead of playing once

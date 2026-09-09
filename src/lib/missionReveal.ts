@@ -57,18 +57,21 @@ import { gsap, ScrollTrigger, prefersReducedMotion } from "./smoothScroll";
  * (fully revealed, no clip, no animation) and every text element is set
  * straight to `opacity:1`/`y:0` — no ScrollTrigger registered for
  * either — the same instant-final-state fallback shape every other
- * entry point on this site already uses. Untouched by the REPLAY change
- * below.
+ * entry point on this site already uses. Unaffected by the REPLAY note
+ * below either way.
  *
- * REPLAY — both triggers use `toggleActions: "play reverse play
- * reverse"` (were `"play none none none"`), same idiom as every other
- * scroll reveal on this site — see `scrollReveal.ts`'s own note for the
- * full derivation. Both the clip-path unveil and the staggered text
- * cascade reverse cleanly: GSAP tweens `clip-path` and staggered
- * `opacity`/`y` tweens both natively support playing backward from
- * whatever progress they're currently at, so a quick scroll-past-then-
- * back re-triggers the SAME unveil/cascade, not a jump-cut or a replay
- * from a stale mid-animation state.
+ * REPLAY — both triggers use `toggleActions: "play none none none"`.
+ * PR #26 briefly shipped `"play reverse play reverse"` (replay on
+ * every re-entry, both directions, so scrolling back up unveiled the
+ * clip-path shut again and re-hid the text cascade) — REFINED here so
+ * scrolling back UP past an already-played MissionBand can never
+ * re-clip the image or fade the text back out, only a fresh downward
+ * `onEnter` ever plays anything. Every position but `onEnter` is
+ * `none` on both triggers — see `scrollReveal.ts`'s own note for the
+ * full traced sequence (down plays it once, back up leaves it exactly
+ * as-is — fully unveiled, text fully settled — and a later `onEnter` on
+ * an already-complete tween is a no-op, not a visible re-unveil/
+ * re-cascade).
  */
 const IMAGE_SELECTOR = "[data-mission-image]";
 const TEXT_SELECTOR = "[data-mission-reveal]";
@@ -94,7 +97,7 @@ export function initMissionReveal(root: ParentNode = document) {
       scrollTrigger: {
         trigger: image,
         start: "top 80%",
-        toggleActions: "play reverse play reverse",
+        toggleActions: "play none none none",
       },
     });
   }
@@ -110,7 +113,7 @@ export function initMissionReveal(root: ParentNode = document) {
       scrollTrigger: {
         trigger: text[0],
         start: "top 80%",
-        toggleActions: "play reverse play reverse",
+        toggleActions: "play none none none",
       },
     });
   }
