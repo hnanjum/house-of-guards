@@ -22,6 +22,7 @@ import ClosingCta from "../components/home/ClosingCta.astro";
     import { initServicesGridReveal } from "../lib/servicesGridReveal";
     import { initMissionReveal } from "../lib/missionReveal";
     import { initSectorsGridTabs } from "../lib/sectorsGridTabs";
+    import { initSectorsGridReveal } from "../lib/sectorsGridReveal";
 
     document.addEventListener("astro:page-load", () => {
       initHeroMuster();
@@ -29,6 +30,7 @@ import ClosingCta from "../components/home/ClosingCta.astro";
       initServicesGridReveal();
       initMissionReveal();
       initSectorsGridTabs();
+      initSectorsGridReveal();
     });
   </script>
 </BaseLayout>
