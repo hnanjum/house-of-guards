@@ -301,8 +301,8 @@ stylistic preference:
   than being rewritten), that's the state BEFORE PR #20, not the current
   one.
 
-  **A genuinely NARROWER second exception exists as of PR #22's own
-  revision round** — `SectorsGrid.astro`'s `SectionHeading` alone
+  **A genuinely NARROWER second exception exists as of PR #23's
+  revision round on `SectorsGrid.astro`** — that section's `SectionHeading` alone
   (`align="center"`) is centred, while its own tab bar and content panel
   below stay left-aligned/their own natural alignment, per direct
   instruction. This is NOT the same shape as `ClosingCta`'s
@@ -356,8 +356,8 @@ stylistic preference:
   style marker and isn't queried by `initScrollReveal()`; see PR #22
   below and that module's own comment for the full mechanism), and
   `src/lib/sectorsGridReveal.ts` (SectorsGrid's OWN scroll-triggered
-  entrance, added in PR #22's own revision round, NOT present in that
-  section's original build — a genuinely fourth motion SHAPE distinct
+  entrance, added in PR #23, NOT present in PR #22's own original build
+  of that section — a genuinely fourth motion SHAPE distinct
   from all three scroll-entrance modules above it: a divider line-draw
   via `scaleX`, a horizontal (not the usual vertical) tab cascade, and
   one panel fade+scale, one shared trigger). Each of these six is a
@@ -604,7 +604,146 @@ treatment for these icons without a real reason to.
 
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
-log` alone. Newest first; each PR number is on `origin/main`.
+log` alone. Newest first; each PR number is on `origin/main` — WITH ONE
+CURRENT EXCEPTION: **PR #23 is NOT YET MERGED as of this entry** (open,
+awaiting review — per this project's own standing "open a PR, don't
+merge it yourself" convention). Everything it describes lives only on
+its own branch until the user merges it; don't assume its code is live
+on `main` just because it's documented here.
+
+- **PR #23 — a revision round on `SectorsGrid.astro` (PR #22's own
+  section), from live review feedback given in the SAME session PR #22
+  shipped in — six changes, opened as a genuinely separate PR, not a
+  same-branch follow-up commit on PR #22. Worth understanding WHY, since
+  it wasn't the original plan: work started by pushing directly onto
+  PR #22's own branch (`feat/sectors-tabbed-explainer`), on the
+  reasoning that revising unmerged work belongs on the same branch/PR
+  rather than a fresh one — a real, deliberate call at the time, stated
+  to the user before starting. **That branch's PR #22 was merged by the
+  user MID-SESSION, while this revision work was already underway** —
+  discovered only once the commit was pushed and `gh pr edit` was used
+  to update PR #22's own description, which came back showing
+  `MERGED`. `git log origin/main` confirmed the merge carried ONLY the
+  original PR #22 commit — this revision-round commit had been pushed
+  AFTER that merge, onto a branch GitHub no longer treats as an open
+  PR's head, so it was never actually incorporated into `main` despite
+  sitting right there in the branch's own history. Corrected by moving
+  the same commit onto a fresh branch (`fix/sectors-grid-revision-round`)
+  and opening this PR from it — confirmed via `git diff origin/main...`
+  before opening that the diff was genuinely scoped to just this
+  revision's own changes, not a re-diff of the whole already-merged
+  component. **PR #22's own GitHub description was also reverted back
+  to what it said BEFORE this mistake** (a mid-session edit had appended
+  a "Revision round" section describing work that was never actually
+  part of that merge) — replaced with its real original text plus a
+  short, honest pointer to this PR instead. Worth remembering for any
+  future session: don't assume a branch's PR is still open just because
+  YOU haven't merged it — check `gh pr view <n> --json state` before
+  pushing a follow-up commit to an existing PR's branch, especially in
+  a session where the user has their own independent access to merge on
+  GitHub at any point.
+
+  Full derivation/reasoning for every item below lives in
+  `SectorsGrid.astro`'s own updated top-of-file comment and `src/lib/
+  sectorsGridReveal.ts`'s own new comment — condensed here, not
+  duplicated in full:
+
+  1. **Heading** — `SectionHeading` now `align="center"`, "Who We
+     Protect" (was sentence case). Real finding surfaced before either
+     change: no sitewide precedent exists for "heading centred, content
+     left" (the only prior centring precedent, `ClosingCta`, centres its
+     WHOLE section) — proceeded per direct instruction anyway, since
+     `SectionHeading`'s own `align` prop only affects its own wrapper,
+     with zero cascading effect on the tab bar/panel below. Case fix
+     ALSO flagged, not silently treated as resolving a real
+     inconsistency: a fresh survey found `ServicesGrid`'s own "Services
+     We Offer" is the OUTLIER (Title Case), not the rule — `ClosingCta`/
+     `MissionBand`/this section's own prior text were all sentence case.
+     Both findings are now folded into the "Left-aligned by default"
+     hard rule's own updated text above (a second, narrower centring
+     exception) — the heading-case question has no sitewide rule to
+     update, so it's flagged only in `SectorsGrid.astro`'s own comment.
+  2. **Mobile tabs** — `flex-wrap` reversed to a single-line
+     `overflow-x-auto` scroll row, on direct instruction, explicitly NOT
+     a case of PR #22's original reasoning being wrong (that reasoning —
+     no horizontal-scroll precedent existed anywhere in this codebase —
+     is still true; the risk it named is now accepted and mitigated
+     instead of avoided). Hidden native scrollbar (a new scoped
+     `<style>` block, the first hidden-scrollbar technique anywhere in
+     this codebase) + a `mask-image` edge-fade signal more tabs exist
+     off-screen.
+  3. **Colour fills** — two of six tabs (Events → Electric Blue,
+     Corporate → Magenta) reuse `ServicesGrid.astro`'s exact two accent
+     hues, per direct instruction — but NOT its real ratio: ServicesGrid
+     is actually 3 coloured : 3 light, not 2:4 as the brief assumed,
+     flagged rather than silently reconciled either way. Broke the
+     existing Ink-hover/Amber-active indicator scheme (invisible/non-
+     compliant on a coloured fill) — real, freshly-computed numbers
+     showed Amber fails as a universal fix (≈2.41:1 vs Electric Blue,
+     though it passes ≈3.38:1 vs Magenta); rebuilt coloured tabs' own
+     indicator on Paper instead (their own already-established text
+     colour) — solid `border-paper` active (~5.17–7.26:1, reusing
+     ServicesGrid's own already-derived numbers), `border-paper/70`
+     hover (a FRESH derivation for this alpha-over-a-coloured-fill
+     context, 55% — light tabs' own value — only reaches ≈2.63:1 against
+     Electric Blue and fails; 70% clears both fills at ≈3.35–4.22:1).
+     Confirmed with the user before implementing, per their own explicit
+     "not obviously right, confirm first" framing.
+  4. **Motion** — a genuinely new, fourth module,
+     `src/lib/sectorsGridReveal.ts` — PR #22 originally shipped this
+     section with NO scroll entrance at all (deliberate at the time,
+     matching the equally-absent entrance on the `SectorsStrip.astro`
+     it replaced); closed now on direct instruction. Distinct from all
+     THREE existing motion shapes on this site (not just the two the
+     brief named) — a divider line-draw (`scaleX` on a NEW dedicated
+     `[data-sectors-line]` element, since the tablist's own native
+     border couldn't be animated independently of its children) +
+     horizontal tab cascade (x-axis, not this site's usual y-rise) + one
+     panel fade+scale, one shared `ScrollTrigger`. A genuine nice-to-have
+     also landed in the same module: a one-time auto-nudge scroll on the
+     mobile tablist's first scroll-into-view, gated on the row actually
+     overflowing and on `prefers-reduced-motion`.
+  5. **A real regression caught and fixed mid-pass, worth remembering the
+     shape of** — THREE separate instances of the exact "dead CSS from a
+     doc comment" bug this project's own standing convention already
+     warns about were introduced while writing this revision's own new
+     comments (`border-ink/55`, `border-paper/70`, and `flex-wrap`, each
+     mentioned bare/unprefixed in prose where the only real markup usage
+     is `hover:`/`sm:`-prefixed) — caught via the SAME audit discipline
+     PR #22's original pass already used once, confirmed via direct
+     `dist/` inspection before and after each fix. A genuinely
+     UNRELATED, pre-existing, real (non-orphaned) `border-b` compiled
+     rule was also investigated during the same audit and confirmed to
+     trace to `Header.astro`'s own real usage, not a false positive from
+     this pass. One small residual finding, disclosed rather than
+     chased further: a bare `.flex-wrap{flex-wrap:wrap}` rule remains in
+     the compiled output with no traceable source anywhere in `src/`
+     (confirmed via an `overflow-visible` control test that Tailwind
+     does NOT generally generate a bare form from a prefix-only mention)
+     — investigated as far as was proportionate for a ~20-byte unused
+     declaration, not fully explained, flagged honestly rather than
+     either hidden or falsely claimed resolved.
+  6. **Images** — real photos, six House-of-Guards-branded officer
+     images supplied mid-session (a Downloads-folder screenshot,
+     filenames `retail`/`Distribution`/`Corporate`/`Events`/`Health`/
+     `Education.png`) — already part of `main` via PR #22's own merge
+     (which DID complete successfully before the branch confusion above
+     happened), unrelated to and unaffected by this PR's own branch
+     mix-up. Mentioned here only so the "Not started"/"Current status"
+     sections below aren't read as contradicting each other about when
+     this happened.
+
+  A real `astro check` (0 errors throughout every round) and a full
+  `astro build` + direct `dist/` inspection were run after the complete
+  set of six changes (not after each one) — matching the explicit
+  build-efficiency instruction for this revision round — plus the three
+  extra rebuild+recheck cycles the dead-CSS fixes in item 5 required.
+  Confirmed in the FINAL build: 6 tabs (2 coloured, 4 light) with
+  correct `data-fill`/class state, the new line element present with
+  correct classes, heading centred/Title Case, zero `border-ink/55`/
+  `border-paper/70` bare rules, zero `picsum`/`cyan-blue` anywhere, and
+  the new `sectorsGridReveal.ts` module's own markers (`scaleX`,
+  `data-sectors-line`, `dataset.fill`) present in the compiled JS.
 
 - **PR #22 — `SectorsStrip.astro`'s plain 2×3 photo-caption grid
   replaced outright by `SectorsGrid.astro`, a tabbed sector explainer:
@@ -828,111 +967,6 @@ log` alone. Newest first; each PR number is on `origin/main`.
   see that paragraph earlier in this entry, right after the TAB VISUAL
   MECHANISM section, for the full account rather than repeating it
   here.)
-
-  **REVISION ROUND, same PR #22, same session — six changes from live
-  review feedback, added as commits on the same branch rather than a
-  fresh PR #23** (this is a revision of unmerged work, not a new unit of
-  work). Full derivation/reasoning for every item below lives in
-  `SectorsGrid.astro`'s own updated top-of-file comment and `src/lib/
-  sectorsGridReveal.ts`'s own new comment — condensed here, not
-  duplicated in full:
-
-  1. **Heading** — `SectionHeading` now `align="center"`, "Who We
-     Protect" (was sentence case). Real finding surfaced before either
-     change: no sitewide precedent exists for "heading centred, content
-     left" (the only prior centring precedent, `ClosingCta`, centres its
-     WHOLE section) — proceeded per direct instruction anyway, since
-     `SectionHeading`'s own `align` prop only affects its own wrapper,
-     with zero cascading effect on the tab bar/panel below. Case fix
-     ALSO flagged, not silently treated as resolving a real
-     inconsistency: a fresh survey found `ServicesGrid`'s own "Services
-     We Offer" is the OUTLIER (Title Case), not the rule — `ClosingCta`/
-     `MissionBand`/this section's own prior text were all sentence case.
-     Both findings are now folded into the "Left-aligned by default"
-     hard rule's own updated text above (a second, narrower centring
-     exception) — the heading-case question has no sitewide rule to
-     update, so it's flagged only in `SectorsGrid.astro`'s own comment.
-  2. **Mobile tabs** — `flex-wrap` reversed to a single-line
-     `overflow-x-auto` scroll row, on direct instruction, explicitly NOT
-     a case of PR #22's original reasoning being wrong (that reasoning —
-     no horizontal-scroll precedent existed anywhere in this codebase —
-     is still true; the risk it named is now accepted and mitigated
-     instead of avoided). Hidden native scrollbar (a new scoped
-     `<style>` block, the first hidden-scrollbar technique anywhere in
-     this codebase) + a `mask-image` edge-fade signal more tabs exist
-     off-screen.
-  3. **Colour fills** — two of six tabs (Events → Electric Blue,
-     Corporate → Magenta) reuse `ServicesGrid.astro`'s exact two accent
-     hues, per direct instruction — but NOT its real ratio: ServicesGrid
-     is actually 3 coloured : 3 light, not 2:4 as the brief assumed,
-     flagged rather than silently reconciled either way. Broke the
-     existing Ink-hover/Amber-active indicator scheme (invisible/non-
-     compliant on a coloured fill) — real, freshly-computed numbers
-     showed Amber fails as a universal fix (≈2.41:1 vs Electric Blue,
-     though it passes ≈3.38:1 vs Magenta); rebuilt coloured tabs' own
-     indicator on Paper instead (their own already-established text
-     colour) — solid `border-paper` active (~5.17–7.26:1, reusing
-     ServicesGrid's own already-derived numbers), `border-paper/70`
-     hover (a FRESH derivation for this alpha-over-a-coloured-fill
-     context, 55% — light tabs' own value — only reaches ≈2.63:1 against
-     Electric Blue and fails; 70% clears both fills at ≈3.35–4.22:1).
-     Confirmed with the user before implementing, per their own explicit
-     "not obviously right, confirm first" framing.
-  4. **Motion** — a genuinely new, fourth module,
-     `src/lib/sectorsGridReveal.ts` — PR #22 originally shipped this
-     section with NO scroll entrance at all (deliberate at the time,
-     matching the equally-absent entrance on the `SectorsStrip.astro`
-     it replaced); closed now on direct instruction. Distinct from all
-     THREE existing motion shapes on this site (not just the two the
-     brief named) — a divider line-draw (`scaleX` on a NEW dedicated
-     `[data-sectors-line]` element, since the tablist's own native
-     border couldn't be animated independently of its children) +
-     horizontal tab cascade (x-axis, not this site's usual y-rise) + one
-     panel fade+scale, one shared `ScrollTrigger`. A genuine nice-to-have
-     also landed in the same module: a one-time auto-nudge scroll on the
-     mobile tablist's first scroll-into-view, gated on the row actually
-     overflowing and on `prefers-reduced-motion`.
-  5. **A real regression caught and fixed mid-pass, worth remembering the
-     shape of** — THREE separate instances of the exact "dead CSS from a
-     doc comment" bug this project's own standing convention already
-     warns about were introduced while writing this revision's own new
-     comments (`border-ink/55`, `border-paper/70`, and `flex-wrap`, each
-     mentioned bare/unprefixed in prose where the only real markup usage
-     is `hover:`/`sm:`-prefixed) — caught via the SAME audit discipline
-     PR #22's original pass already used once, confirmed via direct
-     `dist/` inspection before and after each fix. A genuinely
-     UNRELATED, pre-existing, real (non-orphaned) `border-b` compiled
-     rule was also investigated during the same audit and confirmed to
-     trace to `Header.astro`'s own real usage, not a false positive from
-     this pass. One small residual finding, disclosed rather than
-     chased further: a bare `.flex-wrap{flex-wrap:wrap}` rule remains in
-     the compiled output with no traceable source anywhere in `src/`
-     (confirmed via an `overflow-visible` control test that Tailwind
-     does NOT generally generate a bare form from a prefix-only mention)
-     — investigated as far as was proportionate for a ~20-byte unused
-     declaration, not fully explained, flagged honestly rather than
-     either hidden or falsely claimed resolved.
-  6. **Images** — real photos, six House-of-Guards-branded officer
-     images supplied mid-session (a Downloads-folder screenshot,
-     filenames `retail`/`Distribution`/`Corporate`/`Events`/`Health`/
-     `Education.png`), NOT part of this revision round's own explicit
-     ask but landed in the same session before the revision started —
-     see this entry's own IMAGES paragraph above for the full two-phase
-     account (Picsum placeholder → real local assets). Mentioned here
-     only so the "Not started"/"Current status" sections below aren't
-     read as contradicting each other about when this happened.
-
-  A real `astro check` (0 errors throughout every round) and a full
-  `astro build` + direct `dist/` inspection were run after the complete
-  set of six changes (not after each one) — matching the explicit
-  build-efficiency instruction for this revision round — plus the three
-  extra rebuild+recheck cycles the dead-CSS fixes in item 5 required.
-  Confirmed in the FINAL build: 6 tabs (2 coloured, 4 light) with
-  correct `data-fill`/class state, the new line element present with
-  correct classes, heading centred/Title Case, zero `border-ink/55`/
-  `border-paper/70` bare rules, zero `picsum`/`cyan-blue` anywhere, and
-  the new `sectorsGridReveal.ts` module's own markers (`scaleX`,
-  `data-sectors-line`, `dataset.fill`) present in the compiled JS.
 
 - **PR #21 — docs-only correction: `text-fine`'s own comment and this
   file both still said 10px after the project owner changed it directly
@@ -1499,14 +1533,14 @@ Corporate, Events, Healthcare, Education — driving a shared, swapping
 two-column image+copy panel, centred Title-Case heading, a horizontal-
 scroll mobile tab bar, real House-of-Guards-branded officer photography
 (not placeholders), and its own scroll-triggered entrance motion),
-replacing the old plain photo-caption strip, see PR #22 and its own
+replacing the old plain photo-caption strip, see PR #22 and PR #23's own
 revision-round entry — closing CTA, footer, both still on the original
 Guard Green palette, pending a separate future redesign). Header, Hero,
 StatStrip, ServicesGrid, and MissionBand all run the newer colour
 system (Electric Blue, Magenta, Amber, Cyan-Blue, though MissionBand
 itself only actually uses Amber) — SectorsGrid ALSO now draws on
 Electric Blue and Magenta (two of its six tabs, as real fills — one
-each, added in the PR #22 revision round), plus Amber (its button, the
+each, added in PR #23), plus Amber (its button, the
 sitewide convention) and Ink/Paper (its own two-hue tab-indicator
 scheme, light vs. coloured tabs respectively); Cyan-Blue remains fully
 unused anywhere on the site, including here (see PR #22's own note on
