@@ -285,37 +285,57 @@ stylistic preference:
   of it. Don't build a card-grid-shaped FOURTH treatment, and don't add
   a border/shadow to `ServicesGrid.astro`, without the same kind of
   explicit instruction PR #16 had.
-- **Left-aligned by default.** Centered alignment exists in exactly ONE
-  sanctioned place sitewide now: the closing CTA leading into the footer
-  (`ClosingCta`). **This dropped from two to one on direct instruction**
-  when `MissionBand` was rebuilt (PR #20) — its old centred pull-quote
-  is gone, replaced by a genuine two-column image+text layout with the
-  text column left-aligned, matching every other section's own default.
-  Don't resurrect MissionBand as a centred exception assuming this was
-  an oversight; it was a deliberate, called-out change, the same way
-  `StatStrip`'s own brief third exception (introduced then reverted
-  across two earlier passes) was deliberate both times. If a future
-  session finds this rule described as "exactly two" anywhere else in
-  this file (only in Recent History's own dated PR entries, which stay
-  as accurate history rather than being rewritten), that's the state
-  BEFORE PR #20, not the current one. Don't centre a routine heading or
-  hero — `SectionHeading`'s `align` prop defaults to `"left"` for this
-  reason.
+- **Left-aligned by default.** Whole-SECTION centred alignment (heading
+  AND content together) exists in exactly ONE sanctioned place sitewide:
+  the closing CTA leading into the footer (`ClosingCta`). **This dropped
+  from two to one on direct instruction** when `MissionBand` was rebuilt
+  (PR #20) — its old centred pull-quote is gone, replaced by a genuine
+  two-column image+text layout with the text column left-aligned,
+  matching every other section's own default. Don't resurrect MissionBand
+  as a centred exception assuming this was an oversight; it was a
+  deliberate, called-out change, the same way `StatStrip`'s own brief
+  third exception (introduced then reverted across two earlier passes)
+  was deliberate both times. If a future session finds this rule
+  described as "exactly two" anywhere else in this file (only in Recent
+  History's own dated PR entries, which stay as accurate history rather
+  than being rewritten), that's the state BEFORE PR #20, not the current
+  one.
+
+  **A genuinely NARROWER second exception exists as of PR #22's own
+  revision round** — `SectorsGrid.astro`'s `SectionHeading` alone
+  (`align="center"`) is centred, while its own tab bar and content panel
+  below stay left-aligned/their own natural alignment, per direct
+  instruction. This is NOT the same shape as `ClosingCta`'s
+  whole-section centring — checked against every other section before
+  building it, and found there was no existing precedent for "heading
+  centred, content below left" specifically (see `SectorsGrid.astro`'s
+  own SECTION HEADING comment for the full account). `SectionHeading`'s
+  `align` prop still defaults to `"left"` — nothing about the DEFAULT
+  changed, only this one section now explicitly overrides it. Don't
+  centre a routine heading elsewhere on this reasoning alone; this was a
+  direct, specific instruction for this one section, not a reopened
+  general licence.
 - **No stock photography that isn't genuinely relevant to a UK security
-  company.** Every photo currently in the codebase (the hero image, the
-  six sector images) is an **unthemed Lorem Picsum placeholder** — fixed
-  seeds so they're stable across reloads, but random stock content with
-  no real connection to security/guarding. This is flagged in a code
-  comment at every usage site. If a placeholder image is ever added,
-  flag it the same way and ask before treating it as final — don't let
-  a placeholder silently become permanent.
+  company.** STALE as written — updated to reflect current reality, not
+  left describing a state that hasn't been true since PR #7 (hero) and
+  this session's own PR #22 revision (sectors). Every real photo
+  currently in the codebase (`hero-officer.png`, `mission-team.png`, and
+  the six `src/assets/sectors/*.png` files) is now a REAL, final,
+  House-of-Guards-branded asset — none are placeholders any more. The
+  underlying RULE still holds (no generic/unthemed stock photography,
+  ever) — it's the STATUS DESCRIPTION that had gone stale, not the rule
+  itself. If a placeholder image is ever introduced again for a future
+  section, flag it plainly in a code comment at its usage site and ask
+  before treating it as final — don't let a placeholder silently become
+  permanent, the same discipline that already governed every real photo
+  now in the codebase before it was replaced.
 
 ## Motion system
 
 - **GSAP + ScrollTrigger + Lenis** (`src/lib/smoothScroll.ts`) are the
   primary tools for scroll-based and page-load animation — Lenis is
   wired into GSAP's own ticker so `ScrollTrigger` stays in sync with
-  Lenis's scroll position rather than the native scroll event. Five
+  Lenis's scroll position rather than the native scroll event. SIX
   small, section-scoped modules exist on top of it, each wired into
   `index.astro`'s own `astro:page-load` handler: `src/lib/heroMuster.ts`
   (the homepage hero's one orchestrated LOAD-triggered sequence — the
@@ -328,16 +348,22 @@ stylistic preference:
   plus a five-beat staggered text cascade, `[data-mission-image]`/
   `[data-mission-reveal]` — see that module's own comment for why it
   needed a genuinely different MECHANISM, not just different numbers,
-  to read as distinct from the other three), and `src/lib/
+  to read as distinct from the other three), `src/lib/
   sectorsGridTabs.ts` (SectorsGrid's tab-switch panel crossfade — a
-  genuinely different SHAPE of motion module from the other four: it's
+  genuinely different SHAPE of motion module from the others: it's
   not a scroll-triggered entrance at all, it's a click/keyboard-driven
   state-change animation, so it has no `ScrollTrigger`/`[data-reveal]`-
   style marker and isn't queried by `initScrollReveal()`; see PR #22
-  below and that module's own comment for the full mechanism). Each of
-  these five is a real, deliberate design decision about which shape of
-  motion suits that specific section — don't assume any of them is the
-  "default" pattern a sixth section should just copy; read the specific
+  below and that module's own comment for the full mechanism), and
+  `src/lib/sectorsGridReveal.ts` (SectorsGrid's OWN scroll-triggered
+  entrance, added in PR #22's own revision round, NOT present in that
+  section's original build — a genuinely fourth motion SHAPE distinct
+  from all three scroll-entrance modules above it: a divider line-draw
+  via `scaleX`, a horizontal (not the usual vertical) tab cascade, and
+  one panel fade+scale, one shared trigger). Each of these six is a
+  real, deliberate design decision about which shape of motion suits
+  that specific section — don't assume any of them is the "default"
+  pattern a seventh section should just copy; read the specific
   section's own brief first.
 - **Framer Motion is scoped to exactly two React islands** —
   `NavDrawer.tsx` and `ContactForm.tsx` — and only for their own local
@@ -802,6 +828,111 @@ log` alone. Newest first; each PR number is on `origin/main`.
   see that paragraph earlier in this entry, right after the TAB VISUAL
   MECHANISM section, for the full account rather than repeating it
   here.)
+
+  **REVISION ROUND, same PR #22, same session — six changes from live
+  review feedback, added as commits on the same branch rather than a
+  fresh PR #23** (this is a revision of unmerged work, not a new unit of
+  work). Full derivation/reasoning for every item below lives in
+  `SectorsGrid.astro`'s own updated top-of-file comment and `src/lib/
+  sectorsGridReveal.ts`'s own new comment — condensed here, not
+  duplicated in full:
+
+  1. **Heading** — `SectionHeading` now `align="center"`, "Who We
+     Protect" (was sentence case). Real finding surfaced before either
+     change: no sitewide precedent exists for "heading centred, content
+     left" (the only prior centring precedent, `ClosingCta`, centres its
+     WHOLE section) — proceeded per direct instruction anyway, since
+     `SectionHeading`'s own `align` prop only affects its own wrapper,
+     with zero cascading effect on the tab bar/panel below. Case fix
+     ALSO flagged, not silently treated as resolving a real
+     inconsistency: a fresh survey found `ServicesGrid`'s own "Services
+     We Offer" is the OUTLIER (Title Case), not the rule — `ClosingCta`/
+     `MissionBand`/this section's own prior text were all sentence case.
+     Both findings are now folded into the "Left-aligned by default"
+     hard rule's own updated text above (a second, narrower centring
+     exception) — the heading-case question has no sitewide rule to
+     update, so it's flagged only in `SectorsGrid.astro`'s own comment.
+  2. **Mobile tabs** — `flex-wrap` reversed to a single-line
+     `overflow-x-auto` scroll row, on direct instruction, explicitly NOT
+     a case of PR #22's original reasoning being wrong (that reasoning —
+     no horizontal-scroll precedent existed anywhere in this codebase —
+     is still true; the risk it named is now accepted and mitigated
+     instead of avoided). Hidden native scrollbar (a new scoped
+     `<style>` block, the first hidden-scrollbar technique anywhere in
+     this codebase) + a `mask-image` edge-fade signal more tabs exist
+     off-screen.
+  3. **Colour fills** — two of six tabs (Events → Electric Blue,
+     Corporate → Magenta) reuse `ServicesGrid.astro`'s exact two accent
+     hues, per direct instruction — but NOT its real ratio: ServicesGrid
+     is actually 3 coloured : 3 light, not 2:4 as the brief assumed,
+     flagged rather than silently reconciled either way. Broke the
+     existing Ink-hover/Amber-active indicator scheme (invisible/non-
+     compliant on a coloured fill) — real, freshly-computed numbers
+     showed Amber fails as a universal fix (≈2.41:1 vs Electric Blue,
+     though it passes ≈3.38:1 vs Magenta); rebuilt coloured tabs' own
+     indicator on Paper instead (their own already-established text
+     colour) — solid `border-paper` active (~5.17–7.26:1, reusing
+     ServicesGrid's own already-derived numbers), `border-paper/70`
+     hover (a FRESH derivation for this alpha-over-a-coloured-fill
+     context, 55% — light tabs' own value — only reaches ≈2.63:1 against
+     Electric Blue and fails; 70% clears both fills at ≈3.35–4.22:1).
+     Confirmed with the user before implementing, per their own explicit
+     "not obviously right, confirm first" framing.
+  4. **Motion** — a genuinely new, fourth module,
+     `src/lib/sectorsGridReveal.ts` — PR #22 originally shipped this
+     section with NO scroll entrance at all (deliberate at the time,
+     matching the equally-absent entrance on the `SectorsStrip.astro`
+     it replaced); closed now on direct instruction. Distinct from all
+     THREE existing motion shapes on this site (not just the two the
+     brief named) — a divider line-draw (`scaleX` on a NEW dedicated
+     `[data-sectors-line]` element, since the tablist's own native
+     border couldn't be animated independently of its children) +
+     horizontal tab cascade (x-axis, not this site's usual y-rise) + one
+     panel fade+scale, one shared `ScrollTrigger`. A genuine nice-to-have
+     also landed in the same module: a one-time auto-nudge scroll on the
+     mobile tablist's first scroll-into-view, gated on the row actually
+     overflowing and on `prefers-reduced-motion`.
+  5. **A real regression caught and fixed mid-pass, worth remembering the
+     shape of** — THREE separate instances of the exact "dead CSS from a
+     doc comment" bug this project's own standing convention already
+     warns about were introduced while writing this revision's own new
+     comments (`border-ink/55`, `border-paper/70`, and `flex-wrap`, each
+     mentioned bare/unprefixed in prose where the only real markup usage
+     is `hover:`/`sm:`-prefixed) — caught via the SAME audit discipline
+     PR #22's original pass already used once, confirmed via direct
+     `dist/` inspection before and after each fix. A genuinely
+     UNRELATED, pre-existing, real (non-orphaned) `border-b` compiled
+     rule was also investigated during the same audit and confirmed to
+     trace to `Header.astro`'s own real usage, not a false positive from
+     this pass. One small residual finding, disclosed rather than
+     chased further: a bare `.flex-wrap{flex-wrap:wrap}` rule remains in
+     the compiled output with no traceable source anywhere in `src/`
+     (confirmed via an `overflow-visible` control test that Tailwind
+     does NOT generally generate a bare form from a prefix-only mention)
+     — investigated as far as was proportionate for a ~20-byte unused
+     declaration, not fully explained, flagged honestly rather than
+     either hidden or falsely claimed resolved.
+  6. **Images** — real photos, six House-of-Guards-branded officer
+     images supplied mid-session (a Downloads-folder screenshot,
+     filenames `retail`/`Distribution`/`Corporate`/`Events`/`Health`/
+     `Education.png`), NOT part of this revision round's own explicit
+     ask but landed in the same session before the revision started —
+     see this entry's own IMAGES paragraph above for the full two-phase
+     account (Picsum placeholder → real local assets). Mentioned here
+     only so the "Not started"/"Current status" sections below aren't
+     read as contradicting each other about when this happened.
+
+  A real `astro check` (0 errors throughout every round) and a full
+  `astro build` + direct `dist/` inspection were run after the complete
+  set of six changes (not after each one) — matching the explicit
+  build-efficiency instruction for this revision round — plus the three
+  extra rebuild+recheck cycles the dead-CSS fixes in item 5 required.
+  Confirmed in the FINAL build: 6 tabs (2 coloured, 4 light) with
+  correct `data-fill`/class state, the new line element present with
+  correct classes, heading centred/Title Case, zero `border-ink/55`/
+  `border-paper/70` bare rules, zero `picsum`/`cyan-blue` anywhere, and
+  the new `sectorsGridReveal.ts` module's own markers (`scaleX`,
+  `data-sectors-line`, `dataset.fill`) present in the compiled JS.
 
 - **PR #21 — docs-only correction: `text-fine`'s own comment and this
   file both still said 10px after the project owner changed it directly
@@ -1365,19 +1496,22 @@ paragraphs/button, all on plain Paper with Amber accents), rebuilt from
 the original centred Guard-Green-Deep pull-quote, see PR #20 — sectors
 grid, a tabbed sector explainer (six tabs — Retail, Distribution,
 Corporate, Events, Healthcare, Education — driving a shared, swapping
-two-column image+copy panel, real House-of-Guards-branded officer
-photography, not placeholders), replacing the old plain photo-caption
-strip, see PR #22 — closing CTA, footer, both still on the original
+two-column image+copy panel, centred Title-Case heading, a horizontal-
+scroll mobile tab bar, real House-of-Guards-branded officer photography
+(not placeholders), and its own scroll-triggered entrance motion),
+replacing the old plain photo-caption strip, see PR #22 and its own
+revision-round entry — closing CTA, footer, both still on the original
 Guard Green palette, pending a separate future redesign). Header, Hero,
 StatStrip, ServicesGrid, and MissionBand all run the newer colour
 system (Electric Blue, Magenta, Amber, Cyan-Blue, though MissionBand
-itself only actually uses Amber) — SectorsGrid uses Amber (its button,
-matching the sitewide button convention) and Ink (its active-tab
-underline) but no block-fill accent colour at all, closer in register
-to MissionBand than to Header/Hero/StatStrip/ServicesGrid; Cyan-Blue
-remains fully unused anywhere on the site, including here (see PR #22's
-own note on why it was spec'd for this section and then dropped) —
-ClosingCta is the only section left on Guard Green Secondary, and Guard
+itself only actually uses Amber) — SectorsGrid ALSO now draws on
+Electric Blue and Magenta (two of its six tabs, as real fills — one
+each, added in the PR #22 revision round), plus Amber (its button, the
+sitewide convention) and Ink/Paper (its own two-hue tab-indicator
+scheme, light vs. coloured tabs respectively); Cyan-Blue remains fully
+unused anywhere on the site, including here (see PR #22's own note on
+why it was spec'd for this section and then dropped) — ClosingCta is
+the only section left on Guard Green Secondary, and Guard
 Green Deep's only remaining reference anywhere is `Button.astro`'s own
 dormant `secondary` variant. See the Design system section above for
 the exact, current scope boundary — it has moved twice now, don't

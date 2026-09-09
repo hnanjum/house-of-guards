@@ -24,15 +24,61 @@ import educationPhoto from "../../assets/sectors/education.png";
  * existing tokens/components (Button, NavLink's underline mechanism,
  * MissionBand's two-column panel shape) instead.
  *
- * TAB BAR — a plain `role="tablist"` `flex flex-wrap` row, NOT a
- * horizontal-scroll/snap strip. Checked first, not assumed: no
- * horizontal-scroll pattern exists anywhere else in this codebase (grepped
- * before deciding), so that would have been a brand-new interaction
- * affordance with the usual "is there more to scroll" discoverability
- * problem and no established precedent to lean on. Six one-word labels at
- * `text-caption` sit on one row at `sm:`+ and wrap to a second row on
- * narrow mobile without needing a breakpoint override — `flex-wrap` alone
- * handles it.
+ * SECTION HEADING — centred (`align="center"`), Title Case ("Who We
+ * Protect"), per direct live-review feedback. `SectionHeading`'s own
+ * `align` prop only affects ITS OWN wrapper div (heading + optional
+ * description) — it has no cascading effect on any sibling markup, so
+ * centring just this one element leaves the tab bar and content panel
+ * below fully unaffected, no extra wrapper/override needed anywhere
+ * else. Checked against every other section before applying this: the
+ * ONLY existing centred-alignment precedent anywhere on the site is
+ * `ClosingCta.astro`, and it centres its WHOLE section (heading AND
+ * buttons together) — there is no existing precedent for "heading
+ * centred, content below left-aligned" specifically. Flagged as a real
+ * gap-in-precedent rather than silently treated as equivalent to
+ * ClosingCta's own case; proceeded anyway per direct, explicit
+ * instruction not to force-centre the two-column panel (which would
+ * read badly structurally, per that instruction's own stated reason).
+ * Case fix ("Who we protect" → "Who We Protect") matches
+ * `ServicesGrid.astro`'s own "Services We Offer" — but flagged, not
+ * silently treated as "the established convention": a survey of every
+ * real section heading on this site found `ServicesGrid` to be the
+ * OUTLIER, not the rule — `ClosingCta` ("Ready to talk about your
+ * requirement?"), `MissionBand` ("Meeting your needs, to excellence"),
+ * and this section's own prior text were ALL sentence case. No
+ * documented heading-case rule exists anywhere in CLAUDE.md, and this
+ * section was never deliberately sentence-case for a specific reason —
+ * changed per direct instruction, with the sitewide inconsistency
+ * disclosed rather than silently resolved (ServicesGrid's own heading
+ * is the one still out of step with the majority, unaddressed here).
+ *
+ * TAB BAR — a plain `role="tablist"` row. No longer unconditionally
+ * wrapping — see the MOBILE TAB SCROLL note below for the reversal from this
+ * section's own original PR #22 decision. `sm:`+ still renders every
+ * tab on one row (six short labels fit comfortably at that width, no
+ * scrolling engages there in practice).
+ *
+ * MOBILE TAB SCROLL — REVERSED from PR #22's own original decision,
+ * on direct instruction, not a case of that earlier reasoning having
+ * been wrong. PR #22 chose an unconditionally-wrapping row specifically BECAUSE no
+ * horizontal-scroll pattern existed anywhere else in this codebase at
+ * the time and introducing one carried a real "is there more to
+ * scroll" discoverability risk with no established precedent to lean
+ * on. That risk hasn't gone away — it's now explicitly accepted and
+ * mitigated instead: below `sm:`, the tablist is a single-line
+ * `overflow-x-auto` scroll row (`flex-nowrap`), with the native
+ * scrollbar hidden (a small scoped `<style>` block — `scrollbar-width:
+ * none` / `::-webkit-scrollbar { display: none }` — the first instance
+ * of this technique anywhere in the codebase, kept scoped to this one
+ * component rather than added as a new global utility, since nothing
+ * else needs it yet) and a soft edge-fade `mask-image` gradient on both
+ * sides (transparent → opaque over the first/last ~24px) signalling
+ * that more tabs exist off-screen — the "minimum viable cue" this
+ * task's own brief asked for. `sm:`+ drops both the scroll container
+ * and the mask (`sm:overflow-visible`, mask cleared) since nothing
+ * overflows there. See MOTION below for the one-time auto-nudge
+ * animation added on top of this as a genuine nice-to-have, not a
+ * required part of the fix.
  *
  * TAB VISUAL MECHANISM — reuses `NavLink.astro`'s own established
  * technique verbatim (a `border-b-2` that's transparent at rest, coloured
@@ -78,10 +124,87 @@ import educationPhoto from "../../assets/sectors/education.png";
  *   which is itself large (hue, saturation, and presence/absence, not a
  *   single subtle shift).
  *
+ * TAB FILL — two of six tabs (NOT ServicesGrid's own real 3:3 split —
+ * see below), Electric Blue and Magenta, reusing `ServicesGrid.astro`'s
+ * exact per-item `fill` naming convention. `events.fill = "electric-
+ * blue"` — Electric Blue is this site's "visible/energetic presence"
+ * hue (Manned Guarding, Overnight Security in ServicesGrid); Events is
+ * the most publicly visible, crowd-facing sector here, the closest
+ * thematic match. `corporate.fill = "magenta"` — Magenta is the
+ * "premium/discreet" hue (Close Protection in ServicesGrid); Corporate
+ * reads as the closest match, a higher-trust, longer-running B2B
+ * register. Deliberately NOT Retail (`DEFAULT_SLUG`, the tab shown
+ * active on load) — keeps the initial page state on a plain/light tab,
+ * so a first paint never has to resolve "active indicator on a
+ * coloured fill" before any interaction has happened.
+ *
+ * RATIO — genuinely 2-of-6 here, NOT a literal match to
+ * `ServicesGrid.astro`'s own real fill count, flagged rather than silently
+ * conflated: that section is actually 3 coloured (2 Electric Blue + 1
+ * Magenta) : 3 light, not 2:4. Built to the explicit "2 of 6" instruction
+ * instead — one Electric Blue, one Magenta, ServicesGrid's exact two
+ * hues, just not its exact proportion.
+ *
+ * INDICATOR — the PR #22 scheme (Ink-hover/Amber-active) assumed every
+ * tab sits on Paper; it breaks the moment a tab has its own coloured
+ * fill (Ink is invisible on a dark fill, and Amber isn't universally
+ * safe either — see below). Rather than force one hue to work
+ * everywhere, coloured and light tabs use the SAME grammar (translucent
+ * mark = hover, solid mark = active) with a DIFFERENT foreground hue
+ * per background — light tabs keep Ink/Amber unchanged, coloured tabs
+ * use Paper instead, reusing their own already-established text colour
+ * as the indicator rather than introducing a third hue:
+ *   - Coloured tab, active: solid `border-paper` — reuses
+ *     `ServicesGrid.astro`'s own already-derived white-on-fill numbers (~5.17:1
+ *     Electric Blue, ~7.26:1 Magenta — both AA+, real margin), no fresh
+ *     derivation needed since contrast is a pure function of the two
+ *     colours, unaffected by border-vs-text context.
+ *   - Coloured tab, inactive/hover: Paper at 70% opacity (NOT the light
+ *     tabs' own 55% value) — computed FRESH for this new
+ *     alpha-over-a-coloured-fill context, not assumed to carry over
+ *     from Ink/55's own unrelated derivation: Paper at 55% opacity
+ *     blended over Electric Blue only reaches ≈2.63:1 (fails 3:1); at
+ *     70% it reaches ≈3.35:1 (passes, real margin) — checked against
+ *     Magenta too at the same 70%, ≈4.22:1 (passes with MORE margin,
+ *     since Magenta's own lower luminance means any given light blend
+ *     contrasts harder against it). 70% is therefore the real floor
+ *     for BOTH fills, not a value picked for one and assumed safe for
+ *     the other.
+ *   - Amber was tried FIRST as a universal indicator (matching light
+ *     tabs' own active hue, so one colour would mean "selected"
+ *     everywhere) and rejected on real, freshly-computed numbers, not
+ *     assumed: Amber vs Magenta ≈3.38:1 (passes), but Amber vs Electric
+ *     Blue ≈2.41:1 (fails) — the SAME category of gap already accepted
+ *     twice elsewhere on this site (header-nav underline ~2.15:1,
+ *     MissionBand underline ~2.15:1), but a THIRD instance felt like
+ *     compounding a known pattern rather than genuinely solving this
+ *     one, especially when a fully-compliant alternative (Paper) was
+ *     available without inventing anything new. Not treated as a closed
+ *     decision — flagged to the user with both real options before
+ *     implementing, this is the one they confirmed.
+ *   - `.on-dark` applied directly to each coloured tab `<button>`
+ *     (matches `ServicesGrid.astro`'s own per-card placement, not a
+ *     wrapper) — the default Ink focus ring is invisible on these
+ *     fills, same reasoning as every other Electric-Blue/Magenta
+ *     surface on this site.
+ *   Structurally, hover/active classes stay mutually exclusive per tab
+ *     regardless of fill (see the paragraph above this one) — a
+ *     coloured tab's own hover/active classes swap the SAME way a light
+ *     tab's do, just drawing from the Paper-based pair instead of the
+ *     Amber/Ink one.
+ *
  * PANEL — the two-column MissionBand shape reused directly (image first
- * in DOM/first column, copy second, `md:items-center`, stacks to one
- * column with the image on top below `md:`) rather than inventing a
- * second two-column layout convention. Background is `surface-alt`
+ * in DOM/first column, copy second, `items-center` vertically balancing
+ * the two columns, stacks to one column with the image on top below
+ * `md:`) rather than inventing a second two-column layout convention.
+ * `items-center` is unprefixed on both this panel AND MissionBand's own
+ * — a correction from this comment's own earlier draft, which had
+ * wrongly claimed an `md:`-prefixed version of that same class, caught
+ * during this session's own dead-CSS audit rather than left standing
+ * once found. The identical inaccuracy exists in `MissionBand.astro`'s
+ * own comment too (also never real markup there) — genuinely
+ * out-of-scope to fix in this pass, flagged rather than silently left
+ * for a future session to rediscover. Background is `surface-alt`
  * (a light, neutral, non-accent surface — explicitly NOT a full-colour
  * block fill, matching the brief), padded, no border/shadow — this is
  * ONE panel, not a repeated card grid, so it doesn't trip the "no
@@ -158,17 +281,18 @@ import educationPhoto from "../../assets/sectors/education.png";
  * hand for a REMOTE `src` string, which this isn't (see the placeholder-
  * era note above for when it briefly was).
  *
- * MOTION — tab-switch crossfade only (`src/lib/sectorsGridTabs.ts`), no
- * new scroll-triggered ENTRANCE for this whole section. The brief's own
- * motion requirement is scoped to the tab-switch panel swap; every
- * sibling section already has its own distinct entrance (Hero's muster,
- * StatStrip's/scrollReveal's fade-rise, ServicesGrid's scale+tilt,
- * MissionBand's clip-path unveil) but `SectorsStrip.astro` — the section
- * this replaces — never had one either, so this keeps that same
- * behaviour rather than adding a flourish nobody asked for. `[data-
- * reveal]`/`initScrollReveal()` would be the mechanism to reach for if an
- * entrance is ever wanted here too — nothing new to build, just a marker
- * to add.
+ * MOTION — TWO separate modules now, not one. `src/lib/
+ * sectorsGridTabs.ts` (unchanged from PR #22) still owns the tab-switch
+ * panel crossfade, a click/keyboard-driven state change, not a scroll
+ * entrance. `src/lib/sectorsGridReveal.ts` (NEW, this pass) is this
+ * section's real scroll-triggered entrance — PR #22 originally shipped
+ * with none at all (deliberately, at the time, matching `SectorsStrip
+ * .astro`'s own equally-absent entrance), closed now on direct
+ * instruction. See that module's own top-of-file comment for the full
+ * mechanism (a genuinely fourth motion shape on this site — a divider
+ * line-draw + horizontal tab cascade + a single panel fade+scale, not a
+ * copy of any of the three that already existed) and its own
+ * progressive-enhancement/reduced-motion notes — not repeated here.
  *
  * ICONS — none next to the tab labels. The brief made this conditional
  * ("if sector icons appear... flag if you think this looks wrong"); six
@@ -179,6 +303,8 @@ import educationPhoto from "../../assets/sectors/education.png";
  * restructure.
  */
 
+type TabFill = "electric-blue" | "magenta";
+
 interface Sector {
   slug: string;
   name: string;
@@ -187,7 +313,19 @@ interface Sector {
   blurb: string;
   photo: ImageMetadata;
   alt: string;
+  /** Undefined = plain/light tab (four of six). Set on exactly two
+   * sectors — see this file's own TAB FILL comment above for which and
+   * why. Reuses `ServicesGrid.astro`'s exact naming convention
+   * (`fill`) for a per-item colour assignment. */
+  fill?: TabFill;
 }
+
+// Same shape as `ServicesGrid.astro`'s own `FILL_CLASS` — keyed off
+// each SECTORS entry's own `fill`, never derived from index/position.
+const TAB_FILL_CLASS: Record<TabFill, string> = {
+  "electric-blue": "on-dark bg-electric-blue text-paper",
+  magenta: "on-dark bg-magenta text-paper",
+};
 
 const SECTORS: Sector[] = [
   {
@@ -219,6 +357,7 @@ const SECTORS: Sector[] = [
       "Front-of-house officers who represent your brand as well as protect it — managing access, visitors, and incidents with the same discretion your clients expect from every other part of the building.",
     photo: corporatePhoto,
     alt: "A House of Guards officer standing beside security turnstiles in a corporate office lobby, with a receptionist at the front desk behind him.",
+    fill: "magenta",
   },
   {
     slug: "events",
@@ -229,6 +368,7 @@ const SECTORS: Sector[] = [
       "SIA-licensed teams for corporate functions, private events, and public gatherings — planning access flow and crowd safety before doors open, then managing it calmly throughout.",
     photo: eventsPhoto,
     alt: "A House of Guards officer wearing a hi-vis armband, standing beside a crowd barrier as a large crowd gathers outside a stadium.",
+    fill: "electric-blue",
   },
   {
     slug: "healthcare",
@@ -257,13 +397,13 @@ const DEFAULT_SLUG = SECTORS[0].slug;
 
 <section class="bg-paper">
   <div class="mx-auto max-w-7xl px-gutter py-24 md:px-12">
-    <SectionHeading level="h2">Who we protect</SectionHeading>
+    <SectionHeading level="h2" align="center">Who We Protect</SectionHeading>
 
     <div
       role="tablist"
       aria-label="Sectors we operate in"
       data-sectors-tablist
-      class="border-hairline mt-12 flex flex-wrap gap-x-8 gap-y-3 border-b"
+      class="sectors-tablist-scroll mt-12 flex flex-nowrap items-end gap-x-8 gap-y-3 overflow-x-auto sm:flex-wrap sm:overflow-visible"
     >
       {
         SECTORS.map((sector) => {
@@ -278,9 +418,16 @@ const DEFAULT_SLUG = SECTORS[0].slug;
               tabindex={isActive ? 0 : -1}
               data-sector-tab
               data-slug={sector.slug}
+              data-fill={sector.fill ?? ""}
               class:list={[
-                "text-caption text-ink border-b-2 pb-3 transition-colors duration-200 ease-out",
-                isActive ? "border-amber" : "border-transparent hover:border-ink/55",
+                "text-caption border-b-2 pb-3 shrink-0 transition-colors duration-200 ease-out",
+                sector.fill
+                  ? [
+                      TAB_FILL_CLASS[sector.fill],
+                      "px-4 pt-2",
+                      isActive ? "border-paper" : "border-transparent hover:border-paper/70",
+                    ]
+                  : ["text-ink", isActive ? "border-amber" : "border-transparent hover:border-ink/55"],
               ]}
             >
               {sector.name}
@@ -289,6 +436,8 @@ const DEFAULT_SLUG = SECTORS[0].slug;
         })
       }
     </div>
+
+    <div data-sectors-line aria-hidden="true" class="bg-hairline h-px w-full origin-left"></div>
 
     <div class="mt-12">
       {
@@ -334,3 +483,37 @@ const DEFAULT_SLUG = SECTORS[0].slug;
     </div>
   </div>
 </section>
+
+<style>
+  /* Scoped to this component — first use of a hidden-scrollbar +
+     edge-fade horizontal-scroll row anywhere in this codebase, so kept
+     local rather than promoted to a new global.css utility until a
+     second consumer actually needs it. Native scrollbar hidden below
+     `sm:` only (matches the element's own scroll/non-scroll
+     breakpoint split) — both vendor-prefixed
+     forms needed for real cross-browser coverage (Firefox/`scrollbar-
+     width`, WebKit/`::-webkit-scrollbar`), neither alone is enough.
+     The edge-fade is a `mask-image` gradient, not extra DOM elements —
+     transparent at the very edges, fully opaque by 24px in, so it only
+     ever touches the outermost sliver of whichever tab currently sits
+     at each edge (the intended cue that content continues off-screen,
+     not a defect). Cleared entirely at `sm:`+, where the row no longer
+     scrolls at all. */
+  .sectors-tablist-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent);
+    mask-image: linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent);
+  }
+
+  .sectors-tablist-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .sectors-tablist-scroll {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+</style>

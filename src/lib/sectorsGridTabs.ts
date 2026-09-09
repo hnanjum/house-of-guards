@@ -43,14 +43,37 @@ const TABLIST_SELECTOR = "[data-sectors-tablist]";
 const TAB_SELECTOR = "[data-sector-tab]";
 const PANEL_SELECTOR = "[data-sector-panel]";
 
-const ACTIVE_CLASSES = ["border-amber"];
-const INACTIVE_CLASSES = ["border-transparent", "hover:border-ink/55"];
+// Two indicator vocabularies, keyed off whether a tab carries a
+// `data-fill` value (set from SectorsGrid.astro's own `sector.fill`,
+// "" for the four plain/light tabs) — see that file's own INDICATOR
+// doc comment for the full derivation of why coloured tabs need a
+// different foreground hue (Paper, not Ink/Amber) to stay readable and
+// WCAG-compliant on their own background. Every class ever applied by
+// EITHER vocabulary is listed in its own removal array so switching a
+// tab between light/coloured states (impossible today, since `fill`
+// is fixed per sector — kept anyway as a correctness guard, not a
+// live requirement) can never leave a stale class behind.
+const LIGHT_ACTIVE_CLASSES = ["border-amber"];
+const LIGHT_INACTIVE_CLASSES = ["border-transparent", "hover:border-ink/55"];
+const FILL_ACTIVE_CLASSES = ["border-paper"];
+const FILL_INACTIVE_CLASSES = ["border-transparent", "hover:border-paper/70"];
+const ALL_INDICATOR_CLASSES = [
+  ...LIGHT_ACTIVE_CLASSES,
+  ...LIGHT_INACTIVE_CLASSES,
+  ...FILL_ACTIVE_CLASSES,
+  ...FILL_INACTIVE_CLASSES,
+];
 
 function setTabState(tab: HTMLElement, active: boolean) {
   tab.setAttribute("aria-selected", active ? "true" : "false");
   tab.tabIndex = active ? 0 : -1;
-  tab.classList.remove(...ACTIVE_CLASSES, ...INACTIVE_CLASSES);
-  tab.classList.add(...(active ? ACTIVE_CLASSES : INACTIVE_CLASSES));
+
+  const isFilled = Boolean(tab.dataset.fill);
+  const activeClasses = isFilled ? FILL_ACTIVE_CLASSES : LIGHT_ACTIVE_CLASSES;
+  const inactiveClasses = isFilled ? FILL_INACTIVE_CLASSES : LIGHT_INACTIVE_CLASSES;
+
+  tab.classList.remove(...ALL_INDICATOR_CLASSES);
+  tab.classList.add(...(active ? activeClasses : inactiveClasses));
 }
 
 function crossfadePanel(outgoing: HTMLElement, incoming: HTMLElement) {
