@@ -217,7 +217,7 @@ stylistic preference:
   different way now — every new hue is a real, named, WCAG-checked
   token in `global.css`, not a bracket value or a one-off. **The rule
   STILL FULLY APPLIES, unchanged, everywhere else on the site** —
-  `MissionBand.astro`, `ClosingCta.astro`, `SectorsStrip.astro`, the
+  `MissionBand.astro`, `ClosingCta.astro`, `SectorsGrid.astro`, the
   Footer, and every future page/section — no blue, no gold/amber fill,
   no cream, no purple/terracotta, until a similarly explicit
   instruction extends the new palette there. Don't reach for Electric
@@ -276,10 +276,15 @@ stylistic preference:
   hierarchy). There are now genuinely THREE sanctioned card-shaped
   treatments for services/sectors-shaped content, not the original
   two: `ServicesGrid.astro` (solid alternating-colour cards, no
-  border/shadow — services) and `SectorsStrip.astro` (an edge-to-edge
-  photo strip with hairline seams — sectors). Don't build a FOURTH
-  variant, and don't add a border/shadow treatment to either existing
-  one, without the same kind of explicit instruction this one had.
+  border/shadow — services). `SectorsStrip.astro`'s own edge-to-edge
+  photo-strip treatment (the second variant this rule used to name) is
+  now RETIRED — see PR #22 below — replaced by `SectorsGrid.astro`, a
+  tabbed sector explainer that isn't a repeated card grid at all (one
+  panel swaps per tab, not six cards shown together), so it sits
+  entirely outside this rule's scope rather than being a third variant
+  of it. Don't build a card-grid-shaped FOURTH treatment, and don't add
+  a border/shadow to `ServicesGrid.astro`, without the same kind of
+  explicit instruction PR #16 had.
 - **Left-aligned by default.** Centered alignment exists in exactly ONE
   sanctioned place sitewide now: the closing CTA leading into the footer
   (`ClosingCta`). **This dropped from two to one on direct instruction**
@@ -310,7 +315,7 @@ stylistic preference:
 - **GSAP + ScrollTrigger + Lenis** (`src/lib/smoothScroll.ts`) are the
   primary tools for scroll-based and page-load animation — Lenis is
   wired into GSAP's own ticker so `ScrollTrigger` stays in sync with
-  Lenis's scroll position rather than the native scroll event. Four
+  Lenis's scroll position rather than the native scroll event. Five
   small, section-scoped modules exist on top of it, each wired into
   `index.astro`'s own `astro:page-load` handler: `src/lib/heroMuster.ts`
   (the homepage hero's one orchestrated LOAD-triggered sequence — the
@@ -318,16 +323,22 @@ stylistic preference:
   view on load), `src/lib/scrollReveal.ts` (a plain generic fade/rise,
   `[data-reveal]`, used by StatStrip), `src/lib/servicesGridReveal.ts`
   (ServicesGrid's own scale+tilt entrance, `[data-services-reveal]`,
-  one independent trigger PER card), and `src/lib/missionReveal.ts`
+  one independent trigger PER card), `src/lib/missionReveal.ts`
   (MissionBand's own two-part entrance — a pure clip-path image unveil
   plus a five-beat staggered text cascade, `[data-mission-image]`/
   `[data-mission-reveal]` — see that module's own comment for why it
   needed a genuinely different MECHANISM, not just different numbers,
-  to read as distinct from the other three). Each of these four is a
-  real, deliberate design decision about which shape of motion suits
-  that specific section — don't assume any of them is the "default"
-  pattern a fifth section should just copy; read the specific section's
-  own brief first.
+  to read as distinct from the other three), and `src/lib/
+  sectorsGridTabs.ts` (SectorsGrid's tab-switch panel crossfade — a
+  genuinely different SHAPE of motion module from the other four: it's
+  not a scroll-triggered entrance at all, it's a click/keyboard-driven
+  state-change animation, so it has no `ScrollTrigger`/`[data-reveal]`-
+  style marker and isn't queried by `initScrollReveal()`; see PR #22
+  below and that module's own comment for the full mechanism). Each of
+  these five is a real, deliberate design decision about which shape of
+  motion suits that specific section — don't assume any of them is the
+  "default" pattern a sixth section should just copy; read the specific
+  section's own brief first.
 - **Framer Motion is scoped to exactly two React islands** —
   `NavDrawer.tsx` and `ContactForm.tsx` — and only for their own local
   interactive transitions (drawer slide, status-message fade). Never use
@@ -444,7 +455,7 @@ treatment for these icons without a real reason to.
   plain sentence-case supporting line below the heading — a legitimate,
   different thing from a tracked-caps label above it.
 - Homepage-specific sections live in `src/components/home/` (`Hero`,
-  `StatStrip`, `ServicesGrid`, `MissionBand`, `SectorsStrip`,
+  `StatStrip`, `ServicesGrid`, `MissionBand`, `SectorsGrid`,
   `ClosingCta`), assembled in `src/pages/index.astro`. Shared
   primitives live in `src/components/ui/`. (`ServicesGrid`'s own
   predecessor, `ServicesIndex.astro`, lived directly under
@@ -568,6 +579,229 @@ treatment for these icons without a real reason to.
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number is on `origin/main`.
+
+- **PR #22 — `SectorsStrip.astro`'s plain 2×3 photo-caption grid
+  replaced outright by `SectorsGrid.astro`, a tabbed sector explainer:
+  six tabs (Retail, Distribution, Corporate, Events, Healthcare,
+  Education) drive a shared, swapping two-column image+copy panel.
+  `SectorsStrip.astro` is DELETED, not kept alongside this — same
+  precedent as `ServicesIndex.astro`'s own retirement when
+  `ServicesGrid.astro` replaced it.
+
+  **STRUCTURAL REFERENCE ONLY** — uk.loomis.com's "Why Loomis" module
+  confirmed the interaction shape (tabs driving one shared content
+  panel); nothing about their colours, wavy border, tab shape, or dark
+  background was carried over — every visual decision reuses this
+  project's own existing tokens/components instead (see below).
+
+  **TAB BAR** — a plain `role="tablist"` `flex flex-wrap` row, NOT a
+  horizontal-scroll/snap strip — checked first via a repo grep that no
+  such pattern exists anywhere else in this codebase before deciding,
+  rather than introducing a brand-new interaction affordance with no
+  precedent and the usual "is there more to scroll" discoverability
+  problem. Six one-word labels at `text-caption` sit on one row at
+  `sm:`+ and wrap to a second row on narrow mobile for free.
+
+  **TAB VISUAL MECHANISM** — reuses `NavLink.astro`'s own established
+  technique verbatim (a `border-b-2` that's transparent at rest,
+  coloured on hover/active, `transition-colors`) instead of inventing a
+  second way to draw an underline. Three states: inactive/rest
+  (transparent), inactive/hover (Ink at 55% opacity — see the
+  Cyan-Blue note below for why), active/selected (solid Amber, reusing
+  the already-accepted header-nav/MissionBand bare-mark pairing,
+  ~2.15:1, PR #18). Hover and active classes are structurally mutually
+  exclusive per tab (swapped wholesale by `sectorsGridTabs.ts` on every
+  state change) — never left coexisting on the same element, since a
+  `:hover` pseudo-class rule is MORE specific than a plain class rule
+  and would silently mask an active tab's own Amber underline the
+  moment it's hovered if both were present at once.
+
+  **CYAN-BLUE — spec'd, then DROPPED before any code was written, a
+  real contrast finding, not a style change.** The original brief named
+  Cyan-Blue for the tab hover underline ("intentionally the first real
+  use of Cyan-Blue in the project"). Recomputed fresh, per this
+  project's own standing "never assume a finding carries over, verify
+  every new pairing" discipline: Cyan-Blue as a bare mark on Paper is
+  ~2.77:1 — FAILS the WCAG 1.4.11 3:1 non-text floor outright (this
+  actually matches global.css's own pre-existing note on this exact
+  token, missed when the brief was written). Flagged before writing any
+  component code; the explicit decision was to drop Cyan-Blue entirely
+  (it remains fully unused anywhere in this codebase — global.css's own
+  token comment is unchanged, still describing it as "ready for the
+  next pass that actually needs it") and use Ink at 55% opacity for the
+  hover underline instead, distinguishing hover from active by WEIGHT
+  (translucent Ink vs. solid Amber) rather than by a second hue. Ink/55
+  was itself computed fresh for this new use, not assumed compliant by
+  relative darkness: sRGB blend ≈0.478 → linear luminance ≈0.194 →
+  contrast ≈4.30:1 — clears 3:1 with real margin, not a thin pass like
+  the Amber active-underline it sits next to.
+
+  **A real "dead CSS from a doc comment" bug, caught and fixed during
+  this same pass** — the exact failure class CLAUDE.md's own standing
+  convention already warns about (see that convention's own entry
+  above), hit for real here: an early draft of this component's own
+  top-of-file comment quoted the bare token `` `border-ink/55` `` (no
+  `hover:` prefix) in prose, twice — but the ONLY real markup usage
+  anywhere in the file is the full `hover:border-ink/55` string. This
+  generated a genuine, orphaned `.border-ink\/55{...}` rule (confirmed
+  present in the compiled `dist/` output before the fix, confirmed gone
+  after it) with zero real call site — Tailwind's scanner does
+  plain-text matching across comments too, not comment-aware parsing.
+  Fixed by rewording both mentions to prose rather than re-quoting the
+  bare class-shaped string.
+
+  **PANEL** — the two-column `MissionBand.astro` shape reused directly
+  (image first in DOM/first column, copy second, stacks to one column
+  on mobile) rather than inventing a second two-column convention.
+  Background is `surface-alt` (a light, neutral, non-accent surface),
+  padded, no border/shadow — this is ONE panel, not a repeated card
+  grid, so the "no identical bordered/shadowed card grids" hard rule
+  doesn't apply to it either way (see that rule's own updated text
+  above for the fuller "SectorsStrip's old card-shaped treatment is
+  retired, this isn't a new instance of the pattern at all" note).
+
+  **CAPTION** — plain sentence case ("Retail security", etc.), Ink,
+  DELIBERATELY NOT tracked-caps/uppercase. The brief asked for a
+  "caption" in the panel's content order and specified its colour
+  (Ink, not Amber — referencing MissionBand's own caption-contrast bug
+  by name) but did not name specific tracked-caps copy or invoke the
+  hard rule's own override clause the way MissionBand's brief did
+  (that rule bans tracked-caps eyebrow labels above headings by
+  default; MissionBand's "Our mission" is the one existing exception,
+  built on a direct instruction naming that exact label). Flagged as a
+  judgment call at build time rather than silently assumed either way
+  — this stays plain sentence case unless a fresh, explicit instruction
+  says otherwise, per CLAUDE.md's own "don't read one exception as
+  licence for a third" rule.
+
+  **HEADLINE SIZE** — `text-h3` (28px), not MissionBand's own `text-h2`
+  (40px): this section already has a `text-h2` main heading ("Who we
+  protect") above the tab bar, and giving each swapping panel its own
+  `text-h2` too would put two same-weight headings on screen at once.
+  `text-h3` is this project's own documented "sub-heads, service names"
+  step — the correct register for something subordinate to the
+  section's real `<h2>`.
+
+  **IMAGES — six REAL, FINAL assets, not placeholders**, though this
+  went through two real phases in one session, worth recording
+  honestly. Phase 1 (before any code was written, per an explicit
+  decision at the time): Lorem Picsum placeholders, since no
+  image-generation capability existed in the environment this
+  component was built in — the same interim status `SectorsStrip.astro`
+  's own six photos always had. Routed through `astro:assets`' `<Image
+  />` per the brief (never a plain `<img>`) — this hit a real, concrete
+  build failure before it worked, not a hypothetical one: `picsum.
+  photos` 302-redirects every request to a signed `fastly.picsum.
+  photos` URL, and Astro's image pipeline refuses to follow a redirect
+  to a host that isn't ALSO on the `astro.config.mjs` `image.domains`
+  allowlist — listing only `picsum.photos` threw "not an allowed remote
+  location" for all six images at build time. Fixed by allowlisting
+  both hosts.
+
+  Phase 2 (SAME session, mid-implementation): the user supplied six
+  real photos directly (a Downloads-folder screenshot, filenames
+  `retail`/`Distribution`/`Corporate`/`Events`/`Health`/`Education.png`)
+  — genuine House-of-Guards-branded officer photography (an officer in
+  a "HOUSE OF GUARDS" jacket/vest, back-to-camera or profile, one real
+  environment per sector: a retail high street, a distribution yard
+  with two branded lorries, a corporate lobby with turnstiles and a
+  reception desk, a stadium crowd barrier with a hi-vis armband, a
+  hospital reception/corridor, a school's main gate with a visitor).
+  Copied into `src/assets/sectors/{retail,distribution,corporate,
+  events,healthcare,education}.png` (`healthcare`/`education` renamed
+  from the supplied `Health`/`Education` to match this component's own
+  slug set) and switched to LOCAL imports through `astro:assets`,
+  matching `hero-officer.png`/`mission-team.png`'s exact convention —
+  the `picsum.photos`/`fastly.picsum.photos` remote-domain allowlist
+  from Phase 1 was removed from `astro.config.mjs` again, since nothing
+  in the final component uses a remote image source at all. Real,
+  written-not-generic alt text for each (checked by actually viewing
+  every photo before writing its description, matching this project's
+  own `mission-team.png`-alt-text discipline — not a templated "sector
+  name — photograph" string).
+
+  REAL native-ratio geometry, checked via `sharp` metadata before
+  choosing a crop, not guessed (same discipline `Hero.astro`'s and
+  `MissionBand.astro`'s own comments already establish): all SIX real
+  photos are 1536×1024, exactly 3:2 — byte-identical dimensions across
+  the whole set, and an EXACT match to the panel's `aspect-[3/2]` image
+  slot, so `object-cover` performs genuinely zero crop on any of the
+  six (no edge-strip inspection needed the way `mission-team.png`'s own
+  asymmetric-content check needed one — the ratio match itself already
+  proves it). No explicit `width`/`height` prop on the final `<Image
+  />` call, matching `mission-team.png`'s own call exactly — a local
+  imported asset's native size is already known to Astro's build
+  pipeline from the import, so `widths`/`sizes` alone are sufficient;
+  `width`/`height` were only ever needed by hand during Phase 1's
+  remote-`src` placeholder path. Real compression win, confirmed via
+  the actual build log, not assumed: each 1.8–2.0MB source PNG compiled
+  down to 10–102KB per responsive `webp` variant (5 widths × 6 photos =
+  30 real optimized files, confirmed present in `dist/_astro/`).
+
+  **MOTION** — `src/lib/sectorsGridTabs.ts`, a new module, genuinely
+  different in SHAPE from every other motion module on this site: not
+  a scroll-triggered entrance at all (no `ScrollTrigger`, no
+  `[data-reveal]` marker, not picked up by `initScrollReveal()`), a
+  click/keyboard-driven panel crossfade instead. Sequential fade-out-
+  then-fade-in (NOT a true simultaneous overlap crossfade) — a
+  deliberate choice to avoid ever having two full two-column panels
+  laid out and occupying grid space at the same moment mid-transition,
+  which this project's own standing convention explicitly flags as a
+  real layout-jump risk that no amount of compiled-output inspection
+  could catch (and there's no local preview available here to render-
+  check one against). Full ARIA tab pattern (WAI-ARIA APG "Tabs with
+  Automatic Activation" — arrow-key movement both moves focus and
+  selects/shows that tab's panel, Home/End jump to first/last, roving
+  `tabindex`) built by hand — no existing tab component anywhere in
+  this codebase to reuse. `prefers-reduced-motion`: an instant swap, no
+  GSAP tween at all, with any leftover inline opacity/`y` styles from a
+  prior transition explicitly cleared (`clearProps`) before toggling
+  `[hidden]`, so a runtime preference change mid-session can't leave a
+  panel stuck at partial opacity.
+
+  **ICONS** — none added next to the tab labels. The brief made this
+  conditional; six new bespoke icon files felt like real scope beyond
+  what was asked, and `NavLink.astro`'s own plain-text convention (no
+  icon on any nav-style link anywhere on the site) was the closer
+  precedent. Flagged, not silently decided — icons are a one-line
+  addition to the tab markup if actually wanted.
+
+  **LINKS** — each panel's button points at `/sectors/<slug>` (`retail`,
+  `distribution`, `corporate`, `events`, `healthcare`, `education`) —
+  none of these routes exist yet. Confirmed via a real `astro build`
+  (not assumed) that a plain `<a href>` to a not-yet-created static
+  route does NOT fail the build — Astro only validates route
+  resolution for `getStaticPaths`/dynamic-route params, not for a
+  bare anchor href — so these are dead links today by design, ready for
+  the interior `/sectors/*` pages whenever those get built.
+
+  Multiple clean `astro check` runs (0 errors throughout, 37 files,
+  same 2 pre-existing `ContactForm.tsx` hints) and five `astro build`
+  runs across both image phases were run before calling this done, not
+  one build followed by an assumption the rest still held: build 1
+  (Picsum, `picsum.photos` only in `image.domains`) genuinely FAILED —
+  the redirect-to-`fastly.picsum.photos` error above; build 2 (both
+  hosts allowlisted) succeeded, and its compiled output is what
+  surfaced the dead-CSS `border-ink/55` bug below; build 3 confirmed
+  that fix; build 4, after the real photos replaced the placeholders
+  entirely (new local imports, `image.domains` removed again, alt text
+  rewritten), succeeded and is where the 30-real-`webp`-variant
+  compression numbers above come from; build 5, after two further
+  comment-only corrections (a typo, and a wrong claim that `width`/
+  `height` were passed explicitly for the final local-asset `<Image
+  />` call — they aren't, matching `mission-team.png`'s own
+  convention), confirmed nothing regressed. The FINAL compiled-`dist/`
+  output (post-build-5, not an earlier one) was inspected directly: 6
+  tabs, 6 panels, 6 `/sectors/*` hrefs, exactly 5 hidden panels + 1
+  `aria-selected="true"` at load, the real `border-ink/55:hover` rule
+  present with the correct `color-mix` opacity, zero `cyan-blue` and
+  zero `picsum` anywhere in the output, and all six real, hand-written
+  alt strings present in the rendered HTML.
+
+  (Build 2 → 3 above is the real "dead CSS from a doc comment" bug —
+  see that paragraph earlier in this entry, right after the TAB VISUAL
+  MECHANISM section, for the full account rather than repeating it
+  here.)
 
 - **PR #21 — docs-only correction: `text-fine`'s own comment and this
   file both still said 10px after the project owner changed it directly
@@ -1129,18 +1363,33 @@ image+text section (a genuine AI-generated team photo, not a Picsum
 placeholder, plus an "Our mission" caption/headline/underline/two
 paragraphs/button, all on plain Paper with Amber accents), rebuilt from
 the original centred Guard-Green-Deep pull-quote, see PR #20 — sectors
-strip, closing CTA, footer, both still on the original Guard Green
-palette, pending a separate future redesign). Header, Hero, StatStrip,
-ServicesGrid, and now MissionBand all run the newer colour system
-(Electric Blue, Magenta, Amber, Cyan-Blue, though MissionBand itself
-only actually uses Amber) — ClosingCta is the only section left on
-Guard Green Secondary, and Guard Green Deep's only remaining reference
-anywhere is `Button.astro`'s own dormant `secondary` variant. See the
-Design system section above for the exact, current scope boundary —
-it has moved twice now, don't assume either older framing still holds.
+grid, a tabbed sector explainer (six tabs — Retail, Distribution,
+Corporate, Events, Healthcare, Education — driving a shared, swapping
+two-column image+copy panel, real House-of-Guards-branded officer
+photography, not placeholders), replacing the old plain photo-caption
+strip, see PR #22 — closing CTA, footer, both still on the original
+Guard Green palette, pending a separate future redesign). Header, Hero,
+StatStrip, ServicesGrid, and MissionBand all run the newer colour
+system (Electric Blue, Magenta, Amber, Cyan-Blue, though MissionBand
+itself only actually uses Amber) — SectorsGrid uses Amber (its button,
+matching the sitewide button convention) and Ink (its active-tab
+underline) but no block-fill accent colour at all, closer in register
+to MissionBand than to Header/Hero/StatStrip/ServicesGrid; Cyan-Blue
+remains fully unused anywhere on the site, including here (see PR #22's
+own note on why it was spec'd for this section and then dropped) —
+ClosingCta is the only section left on Guard Green Secondary, and Guard
+Green Deep's only remaining reference anywhere is `Button.astro`'s own
+dormant `secondary` variant. See the Design system section above for
+the exact, current scope boundary — it has moved twice now, don't
+assume either older framing still holds.
 
 **Not started**: the interior pages — About, Careers, Our Policies,
-Gallery, Contact. All still need building.
+Gallery, Contact, plus the six new `/sectors/<slug>` pages SectorsGrid's
+own "Learn more" buttons now link to (`retail`/`distribution`/
+`corporate`/`events`/`healthcare`/`education`) — none of these routes
+exist yet (confirmed via a real `astro build` that a dead internal link
+doesn't fail the build, so this is a known, disclosed gap, not an
+oversight). All still need building.
 
 **Going forward, design work on this project is reference-driven, not
 brief-driven.** Expect to be handed actual screenshots/mockups and asked

@@ -1,0 +1,336 @@
+---
+import { Image } from "astro:assets";
+import SectionHeading from "../ui/SectionHeading.astro";
+import Button from "../ui/Button.astro";
+import retailPhoto from "../../assets/sectors/retail.png";
+import distributionPhoto from "../../assets/sectors/distribution.png";
+import corporatePhoto from "../../assets/sectors/corporate.png";
+import eventsPhoto from "../../assets/sectors/events.png";
+import healthcarePhoto from "../../assets/sectors/healthcare.png";
+import educationPhoto from "../../assets/sectors/education.png";
+
+/**
+ * Replaces `SectorsStrip.astro` (deleted outright, not kept alongside this
+ * — matches how `ServicesIndex.astro` was retired when `ServicesGrid.astro`
+ * replaced it) — a 2x3 photo-caption grid with no interactivity — with a
+ * tabbed sector explainer: six tabs drive a shared, swapping two-column
+ * image+copy panel below.
+ *
+ * STRUCTURAL REFERENCE ONLY — uk.loomis.com's "Why Loomis" module was used
+ * to confirm the interaction shape (a tab bar switching a shared content
+ * panel), nothing else. No colours, no wavy border, no tab shape, no dark
+ * background were carried over from it — those are Loomis's brand identity,
+ * not ours; every visual decision below comes from this project's own
+ * existing tokens/components (Button, NavLink's underline mechanism,
+ * MissionBand's two-column panel shape) instead.
+ *
+ * TAB BAR — a plain `role="tablist"` `flex flex-wrap` row, NOT a
+ * horizontal-scroll/snap strip. Checked first, not assumed: no
+ * horizontal-scroll pattern exists anywhere else in this codebase (grepped
+ * before deciding), so that would have been a brand-new interaction
+ * affordance with the usual "is there more to scroll" discoverability
+ * problem and no established precedent to lean on. Six one-word labels at
+ * `text-caption` sit on one row at `sm:`+ and wrap to a second row on
+ * narrow mobile without needing a breakpoint override — `flex-wrap` alone
+ * handles it.
+ *
+ * TAB VISUAL MECHANISM — reuses `NavLink.astro`'s own established
+ * technique verbatim (a `border-b-2` that's transparent at rest, coloured
+ * on hover/active, `transition-colors` — never a layout-shifting border
+ * that only appears on state change) rather than inventing a second way to
+ * draw an underline on this site. Three states, not two:
+ *   - Inactive, rest: `border-transparent` — Ink text always, no colour
+ *     change to the text itself, matching NavLink's own "text colour never
+ *     carries the accent" rule.
+ *   - Inactive, hover: Ink at 55% opacity, NOT Cyan-Blue.
+ *     Cyan-Blue was the original spec here but was dropped before writing
+ *     any code — recomputed fresh, its own bare-mark-on-Paper contrast is
+ *     ~2.77:1 (matches global.css's own existing note on this token),
+ *     failing the WCAG 1.4.11 3:1 non-text floor outright. Rather than
+ *     ship a second known-failing bare mark next to the header nav's
+ *     already-accepted Amber underline (~2.15:1), Cyan-Blue was replaced
+ *     with Ink at reduced opacity, checked fresh for THIS use rather than
+ *     assumed compliant by relative darkness: Ink at 55% opacity over
+ *     Paper composites to sRGB ≈0.478 → linear luminance ≈0.194 → contrast
+ *     ≈(1.05)/(0.194+0.05) ≈ 4.30:1 — clears the 3:1 floor with real
+ *     margin (not a thin pass like Amber's own accepted underline).
+ *     Cyan-Blue stays fully unused in this codebase — not applied here,
+ *     not applied anywhere — see global.css's own token comment, which
+ *     still describes it as "ready for the next pass that actually needs
+ *     it," unchanged by this component.
+ *   - Active/selected: solid Amber (`border-amber`), reusing the
+ *     ALREADY-REVIEWED-AND-ACCEPTED header-nav/MissionBand-underline
+ *     bare-mark pairing (~2.15:1, below 3:1, explicitly kept as a settled
+ *     tradeoff in PR #18) — not a new pairing, the same one every other
+ *     "this is the active/selected thing" mark on the site already uses.
+ *     Hover and active never compete for the same element: the hover
+ *     underline class is only ever present in an inactive tab's own class
+ *     list (added/removed by `sectorsGridTabs.ts` on every state change),
+ *     never left sitting alongside `border-amber` — a `:hover` pseudo-class
+ *     rule is MORE specific than a plain class rule, so if both were left
+ *     on the same element the hover rule would silently win and mask the
+ *     active tab's own Amber underline the moment it's hovered. Avoided
+ *     structurally (mutually exclusive class sets swapped wholesale per
+ *     tab), not by relying on source order or a specificity trick.
+ *   `aria-selected` carries the state to assistive tech independently of
+ *   colour — this isn't relying on colour alone (WCAG 1.4.1) even before
+ *   accounting for the Amber-vs-Ink-vs-transparent visual distinction,
+ *   which is itself large (hue, saturation, and presence/absence, not a
+ *   single subtle shift).
+ *
+ * PANEL — the two-column MissionBand shape reused directly (image first
+ * in DOM/first column, copy second, `md:items-center`, stacks to one
+ * column with the image on top below `md:`) rather than inventing a
+ * second two-column layout convention. Background is `surface-alt`
+ * (a light, neutral, non-accent surface — explicitly NOT a full-colour
+ * block fill, matching the brief), padded, no border/shadow — this is
+ * ONE panel, not a repeated card grid, so it doesn't trip the "no
+ * identical bordered/shadowed card grids" hard rule either way, but it's
+ * also just not bordered/shadowed to begin with, matching ServicesGrid's
+ * own light-card treatment.
+ *
+ * CAPTION — plain sentence case (e.g. "Retail security"), Ink,
+ * DELIBERATELY NOT tracked-caps/uppercase. CLAUDE.md's hard rule bans
+ * tracked-caps eyebrow labels above headings; MissionBand's own "Our
+ * mission" caption is the one existing exception, and it exists ONLY
+ * because that exact label text was named in a direct, explicit
+ * instruction invoking the rule's own override clause. This task's brief
+ * asked for a "caption" as part of the panel's content order and named
+ * Ink (not Amber) as its required colour — it did not name specific
+ * tracked-caps copy or invoke the override clause the way MissionBand's
+ * brief did, so this caption stays a plain, quiet label rather than a
+ * third tracked-caps element added on inference. Flag if the tracked-caps
+ * treatment was actually wanted here too — it's a one-line change
+ * (uppercase tracking-[0.14em]), just not the default without a fresh,
+ * explicit ask, per CLAUDE.md's own "don't read one exception as licence
+ * for a third" instruction.
+ *
+ * COLOUR — every pairing on this panel re-derived fresh, not assumed from
+ * elsewhere on the site (new geometry: a photo-heavy two-column panel on
+ * `surface-alt`, not a solid accent fill or plain Paper):
+ *   - Caption/headline/body text: Ink on `surface-alt` (#f5f5f5) —
+ *     ~17.8:1 (AAA), the same number global.css's own `surface-alt` token
+ *     comment already derives for Ink-on-this-fill (ServicesGrid's light
+ *     cards use the identical pairing) — restated here for this new
+ *     context rather than silently assumed to carry over unchanged.
+ *   - Button: the unmodified `Button.astro` `primary` variant (Amber
+ *     fill, Ink text, ~9.05:1 AAA) — no one-off button styling, same
+ *     component every other primary CTA on the site uses.
+ *
+ * HEADLINE SIZE — `text-h3` (28px), not `text-h2` (40px, MissionBand's own
+ * size). This section already has its own `text-h2` main heading ("Who we
+ * protect") sitting above the tab bar; giving each swapping panel ANOTHER
+ * `text-h2` would put two same-weight headings in view at once and blur
+ * which one is the section's real heading. `text-h3` is this project's
+ * own documented "sub-heads, service names" step — the correct register
+ * for a heading that's subordinate to the section's own `<h2>`.
+ *
+ * IMAGES — six REAL, FINAL assets (`src/assets/sectors/{retail,
+ * distribution,corporate,events,healthcare,education}.png`), the same
+ * "real, final asset" status `hero-officer.png`/`mission-team.png`
+ * already carry — NOT placeholders. `SectorsStrip.astro`'s own six
+ * photos were always explicit Lorem Picsum placeholders (see that
+ * file's own now-deleted comment); this component briefly used the
+ * identical placeholder approach too, flagged as an interim decision
+ * before real photos existed, then swapped to these real local assets
+ * the same session once they were supplied. Local imports through
+ * `astro:assets`' `<Image />`, matching `hero-officer.png`/
+ * `mission-team.png`'s own established convention exactly
+ * (`src/assets/<section>/<name>.png`, imported, never a plain `<img>`,
+ * never a remote URL) — the `picsum.photos`/`fastly.picsum.photos`
+ * remote-domain allowlist this file's own placeholder pass needed in
+ * `astro.config.mjs` has been removed again, since nothing here uses a
+ * remote image source any more.
+ *
+ * REAL GEOMETRY, checked via `sharp` before choosing a crop, not
+ * guessed — same discipline `Hero.astro`'s and `MissionBand.astro`'s
+ * own comments already establish for their own photos: all SIX images
+ * are 1536×1024, exactly 3:2, byte-identical dimensions across the
+ * whole set. The panel's image slot is `aspect-[3/2]` — an EXACT match,
+ * not a close approximation — so `object-cover` performs genuinely zero
+ * crop on any of the six, confirmed by the ratio match itself rather
+ * than needing an edge-strip inspection the way `mission-team.png`'s
+ * own asymmetric-content check needed one. No explicit `width`/`height`
+ * prop, matching `mission-team.png`'s own call exactly — a LOCAL
+ * imported asset's native 1536×1024 is already known to Astro's build
+ * pipeline from the import itself, so `widths`/`sizes` alone (below) are
+ * both necessary and sufficient; `width`/`height` only need stating by
+ * hand for a REMOTE `src` string, which this isn't (see the placeholder-
+ * era note above for when it briefly was).
+ *
+ * MOTION — tab-switch crossfade only (`src/lib/sectorsGridTabs.ts`), no
+ * new scroll-triggered ENTRANCE for this whole section. The brief's own
+ * motion requirement is scoped to the tab-switch panel swap; every
+ * sibling section already has its own distinct entrance (Hero's muster,
+ * StatStrip's/scrollReveal's fade-rise, ServicesGrid's scale+tilt,
+ * MissionBand's clip-path unveil) but `SectorsStrip.astro` — the section
+ * this replaces — never had one either, so this keeps that same
+ * behaviour rather than adding a flourish nobody asked for. `[data-
+ * reveal]`/`initScrollReveal()` would be the mechanism to reach for if an
+ * entrance is ever wanted here too — nothing new to build, just a marker
+ * to add.
+ *
+ * ICONS — none next to the tab labels. The brief made this conditional
+ * ("if sector icons appear... flag if you think this looks wrong"); six
+ * new bespoke icon files felt like real scope beyond what was asked, and
+ * `NavLink.astro`'s own plain-text convention (no icon on any nav-style
+ * link anywhere on the site) was the closer precedent to follow. Flag if
+ * icons are actually wanted — the tab markup has room for one without a
+ * restructure.
+ */
+
+interface Sector {
+  slug: string;
+  name: string;
+  caption: string;
+  headline: string;
+  blurb: string;
+  photo: ImageMetadata;
+  alt: string;
+}
+
+const SECTORS: Sector[] = [
+  {
+    slug: "retail",
+    name: "Retail",
+    caption: "Retail security",
+    headline: "Protecting stock, staff, and footfall",
+    blurb:
+      "Uniformed and covert officers who understand retail environments — deterring theft, managing difficult incidents calmly, and supporting your team through busy trading periods. Visible where it reassures customers, discreet where it doesn't.",
+    photo: retailPhoto,
+    alt: "A House of Guards officer, back to camera, standing watch on a busy shopping street outside retail storefronts.",
+  },
+  {
+    slug: "distribution",
+    name: "Distribution",
+    caption: "Distribution & logistics",
+    headline: "Securing sites that never stop moving",
+    blurb:
+      "Access control, vehicle checks, and perimeter patrols for warehouses and distribution centres where stock, vehicles, and shift patterns are constantly in motion. Officers trained to work alongside your operations, not around them.",
+    photo: distributionPhoto,
+    alt: "A House of Guards officer in a protective vest standing at a distribution yard, with two branded lorries parked at loading bays behind him.",
+  },
+  {
+    slug: "corporate",
+    name: "Corporate",
+    caption: "Corporate security",
+    headline: "A professional presence at reception and beyond",
+    blurb:
+      "Front-of-house officers who represent your brand as well as protect it — managing access, visitors, and incidents with the same discretion your clients expect from every other part of the building.",
+    photo: corporatePhoto,
+    alt: "A House of Guards officer standing beside security turnstiles in a corporate office lobby, with a receptionist at the front desk behind him.",
+  },
+  {
+    slug: "events",
+    name: "Events",
+    caption: "Event security",
+    headline: "Crowd management from arrival to close",
+    blurb:
+      "SIA-licensed teams for corporate functions, private events, and public gatherings — planning access flow and crowd safety before doors open, then managing it calmly throughout.",
+    photo: eventsPhoto,
+    alt: "A House of Guards officer wearing a hi-vis armband, standing beside a crowd barrier as a large crowd gathers outside a stadium.",
+  },
+  {
+    slug: "healthcare",
+    name: "Healthcare",
+    caption: "Healthcare security",
+    headline: "Calm, considered security in sensitive settings",
+    blurb:
+      "Officers trained to work within clinical environments — supporting staff, managing visitors, and de-escalating incidents without adding to the stress of an already difficult setting.",
+    photo: healthcarePhoto,
+    alt: "A House of Guards officer standing at a hospital reception desk, with a corridor leading toward the outpatients department behind him.",
+  },
+  {
+    slug: "education",
+    name: "Education",
+    caption: "Education security",
+    headline: "Safeguarding campuses, staff, and students",
+    blurb:
+      "Site security for schools, colleges, and universities — from daily access management to event cover — delivered by officers who understand the specific duty of care an education setting requires.",
+    photo: educationPhoto,
+    alt: "A House of Guards officer speaking with a visitor at a school's main entrance gate, with the school building behind them.",
+  },
+];
+
+const DEFAULT_SLUG = SECTORS[0].slug;
+---
+
+<section class="bg-paper">
+  <div class="mx-auto max-w-7xl px-gutter py-24 md:px-12">
+    <SectionHeading level="h2">Who we protect</SectionHeading>
+
+    <div
+      role="tablist"
+      aria-label="Sectors we operate in"
+      data-sectors-tablist
+      class="border-hairline mt-12 flex flex-wrap gap-x-8 gap-y-3 border-b"
+    >
+      {
+        SECTORS.map((sector) => {
+          const isActive = sector.slug === DEFAULT_SLUG;
+          return (
+            <button
+              type="button"
+              role="tab"
+              id={`sectors-tab-${sector.slug}`}
+              aria-controls={`sectors-panel-${sector.slug}`}
+              aria-selected={isActive ? "true" : "false"}
+              tabindex={isActive ? 0 : -1}
+              data-sector-tab
+              data-slug={sector.slug}
+              class:list={[
+                "text-caption text-ink border-b-2 pb-3 transition-colors duration-200 ease-out",
+                isActive ? "border-amber" : "border-transparent hover:border-ink/55",
+              ]}
+            >
+              {sector.name}
+            </button>
+          );
+        })
+      }
+    </div>
+
+    <div class="mt-12">
+      {
+        SECTORS.map((sector) => {
+          const isActive = sector.slug === DEFAULT_SLUG;
+          return (
+            <div
+              role="tabpanel"
+              id={`sectors-panel-${sector.slug}`}
+              aria-labelledby={`sectors-tab-${sector.slug}`}
+              tabindex="0"
+              data-sector-panel
+              data-slug={sector.slug}
+              hidden={!isActive}
+            >
+              <div class="bg-surface-alt grid grid-cols-1 items-center gap-10 p-8 md:grid-cols-2 md:gap-14 md:p-12">
+                <div class="aspect-[3/2] overflow-hidden">
+                  <Image
+                    src={sector.photo}
+                    alt={sector.alt}
+                    widths={[400, 600, 768, 1024, 1536]}
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    class="h-full w-full object-cover"
+                    format="webp"
+                    quality={82}
+                    loading="lazy"
+                  />
+                </div>
+
+                <div class="text-left">
+                  <p class="text-caption text-ink">{sector.caption}</p>
+                  <h3 class="text-h3 text-ink mt-3">{sector.headline}</h3>
+                  <p class="text-body text-ink mt-4 max-w-md">{sector.blurb}</p>
+                  <div class="mt-8">
+                    <Button href={`/sectors/${sector.slug}`}>Learn more</Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>

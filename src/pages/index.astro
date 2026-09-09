@@ -4,7 +4,7 @@ import Hero from "../components/home/Hero.astro";
 import StatStrip from "../components/home/StatStrip.astro";
 import ServicesGrid from "../components/home/ServicesGrid.astro";
 import MissionBand from "../components/home/MissionBand.astro";
-import SectorsStrip from "../components/home/SectorsStrip.astro";
+import SectorsGrid from "../components/home/SectorsGrid.astro";
 import ClosingCta from "../components/home/ClosingCta.astro";
 ---
 
@@ -13,7 +13,7 @@ import ClosingCta from "../components/home/ClosingCta.astro";
   <StatStrip />
   <ServicesGrid />
   <MissionBand />
-  <SectorsStrip />
+  <SectorsGrid />
   <ClosingCta />
 
   <script>
@@ -21,12 +21,14 @@ import ClosingCta from "../components/home/ClosingCta.astro";
     import { initScrollReveal } from "../lib/scrollReveal";
     import { initServicesGridReveal } from "../lib/servicesGridReveal";
     import { initMissionReveal } from "../lib/missionReveal";
+    import { initSectorsGridTabs } from "../lib/sectorsGridTabs";
 
     document.addEventListener("astro:page-load", () => {
       initHeroMuster();
       initScrollReveal();
       initServicesGridReveal();
       initMissionReveal();
+      initSectorsGridTabs();
     });
   </script>
 </BaseLayout>
