@@ -5,6 +5,7 @@ import StatStrip from "../components/home/StatStrip.astro";
 import ServicesGrid from "../components/home/ServicesGrid.astro";
 import MissionBand from "../components/home/MissionBand.astro";
 import SectorsGrid from "../components/home/SectorsGrid.astro";
+import StandardsCarousel from "../components/home/StandardsCarousel.astro";
 import ClosingCta from "../components/home/ClosingCta.astro";
 ---
 
@@ -14,6 +15,7 @@ import ClosingCta from "../components/home/ClosingCta.astro";
   <ServicesGrid />
   <MissionBand />
   <SectorsGrid />
+  <StandardsCarousel />
   <ClosingCta />
 
   <script>
@@ -23,6 +25,7 @@ import ClosingCta from "../components/home/ClosingCta.astro";
     import { initMissionReveal } from "../lib/missionReveal";
     import { initSectorsGridTabs } from "../lib/sectorsGridTabs";
     import { initSectorsGridReveal } from "../lib/sectorsGridReveal";
+    import { initStandardsCarousel } from "../lib/standardsCarousel";
 
     document.addEventListener("astro:page-load", () => {
       initHeroMuster();
@@ -31,6 +34,7 @@ import ClosingCta from "../components/home/ClosingCta.astro";
       initMissionReveal();
       initSectorsGridTabs();
       initSectorsGridReveal();
+      initStandardsCarousel();
     });
   </script>
 </BaseLayout>

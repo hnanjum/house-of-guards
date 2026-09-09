@@ -1,0 +1,340 @@
+---
+import Chevron from "../../icons/Chevron.astro";
+
+/**
+ * "Standards We Refuse to Drop" — a genuinely NEW homepage section, not
+ * a conversion of an existing one, despite how the original brief for
+ * this described it ("convert the current static 8-item, 2-row grid
+ * into a carousel"). Checked before writing any code, not assumed: a
+ * full grep across every branch (local and remote), the entire commit
+ * history, and every existing homepage component found no trace of this
+ * section anywhere in the repo — flagged to the user directly, who
+ * confirmed "you're right, build it fresh, not a conversion" and
+ * supplied the real eyebrow/heading/background and all 8 card pairs
+ * used below. Built directly in its final CAROUSEL form — there was
+ * never an intermediate static grid to build first and then convert.
+ *
+ * SECTION BACKGROUND — solid `bg-ink` (`#0D0D0D`), `on-dark` for the
+ * focus ring. This is a GENUINELY NEW use of Ink, not a colour already
+ * verified for this role: every prior `bg-ink`/Ink-adjacent usage in
+ * this codebase is either Hero's own translucent `bg-ink/28` tint
+ * overlay, a small UI mark (NavDrawer's hamburger bars, Divider's `ink`
+ * tone), or `Button.astro`'s `secondary`-variant FILL (a small element,
+ * not a whole section) — never a full, opaque section-level background
+ * before this. Contrast re-derived fresh for this specific role, not
+ * assumed to carry over from any of those: white/Paper text on Ink is
+ * ~19.44:1 (the exact same pairing already documented in global.css's
+ * own `:focus-visible` comment, "Ink on Paper is ~19.44:1," just the
+ * two colours swapped — contrast is symmetric between any two colours
+ * regardless of which is foreground) — trivially AAA for both the
+ * heading and the `text-paper/70` secondary text (computed
+ * independently below, not assumed to inherit the plain-white number).
+ * `on-dark` is required here, checked not assumed: the sitewide default
+ * focus ring is Ink itself (global.css's own `:focus-visible` rule) —
+ * an Ink ring on an Ink background is a literal 1:1 contrast ratio,
+ * completely invisible, the most extreme version of the exact problem
+ * `.on-dark` exists to solve. Paper ring on Ink: the same ~19.44:1 as
+ * the text above, comfortably safe.
+ *
+ * `text-paper/70` (SECONDARY TEXT, the eyebrow and every card's body
+ * copy) — computed fresh for THIS background, not assumed from
+ * Footer.astro's own use of the identical class on a DIFFERENT dark
+ * fill (`--color-footer-grey`, a lighter neutral than Ink): white at
+ * 70% opacity composited over Ink's own sRGB (13,13,13) → composite
+ * ≈0.715 → linearised ≈0.470 → contrast against Ink's own linear
+ * luminance (≈0.004) ≈ (0.470+0.05)/(0.004+0.05) ≈ 9.6:1 — clears the
+ * full 4.5:1 normal-text floor with wide margin, not a thin pass.
+ *
+ * EYEBROW — "So... why choose us?", plain sentence case with real
+ * punctuation, NOT tracked-caps/ALL-CAPS. CLAUDE.md's own hard rule
+ * bans tracked-caps eyebrow labels above headings by default, with
+ * MissionBand's "Our mission" as the one existing named exception — but
+ * this copy was never given in that ALL-CAPS/tracked shape to begin
+ * with, so this doesn't need to invoke that rule's own override clause
+ * at all; it's rendered as a plain, unstyled-beyond-size-and-colour
+ * caption `<p>`, matching `SectorsGrid.astro`'s own "Retail security"-
+ * style captions rather than MissionBand's tracked exception. Rendered
+ * directly (not via `SectionHeading`, which has no eyebrow slot at all
+ * by design — see that component's own comment) as a plain sibling `<p>`
+ * above a plain `<h2>`, the exact same structure `MissionBand.astro`
+ * already uses for its own caption+headline pair, for the same reason:
+ * `SectionHeading` can't express this shape.
+ *
+ * HEADING ALIGNMENT — left, the sitewide default (`CLAUDE.md`'s "Left-
+ * aligned by default" hard rule) — the brief didn't ask for a centred
+ * treatment here, unlike `SectorsGrid.astro`'s own narrow, explicitly-
+ * instructed exception, so this stays on the default rather than
+ * inventing a THIRD centring case with no instruction behind it.
+ *
+ * CARDS — 8, headline + one-sentence body, no icon (none was supplied
+ * or asked for; `SectorsGrid.astro`'s own "flag if icons are actually
+ * wanted" precedent applies the same way here — flagging rather than
+ * adding six-plus new bespoke icon files as unrequested scope). Base
+ * (inactive) treatment: a thin `border-paper/15` hairline + a very
+ * faint `bg-paper/3` wash, just enough to read as a distinct card
+ * against the Ink section fill without competing with the active
+ * card's own highlight. Deliberately NOT `Divider.astro`'s own `paper`
+ * tone (`border-paper/35`) — checked, not assumed to be the same
+ * value: that opacity was calibrated for an actual visible SEPARATOR
+ * rule doing real dividing work, a different visual job from this
+ * card's own quiet edge, which never needs to carry a WCAG floor at
+ * all (a card's identity is its heading/body text, not its border —
+ * decorative, exempt from 1.4.11 the way `Divider`'s own real rules
+ * aren't). `border-paper/15` computed anyway for the record: ≈1.50:1
+ * against Ink, well under the 3:1 non-text floor, confirming it reads
+ * as the faint edge it's meant to be, not a component genuinely
+ * relying on being seen.
+ *
+ * ACTIVE/CENTRED-CARD HIGHLIGHT — thin `border-amber` (2px, matching
+ * `SectorsGrid.astro`'s own `border-b-2` active-tab weight, not a
+ * heavier "call it out" border) + `shadow-lg shadow-amber/15` + a
+ * slightly brighter `bg-paper/5` wash (up from the base `bg-paper/3`) —
+ * deliberately NOT a solid Electric-Blue/Magenta fill (both are
+ * reserved for `ServicesGrid.astro`/`SectorsGrid.astro`'s own panel
+ * fills, per CLAUDE.md's own scope note) and NOT `Button.astro`'s own
+ * Amber FILL (reserved sitewide for the one actual button/CTA
+ * component). Contrast for the border itself (a bare, non-text mark,
+ * the 3:1 WCAG 1.4.11 floor applies, not 4.5:1): Amber vs Ink ≈9.05:1 —
+ * the SAME pairing already documented in global.css's own Amber token
+ * comment ("Ink on this fill: ~9.05:1"), reused directly since contrast
+ * between two colours doesn't depend on which one is the border and
+ * which is the background. Comfortably clears 3:1 with the largest
+ * margin of any bare-mark Amber use on this site (the header nav/
+ * MissionBand underline's own accepted ~2.15:1-on-Paper case is the
+ * one this project has actually had to accept a THIN margin on — this
+ * one needs no such tradeoff). This is a genuine THIRD instance of
+ * Amber's already-established "bare, non-text mark" use (nav active-
+ * link underline, MissionBand's underline rule), not a new kind of
+ * exception requiring fresh review — see the colour table's own Amber
+ * row and global.css's own token comment, both updated in this same
+ * change to name it. The box-shadow itself is pure decoration on top
+ * of that already-sufficient border cue, not a second thing carrying
+ * its own contrast requirement (WCAG doesn't require a shadow to be
+ * perceivable — it's a depth cue, not the state indicator).
+ *
+ * DOES THIS READ AS A BUTTON/CTA? Checked deliberately before shipping,
+ * per the brief's own explicit ask. Every existing Amber use on this
+ * site is either a SOLID fill (every real button/CTA, always Ink text
+ * on top) or a bare UNDERLINE beneath clickable nav text — this is
+ * neither: a thin BORDER/RING around an entire non-interactive content
+ * card, with no fill change and no text-colour change of its own. The
+ * closest real precedent for "a thin Amber border marking a state, not
+ * a click target" is `SectorsGrid.astro`'s own active-tab
+ * `border-amber` underline — already an established, understood
+ * "this one is currently selected" signal on this site, not "click
+ * this" (the tab bar's OWN click targets are the buttons themselves,
+ * unstyled by their border colour). This card's border reads the same
+ * way — a state indicator, not an affordance — and, unlike the tab
+ * bar, these cards aren't even clickable at all (no `<a>`/`<button>`
+ * wrapper, no cursor change), which removes any residual "is this
+ * interactive" ambiguity the tab-bar case didn't have to answer. No
+ * change made purely on this reasoning — flagged and confirmed as
+ * intended, matching the brief's own framing.
+ *
+ * "NO ARROWS APPENDED TO LINK/BUTTON TEXT" — CLAUDE.md's hard rule bans
+ * a decorative arrow glyph tacked onto a text link/button's own copy
+ * ("All services →"). The Prev/Next controls below are a different
+ * thing entirely: standalone, icon-only, `aria-label`led NAVIGATION
+ * controls with no text of their own for an arrow to be "appended" to —
+ * the rule's own target (and `Button.astro`'s own "never add an arrow"
+ * note) is specifically about ornamenting a link/button's TEXT, not
+ * banning directional icons as functional pagination controls in
+ * general. Flagged here so this doesn't get mistaken for a violation on
+ * a future pass.
+ *
+ * LAYOUT/RESPONSIVE — plain flex row (`[data-standards-track]`),
+ * `overflow-x-auto`, `snap-x snap-mandatory`, each card `snap-center`
+ * and `shrink-0`. Card width, not item COUNT, drives how many are
+ * visible: `w-full` (mobile, exactly one card, no partial peek — the
+ * below-row Prev/Next buttons already signal "there's more" explicitly,
+ * unlike `SectorsGrid.astro`'s own tab row, which had no other
+ * affordance and needed an edge-fade `mask-image` for that reason
+ * alone) → `sm:w-[calc((100%-1.5rem)/2)]` (two visible, one `gap-6`
+ * between them) → `lg:w-[calc((100%-3rem)/3)]` (three visible, two
+ * `gap-6`s between them, per the brief's own explicit "3 cards visible
+ * on desktop"). Every width is an exact `calc()` against the track's
+ * own real `gap-6` (1.5rem — global.css's own comment confirms the
+ * plain numeric Tailwind spacing scale below section level, which this
+ * `gap-6` is drawn from, is unmodified from Tailwind's own default), so
+ * N cards plus (N-1) gaps always
+ * fill the row exactly, with the (N+1)th card's own edge starting
+ * flush at the row's right edge, ready to scroll into view — not an
+ * approximate percentage that would leave a sliver of a 4th card
+ * showing at `lg:`.
+ *
+ * ARROWS — one real Prev/Next button PAIR, not four (a naive "one
+ * mobile-only pair, one desktop-only pair" duplicate would double the
+ * DOM nodes needing `disabled`-state sync and double the `aria-label`s
+ * to keep in agreement). Instead: a single wrapper `<div>` that's a
+ * plain centred flex row BELOW the track on mobile (`flex md:contents`)
+ * — matching the brief's own "arrows appear BELOW the card row" mobile
+ * spec — and, at `md:`+, becomes `display:contents` (its own box drops
+ * out of layout entirely, promoting its two button children to be
+ * direct flow participants of the OUTER `relative` wrapper one level
+ * up). Each button then gets `md:absolute` with `md:left-0`/`md:right-
+ * 0` plus its own half-width negative/positive inline translate (`md:
+ * -translate-x-1/2` on the left button, `md:translate-x-1/2` on the
+ * right one) to sit half outside the row's own edge — so roughly half
+ * of each 44px button sits inside the track's
+ * own padded edge and half sits out in the section's own `px-gutter`/
+ * `md:px-12` gutter — comfortably inside the 48px `md:px-12` gutter
+ * width, confirmed against global.css's own `--spacing-gutter`
+ * definition before choosing this offset) and `md:top-1/2 md:
+ * -translate-y-1/2`, vertically centred against whatever height the
+ * ONE relative ancestor (the track alone, not the whole section) ends
+ * up — satisfying "vertically centred against the row" exactly, not
+ * against the section as a whole.
+ *
+ * DISABLED-END STATE — no infinite loop; disabled/greyed at either end,
+ * per the brief's own default, with the reasoning for choosing that
+ * over looping recorded in `standardsCarousel.ts`'s own top-of-file
+ * comment (a finite "read through 8 items" list, not a rotating
+ * showcase — not repeated here).
+ *
+ * ACCESSIBILITY — `role="group"` + `aria-label` on the track (a
+ * deliberately lighter pattern than the full WAI-ARIA APG "Carousel"
+ * role, which assumes auto-advancing slides with live-region
+ * announcements; this carousel is entirely user-driven, so that
+ * pattern's own machinery would be more than this needs — flagged as a
+ * judgment call, not silently picked), `tabindex="0"` so it's a real
+ * keyboard-focusable region, and a `keydown` listener for ArrowLeft/
+ * ArrowRight (see `standardsCarousel.ts`'s own comment for why this
+ * overrides the browser's own smaller default arrow-key scroll
+ * increment rather than relying on it). Both buttons carry real
+ * `aria-label`s ("Previous standard"/"Next standard") since neither has
+ * visible text of its own, and `disabled` (not just a visual dim) at
+ * either end removes that button from the tab order there too.
+ *
+ * MOTION — no new bespoke module. `[data-reveal]` on the eyebrow+
+ * heading block and again on the track — the SAME sitewide generic
+ * fade/rise `scrollReveal.ts` already provides, already wired
+ * unconditionally into `index.astro`'s own `initScrollReveal()` call
+ * (no-argument, queries the whole document) — so this needed ZERO new
+ * script wiring, just the attribute. The brief's own "preserve existing
+ * entrance motion... adjust it only if genuinely required" instruction
+ * assumed a PRE-EXISTING motion module to preserve; since this section
+ * never existed before this change, there was nothing to preserve —
+ * flagged rather than silently building a bespoke module to satisfy
+ * language that didn't actually apply. A bespoke module the way
+ * `SectorsGrid.astro`/`MissionBand.astro`/`ServicesGrid.astro` each
+ * needed one wasn't warranted either: none of those three needed
+ * something DIFFERENT because of an arbitrary rule that every section
+ * gets its own unique motion — each needed it because its own layout
+ * genuinely couldn't be served by a plain fade/rise (a tab bar, a
+ * clip-path image unveil, six independently-triggered cards). A plain
+ * heading + a plain horizontally-scrollable list of cards is exactly
+ * the shape `scrollReveal.ts` was already built for (the same shape
+ * `StatStrip.astro`'s own three columns use it for).
+ */
+
+interface Standard {
+  headline: string;
+  body: string;
+}
+
+const STANDARDS: Standard[] = [
+  {
+    headline: "Licensed Guards",
+    body: "Every officer holds a valid SIA licence and the correct training for their role, including first aid.",
+  },
+  {
+    headline: "Fair Pricing",
+    body: "Cost efficiency matters to us, so we price competitively without compromising the standard of cover.",
+  },
+  {
+    headline: "Bespoke Cover",
+    body: "We build the shift pattern and team around your requirement rather than forcing you into a package.",
+  },
+  {
+    headline: "Professional Standards",
+    body: "Smart uniform, mature conduct and clear reporting on every deployment — no exceptions.",
+  },
+  {
+    headline: "Support 24/7",
+    body: "Our lines and our officers are available every hour of the week, all year round.",
+  },
+  {
+    headline: "Punctual Staff",
+    body: "Our people arrive early, briefed and ready for the shift they have committed to.",
+  },
+  {
+    headline: "Real Experience",
+    body: "Our crew have worked stadiums, marathons, events, retail floors, pubs and club doors.",
+  },
+  {
+    headline: "A Diverse Team",
+    body: "We hire on skill and character, welcoming people from every background into the crew.",
+  },
+];
+---
+
+<section class="on-dark bg-ink">
+  <div class="mx-auto max-w-7xl px-gutter py-24 md:px-12">
+    <div data-reveal>
+      <p class="text-caption text-paper/70">So... why choose us?</p>
+      <h2 class="text-h2 text-paper mt-4">Standards We Refuse to Drop</h2>
+    </div>
+
+    <div class="relative mt-12">
+      <div
+        data-standards-track
+        role="group"
+        aria-label="Standards we refuse to drop"
+        tabindex="0"
+        data-reveal
+        class="standards-track flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth"
+      >
+        {
+          STANDARDS.map((standard) => (
+            <div
+              data-standards-card
+              class="standards-card w-full shrink-0 snap-center border border-paper/15 bg-paper/3 p-8 transition-[border-color,box-shadow,background-color] duration-300 ease-out sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3rem)/3)]"
+            >
+              <h3 class="text-h3 text-paper">{standard.headline}</h3>
+              <p class="text-caption text-paper/70 mt-3">{standard.body}</p>
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="mt-6 flex items-center justify-center gap-4 md:contents">
+        <button
+          type="button"
+          data-standards-prev
+          aria-label="Previous standard"
+          class="grid size-11 shrink-0 place-items-center border border-paper/25 text-paper transition-colors duration-200 ease-out hover:border-paper/50 disabled:opacity-30 disabled:pointer-events-none md:absolute md:top-1/2 md:left-0 md:-translate-x-1/2 md:-translate-y-1/2"
+        >
+          <Chevron class="size-5 rotate-180" />
+        </button>
+        <button
+          type="button"
+          data-standards-next
+          aria-label="Next standard"
+          class="grid size-11 shrink-0 place-items-center border border-paper/25 text-paper transition-colors duration-200 ease-out hover:border-paper/50 disabled:opacity-30 disabled:pointer-events-none md:absolute md:top-1/2 md:right-0 md:translate-x-1/2 md:-translate-y-1/2"
+        >
+          <Chevron class="size-5" />
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Second consumer of this hidden-scrollbar technique —
+     `SectorsGrid.astro`'s own comment on its identical style block
+     explicitly names "kept local rather than promoted to a shared
+     global.css utility until a second consumer actually needs it."
+     That threshold is now met; NOT promoted in this change regardless,
+     since doing so means editing SectorsGrid.astro's own working code
+     as a side effect of an unrelated task — flagged here as a real
+     promotion candidate for a future pass, not silently duplicated
+     without comment. */
+  .standards-track {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .standards-track::-webkit-scrollbar {
+    display: none;
+  }
+</style>

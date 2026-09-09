@@ -96,11 +96,11 @@ Green" framing still describes the current boundary:
 
 | Token | Hex | Role |
 |---|---|---|
-| `ink` | `#0D0D0D` | Near-black text, `secondary` button fill, icon strokes, the default focus ring |
+| `ink` | `#0D0D0D` | Near-black text, `secondary` button fill, icon strokes, the default focus ring, and — as of `StandardsCarousel.astro` — a full opaque SECTION background for the first time (every prior use was a translucent overlay or a small element, never a whole section; `on-dark` required here, an Ink-on-Ink focus ring is a literal 1:1 ratio) |
 | `paper` | `#FFFFFF` | The default background everywhere; also the text colour on every dark fill below |
 | `electric-blue` | `#2563EB` | **Primary block/background colour** (Header/Hero/StatStrip/ServicesGrid only) — Header's info-bar fill, StatStrip's fill, Hero's text-panel scrim (translucent, 85%), ServicesGrid's Manned Guarding/Overnight Security cards and Corporate Security's icon stroke. White/Paper on the opaque fill: ~5.17:1 (AA). Ink on it: ~3.76:1 — clears the 3:1 non-text floor but fails 4.5:1, so text/icons stay white. As an icon-stroke mark on a light card: ~5.17:1 vs Paper, ~4.74:1 vs Surface Alt — both clear 3:1 with real margin. See `global.css`'s own token comment for the full derivation, including Hero's own two-step translucent-panel composite (~4.53:1, a genuine but thin pass, flagged in that file) |
 | `magenta` | `#A5195C` | **Secondary block/background colour** (ServicesGrid only) — Close Protection's card fill, CCTV Monitoring's and Construction Site Security's icon stroke. White on the fill: ~7.26:1 (AAA, the strongest fill pairing in this rebrand). Ink on it: ~2.68:1 — fails even the lenient 3:1 floor outright, so this fill never carries Ink. As an icon-stroke mark on a light card: ~7.26:1 vs Paper, ~6.66:1 vs Surface Alt |
-| `amber` | `#F59E0B` | **The sole button/CTA colour, sitewide, no exceptions** — `Button.astro`'s `primary` variant, `NavDrawer.tsx`'s hand-matched CTA, `MissionBand.astro`'s "More about us" button (the same unmodified `primary` variant, not a one-off), and (as a bare non-text mark ONLY) the header nav's active-link underline plus MissionBand's own underline rule. Ink on this fill: ~9.05:1 (AAA) — buttons therefore use INK text, a genuine reversal from Guard Green Secondary's own white-text pairing. White on it: ~2.15:1, fails even 3:1. **Bare-mark contrast (a non-text mark directly on Paper — the nav underline, MissionBand's own underline rule) is ~2.15:1, below the 3:1 WCAG 1.4.11 floor — flagged in PR #17, reviewed by the user against this exact number, and explicitly KEPT AS-IS as an accepted tradeoff for that USE (a decorative mark). This is a settled decision for bare marks, not an open item — don't "fix" it without a fresh, explicit ask.** **AMBER IS NEVER SAFE AS RUNNING TEXT COLOUR ON PAPER — this was tried once and reverted.** `MissionBand.astro`'s caption initially shipped with Amber text too (PR #20's own first commit), flagged at the time as a genuinely different, more severe case than the bare-mark precedent (text needs the 4.5:1 floor, not 3:1, and ~2.15:1 fails both) — confirmed on review to be a real contrast-failure BUG, not a style preference, and corrected outright to Ink (a follow-up commit on the same PR). Don't reach for Amber as a `text-*` foreground colour anywhere on this site; every safe use of this token is either a fill (with Ink text on top) or a bare non-text mark. See `NavLink.astro`'s and `MissionBand.astro`'s own comments |
+| `amber` | `#F59E0B` | **The sole button/CTA colour, sitewide, no exceptions** — `Button.astro`'s `primary` variant, `NavDrawer.tsx`'s hand-matched CTA, `MissionBand.astro`'s "More about us" button (the same unmodified `primary` variant, not a one-off), and (as a bare non-text mark ONLY) the header nav's active-link underline, MissionBand's own underline rule, and — as of `StandardsCarousel.astro` — the active/centred card's own thin border+shadow. Ink on this fill: ~9.05:1 (AAA) — buttons therefore use INK text, a genuine reversal from Guard Green Secondary's own white-text pairing. White on it: ~2.15:1, fails even 3:1. **Bare-mark contrast on PAPER (the nav underline, MissionBand's own underline rule) is ~2.15:1, below the 3:1 WCAG 1.4.11 floor — flagged in PR #17, reviewed by the user against this exact number, and explicitly KEPT AS-IS as an accepted tradeoff for that USE (a decorative mark). This is a settled decision for bare marks on Paper, not an open item — don't "fix" it without a fresh, explicit ask.** Bare-mark contrast on the NEW `bg-ink` fill (`StandardsCarousel.astro`'s active-card border) is a different, much stronger pairing — ~9.05:1, the same ratio as Ink-on-Amber above, re-derived fresh rather than assumed to share the Paper case's own thin ~2.15:1 (see global.css's own Amber token comment for both derivations side by side). **AMBER IS NEVER SAFE AS RUNNING TEXT COLOUR ON PAPER — this was tried once and reverted.** `MissionBand.astro`'s caption initially shipped with Amber text too (PR #20's own first commit), flagged at the time as a genuinely different, more severe case than the bare-mark precedent (text needs the 4.5:1 floor, not 3:1, and ~2.15:1 fails both) — confirmed on review to be a real contrast-failure BUG, not a style preference, and corrected outright to Ink (a follow-up commit on the same PR). Don't reach for Amber as a `text-*` foreground colour anywhere on this site; every safe use of this token is either a fill (with Ink text on top) or a bare non-text mark. See `NavLink.astro`'s, `MissionBand.astro`'s, and `StandardsCarousel.astro`'s own comments |
 | `cyan-blue` | `#0EA5E9` | **Rare accent only — never a section/card background fill.** Not applied anywhere in Header/Hero/StatStrip/ServicesGrid as of this rebrand (no per-section spec called for it); defined and fully contrast-checked so it's ready the moment a hover state or icon detail needs it. White on this fill: ~2.77:1 — fails even 3:1, so white is never a safe foreground here, including as a bare mark on Paper (same number, symmetric). Ink on it: ~7.01:1 (AAA) — the only safe foreground for this token |
 | `stone` | `#6E6E6E` | Secondary text on Paper only (captions, meta, credential lines). ~4.6:1 on white — 14px and above only |
 | `hairline` | `#E4E4E4` | Borders/rules/seams on Paper. Perfectly neutral (R=G=B) — never a warm greige |
@@ -275,7 +275,13 @@ stylistic preference:
   swapped into the middle. Any new icon must clear the same bar.
 - **No arrows appended to link/button text** ("All services →"). The
   `Button` primitive never renders one; affordance comes from
-  weight/colour/border only.
+  weight/colour/border only. This is specifically about ornamenting a
+  link/button's own COPY — it doesn't ban a directional icon used as a
+  standalone, `aria-label`led navigation control with no text of its
+  own to append to, e.g. `StandardsCarousel.astro`'s Prev/Next arrows
+  (see that component's own comment for the fuller distinction) —
+  flagged there so a future pass doesn't mistake genuine carousel
+  pagination for a rule violation.
 - **No identical bordered/shadowed card grids with no real hierarchy.**
   `ServicesIndex.astro` (the old numbered/expandable-list treatment
   this rule originally pointed at) has been deleted outright, replaced
@@ -294,9 +300,20 @@ stylistic preference:
   tabbed sector explainer that isn't a repeated card grid at all (one
   panel swaps per tab, not six cards shown together), so it sits
   entirely outside this rule's scope rather than being a third variant
-  of it. Don't build a card-grid-shaped FOURTH treatment, and don't add
-  a border/shadow to `ServicesGrid.astro`, without the same kind of
-  explicit instruction PR #16 had.
+  of it. `StandardsCarousel.astro` (PR #29) is the newest borderline
+  case, flagged and reasoned through rather than assumed either way: its
+  8 cards DO carry a real (if faint, `border-paper/15`) border, unlike
+  `ServicesGrid.astro`'s borderless fills — but it's a horizontally-
+  scrolling CAROUSEL, never showing all 8 cards laid out together the
+  way a GRID (the rule's own literal target) does, and it carries real,
+  DYNAMIC per-card hierarchy (the scroll-centred card gets a genuine
+  `border-amber`+shadow highlight the other 7 never share at that
+  moment) rather than the identical, static, no-hierarchy treatment the
+  rule actually bans. Sits outside this rule's scope for the same
+  reason `SectorsGrid.astro` does (not a grid at all), not a fourth
+  exception TO the rule. Don't build a card-grid-shaped FOURTH
+  treatment, and don't add a border/shadow to `ServicesGrid.astro`,
+  without the same kind of explicit instruction PR #16 had.
 - **Left-aligned by default.** Whole-SECTION centred alignment (heading
   AND content together) exists in exactly ONE sanctioned place sitewide:
   the closing CTA leading into the footer (`ClosingCta`). **This dropped
@@ -347,13 +364,18 @@ stylistic preference:
 - **GSAP + ScrollTrigger + Lenis** (`src/lib/smoothScroll.ts`) are the
   primary tools for scroll-based and page-load animation — Lenis is
   wired into GSAP's own ticker so `ScrollTrigger` stays in sync with
-  Lenis's scroll position rather than the native scroll event. SIX
+  Lenis's scroll position rather than the native scroll event. SEVEN
   small, section-scoped modules exist on top of it, each wired into
   `index.astro`'s own `astro:page-load` handler: `src/lib/heroMuster.ts`
   (the homepage hero's one orchestrated LOAD-triggered sequence — the
   one exception to "scroll-triggered," since the hero is already in
   view on load), `src/lib/scrollReveal.ts` (a plain generic fade/rise,
-  `[data-reveal]`, used by StatStrip), `src/lib/servicesGridReveal.ts`
+  `[data-reveal]`, used by StatStrip and, as of PR #29, also
+  `StandardsCarousel.astro`'s eyebrow+heading block and its track — the
+  first section since StatStrip to reuse this generic module directly
+  rather than needing its own bespoke one, since a plain heading + a
+  plain scrollable card list is exactly the shape it was already built
+  for), `src/lib/servicesGridReveal.ts`
   (ServicesGrid's own scale+tilt entrance, `[data-services-reveal]`,
   one independent trigger PER card), `src/lib/missionReveal.ts`
   (MissionBand's own two-part entrance — a pure clip-path image unveil
@@ -366,16 +388,25 @@ stylistic preference:
   not a scroll-triggered entrance at all, it's a click/keyboard-driven
   state-change animation, so it has no `ScrollTrigger`/`[data-reveal]`-
   style marker and isn't queried by `initScrollReveal()`; see PR #22
-  below and that module's own comment for the full mechanism), and
+  below and that module's own comment for the full mechanism),
   `src/lib/sectorsGridReveal.ts` (SectorsGrid's OWN scroll-triggered
   entrance, added in PR #23, NOT present in PR #22's own original build
   of that section — a genuinely fourth motion SHAPE distinct
   from all three scroll-entrance modules above it: a divider line-draw
   via `scaleX`, a horizontal (not the usual vertical) tab cascade, and
-  one panel fade+scale, one shared trigger). Each of these six is a
+  one panel fade+scale, one shared trigger), and `src/lib/
+  standardsCarousel.ts` (`StandardsCarousel.astro`'s own scroll/arrow/
+  keyboard interaction and active-card highlight, PR #29 — a genuinely
+  DIFFERENT kind of module from the other six: it isn't GSAP-driven at
+  all, the interaction itself is native CSS scroll-snap plus the
+  browser's own scroll physics, so this module only reads and reacts to
+  the resulting scroll position rather than owning a tween of its own;
+  `prefersReducedMotion()` is still checked once, for the one thing
+  that genuinely is motion — whether an arrow click's programmatic
+  scroll animates or jumps instantly). Each of these seven is a
   real, deliberate design decision about which shape of motion suits
   that specific section — don't assume any of them is the "default"
-  pattern a seventh section should just copy; read the specific
+  pattern a future section should just copy; read the specific
   section's own brief first.
 - **Every scroll-triggered reveal plays ONCE on downward entry and
   never resets — NOT "both directions."** `toggleActions: "play none
@@ -503,7 +534,15 @@ Two functional icons for the footer — `src/icons/Phone.astro` and
 (rounded caps on `Phone`, and they've never picked up the `2`-weight
 bump above — still `1.25`) since they need to read instantly as
 universal pictograms next to real contact details, not as bespoke
-brand marks.
+brand marks. A third functional icon, `src/icons/Chevron.astro` (PR
+#29, `StandardsCarousel.astro`'s Prev/Next controls), joins the same
+category for the same reason — a real, widely-deployed glyph (Feather
+Icons' own "chevron-right," verbatim, mirrored via `class="rotate-180"`
+for the left-pointing variant rather than a second path string) rather
+than a bespoke brand mark, `viewBox="0 0 24 24"` with round caps/joins
+like `Phone`/`Email`, though it does keep the `2`-weight stroke (a
+plain directional pictogram at a small 20px size reads better a touch
+heavier than Phone/Email's own 24px `1.25`).
 
 **Placement rule, load-bearing, UPDATED from the old accordion-only
 version of this rule**: the six service icons now render on EVERY card
@@ -559,7 +598,7 @@ treatment for these icons without a real reason to.
   different thing from a tracked-caps label above it.
 - Homepage-specific sections live in `src/components/home/` (`Hero`,
   `StatStrip`, `ServicesGrid`, `MissionBand`, `SectorsGrid`,
-  `ClosingCta`), assembled in `src/pages/index.astro`. Shared
+  `StandardsCarousel`, `ClosingCta`), assembled in `src/pages/index.astro`. Shared
   primitives live in `src/components/ui/`. (`ServicesGrid`'s own
   predecessor, `ServicesIndex.astro`, lived directly under
   `src/components/` instead — an inconsistency with this convention
@@ -682,18 +721,182 @@ treatment for these icons without a real reason to.
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number is on `origin/main` — WITH ONE
-CURRENT EXCEPTION: **PR #28 is NOT YET MERGED as of this entry** (open,
+CURRENT EXCEPTION: **PR #29 is NOT YET MERGED as of this entry** (open,
 awaiting review — per this project's own standing "open a PR, don't
 merge it yourself" convention). Everything it describes lives only on
 its own branch until the user merges it; don't assume its code is live
-on `main` just because it's documented here. (PR #27, flagged as
-unmerged-as-of-its-own-entry in an earlier revision of this paragraph,
-is now confirmed merged — checked live via `gh pr list` fresh at the
-start of THIS session, not assumed from this file's own text. This "the
+on `main` just because it's documented here. **PR #29's entry sits
+ABOVE PR #28's below even though #28's own code landed on `main`
+first** — both were opened from the same session as two genuinely
+independent changes (per explicit instruction to treat them that way),
+#28 merged quickly while #29 was still being verified, and this file's
+own newest-first ordering tracks each PR's OWN recency, not merge
+order — don't read the position below as implying #29 predates #28.
+(PR #28 was originally flagged here, alongside #29, as "both open, not
+yet merged" — now confirmed merged; the user merged it directly and
+asked for this branch to be rebased onto the resulting `main` and this
+exact CLAUDE.md conflict resolved keeping BOTH PRs' own additions
+rather than either overwriting the other, which is what produced the
+current shape of this whole section. PR #27, flagged as unmerged-as-
+of-its-own-entry in an earlier revision of this paragraph, is also
+confirmed merged — checked live via `gh pr list` fresh at the start of
+that session, not assumed from this file's own text. This "the
 previous entry's own unmerged-flag has gone stale" pattern keeps
 recurring across sessions — PR #23/#24/#25/#26 all hit it too, further
 down this log; check `gh pr list` fresh every time rather than trusting
 this paragraph's own PR number.)
+
+- **PR #29 — "Standards We Refuse to Drop": a NEW homepage carousel
+  section, not a conversion of an existing one, despite the original
+  brief describing it as converting "the current static 8-item, 2-row
+  grid into a carousel." Checked before writing any code, not assumed:
+  a full `git grep` across every local AND remote branch, the entire
+  commit history (`git log --all --oneline | grep -i standard`), and
+  every existing homepage component found zero trace of this section
+  anywhere in the repository — there was never an intermediate static
+  grid. Surfaced this to the user directly via two rounds of
+  clarification (the first answer's own real content was accidentally
+  an unfilled template placeholder — `[paste all 8 headline + body pairs
+  from your screenshot]`, no screenshot ever having been attached to the
+  conversation — caught and flagged rather than silently fabricated
+  into 8 invented marketing claims for a real company) before the real
+  eyebrow/heading/background and all 8 real headline+body pairs were
+  supplied. Built directly in its final carousel form, per the user's
+  own explicit confirmation ("you're right, build it fresh, not a
+  conversion").
+
+  **New files**: `src/components/home/StandardsCarousel.astro` (markup +
+  content data + a long top-of-file comment walking through every
+  design decision — colour derivations, the "does the active-card
+  border read as a CTA" check the brief explicitly asked for, the
+  "preserve existing entrance motion" instruction that didn't apply
+  since none existed to preserve, and the deliberate choice not to loop
+  the carousel — not condensed further here, read that file's own
+  comment for the full account), `src/lib/standardsCarousel.ts` (the
+  scroll/arrow/keyboard interaction + active-card-highlight logic, NOT
+  GSAP-driven unlike every other motion module on this site — native
+  CSS scroll-snap plus the browser's own scroll physics, so touch swipe
+  works with zero gesture-library code), `src/icons/Chevron.astro` (a
+  third functional icon alongside Phone/Email, Feather Icons' real
+  "chevron-right" glyph verbatim, mirrored via `rotate-180` for the
+  left-pointing variant).
+
+  **Section background** — `on-dark bg-ink`, a genuinely NEW use of Ink
+  (every prior use was a translucent overlay or a small UI element,
+  never a full opaque section fill before this) — contrast re-derived
+  fresh for this role rather than assumed: white/Paper text on Ink
+  ≈19.44:1, `text-paper/70` secondary text ≈9.6:1 (computed
+  independently, not assumed to carry over from Footer's own use of the
+  identical class on a DIFFERENT, lighter dark fill). `.on-dark` is
+  required (an Ink focus ring on an Ink background is a literal 1:1
+  ratio, the most extreme version of the exact problem it exists to
+  solve) — both `global.css`'s `:focus-visible`/`.on-dark` comment and
+  its Amber token comment updated in this same change to record this as
+  a new case, not silently left implicit.
+
+  **Active-card highlight** — thin `border-amber` (2px) + `shadow-lg
+  shadow-amber/15` + a slightly brighter `bg-paper/5` wash, on whichever
+  card the scroll position currently centres. Deliberately NOT a solid
+  Electric-Blue/Magenta fill (both reserved for ServicesGrid/SectorsGrid's
+  own panel fills) and NOT Amber as a FILL (reserved for `Button.astro`).
+  This is a genuine THIRD instance of Amber's already-established "bare,
+  non-text mark" use (alongside the header nav underline and MissionBand's
+  own underline rule) — re-derived fresh rather than assumed to share
+  either's number, since both existing cases check Amber against PAPER;
+  this checks it against the new Ink fill: ≈9.05:1, clearing the 3:1
+  floor with the widest margin of any bare-mark Amber use on the site (no
+  thin-margin tradeoff to accept the way the Paper case needed one).
+  Explicitly checked against "does this read as a button/CTA" before
+  shipping, per the brief's own ask: every real Amber use on this site is
+  either a solid fill or a bare underline beneath clickable nav text —
+  this is neither (a border/ring around a non-interactive, non-clickable
+  card, no fill change, no cursor change) — the closest real precedent is
+  `SectorsGrid.astro`'s own `border-amber` active-tab underline, an
+  already-understood "currently selected" signal, not "click this."
+
+  **"No identical bordered/shadowed card grids" and "no arrows appended
+  to link/button text" hard rules** — both checked against this section
+  explicitly, both updated in this same commit with the reasoning for why
+  it doesn't trip either: the cards DO carry a real (if faint,
+  `border-paper/15` ≈1.50:1, genuinely decorative/exempt from any WCAG
+  floor) border, unlike `ServicesGrid.astro`'s borderless fills, but this
+  is a CAROUSEL — never showing all 8 cards laid out together the way a
+  GRID does — with real, dynamic per-card hierarchy (the active state),
+  not the identical/no-hierarchy treatment the rule actually targets. The
+  Prev/Next arrows are standalone, `aria-label`led navigation controls
+  with no text of their own, not a decorative glyph ornamenting a link's
+  copy — a different thing from what that rule bans.
+
+  **Layout** — native CSS scroll-snap (`snap-x snap-mandatory`, each card
+  `snap-center`), card width (not item count) driving visible count:
+  `w-full` (mobile, one card, no peek — the below-row Prev/Next buttons
+  already signal "there's more," unlike `SectorsGrid.astro`'s own tab row,
+  which needed an edge-fade `mask-image` for the same reason since it had
+  no other affordance) → `sm:w-[calc((100%-1.5rem)/2)]` (two visible) →
+  `lg:w-[calc((100%-3rem)/3)]` (three visible, the brief's own explicit
+  ask), every width an exact `calc()` against the track's real `gap-6` so
+  N cards + (N-1) gaps always fill the row exactly. ONE real Prev/Next
+  button pair, not four — a `display:contents` wrapper trick promotes the
+  same two buttons from "a centred flex row below the track" (mobile) to
+  "absolutely positioned, half outside the track's own left/right edge,
+  vertically centred against the row" (`md:`+), so there's only ever one
+  `disabled`-state and one `aria-label` per direction to keep in sync,
+  not two.
+
+  **No infinite loop** — disabled/greyed Prev at the start and Next at
+  the end, the brief's own default; the reasoning for choosing that over
+  looping (a finite "read through 8 items" list, not a rotating showcase)
+  is recorded in `standardsCarousel.ts`'s own comment.
+
+  **Motion** — zero new bespoke module. `[data-reveal]` on the
+  eyebrow+heading block and the track, reusing the SAME sitewide generic
+  `scrollReveal.ts` StatStrip already uses (already wired into
+  `index.astro`'s no-argument `initScrollReveal()` call, so this needed
+  no new script wiring at all) — the first section since StatStrip to
+  reuse it directly rather than needing something bespoke the way
+  `SectorsGrid`/`MissionBand`/`ServicesGrid` each did (each of THOSE
+  needed a genuinely different mechanism because of what its own layout
+  demanded — a tab bar, a clip-path unveil, six independent per-card
+  triggers — not because of an arbitrary "every section needs its own
+  motion" expectation). The brief's own "preserve existing entrance
+  motion... adjust it only if genuinely required" instruction assumed a
+  pre-existing motion module to preserve; flagged plainly that none
+  existed, rather than inventing a bespoke one just to satisfy language
+  that didn't actually apply to a genuinely new section.
+
+  **A real, self-caught mistake during the dead-CSS-from-doc-comments
+  audit this project's own standing convention requires**: an early draft
+  of this component's own LAYOUT comment quoted the bare token `` `p-4` ``
+  in prose (paraphrasing `global.css`'s own "still used directly — p-4,
+  gap-6, etc" line) — `p-4` isn't used as real markup anywhere in this
+  component, and confirmed via direct `dist/` inspection that it WAS
+  compiling to a genuine orphaned `.p-4{...}` rule before the fix (reworded
+  to prose) and confirmed gone after — the same failure class this
+  project's own standing convention already warns about, caught in the
+  act rather than assumed safe. (`global.css`'s OWN identical "p-4,
+  gap-6, etc" phrase does NOT independently regenerate this rule — `.css`
+  files aren't part of Tailwind's scanned content set, confirmed by
+  rebuilding with the fix in place and `.p-4` genuinely absent even
+  though `global.css`'s own line is untouched — so this was entirely a
+  self-inflicted risk in the new file, not a pre-existing bug elsewhere
+  needing its own fix.) A second, related instance was also caught and
+  fixed the same pass: a bare, unprefixed `` `translate-x-1/2` ``
+  mention in the ARROWS paragraph, when every real occurrence in this
+  file's own markup is `md:`-prefixed — reworded to keep the prefix in
+  both backtick spans.
+
+  `astro check`: 0 errors (41 files, same 2 pre-existing `ContactForm
+  .tsx` hints). A clean `astro build` + direct `dist/index.html`/`.css`
+  inspection confirmed: all 8 real cards present with the real supplied
+  copy, correct DOM order (SectorsGrid → StandardsCarousel → ClosingCta
+  → Footer), the `md:contents` arrow-wrapper structure and both
+  `aria-label`s present, both `calc()` width expressions compiled, and —
+  the specific classes this component relies on being JS-toggled at
+  runtime, not just present in static markup — `border-amber`,
+  `shadow-amber/15` (confirmed a real `color-mix()` rule, not a silent
+  no-op), `bg-paper/5`, `bg-paper/3`, `border-paper/15` all genuinely
+  compiled, checked directly rather than assumed from the source class
+  string alone.
 
 - **PR #28 — `SectorsGrid.astro`'s content-panel fill sequence reassigned
   from PR #25's own Corporate/Events-only pairing to a fixed FOUR-of-six
@@ -1906,7 +2109,17 @@ scroll mobile tab bar, real House-of-Guards-branded officer photography
 replacing the old plain photo-caption strip, see PR #22, PR #23's own
 revision-round entry, PR #25's own re-revision moving the colour off
 the tabs and onto the content panel instead, and PR #28's own
-reassignment of the panel-fill sequence — closing CTA, footer,
+reassignment of the panel-fill sequence — "Standards We Refuse
+to Drop," a new dark-Ink carousel (8 cards, headline+body, no icon;
+native CSS scroll-snap, one/two/three visible at mobile/tablet/desktop,
+real Prev/Next arrow controls flanking the row on `md:`+ and stacked
+below it on mobile, keyboard ArrowLeft/ArrowRight support, no infinite
+loop — disabled at either end instead; the scroll-centred card gets a
+thin `border-amber`+shadow highlight, every other card stays plain), a
+GENUINELY NEW section rather than a conversion of an existing one
+despite the original brief describing it that way — see PR #29's own
+entry for the full "checked every branch/commit, this never existed
+here" account — closing CTA, footer,
 both still on the original Guard Green palette, pending a separate
 future redesign). Header, Hero, StatStrip, ServicesGrid, and
 MissionBand all run the newer colour system (Electric Blue, Magenta,
