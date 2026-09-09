@@ -179,7 +179,20 @@
          considered and NOT taken (a darker amber variant reserved for
          bare marks only, or a non-colour affordance like weight/
          thickness) are still on record in `NavLink.astro`'s own
-         comment if this is ever revisited by direct instruction. */
+         comment if this is ever revisited by direct instruction.
+       - AS A BARE MARK ON INK (`StandardsCarousel.astro`'s active-card
+         border+shadow — a THIRD bare-mark instance, alongside the
+         header nav underline above and `MissionBand.astro`'s own
+         underline rule) — a genuinely different pairing from either of
+         those two (both check Amber against PAPER; this checks it
+         against the new `bg-ink` full-section fill that component
+         introduces), so re-derived fresh rather than assumed to share
+         the ~2.15:1 number above. Contrast between two colours is
+         symmetric regardless of which is foreground, so this is the
+         SAME ratio as "Ink on this fill" two bullets up: ≈9.06:1 —
+         clears the 3:1 non-text floor with the widest margin of any
+         bare-mark Amber use on this site, no tradeoff to flag or
+         accept here the way the Paper case above needed one. */
   --color-amber: #f59e0b;
 
   /* CYAN-BLUE — a rare accent only (hover states, a small icon detail,
@@ -506,7 +519,20 @@ select {
    just because they shipped in the same rebrand — Electric Blue and
    Magenta both need `.on-dark`, Amber flatly doesn't, and Cyan-Blue
    (not yet used anywhere) would need it the moment it's ever used as
-   anything but an Ink-paired mark, per its own token comment above. */
+   anything but an Ink-paired mark, per its own token comment above.
+
+   INK AS A FULL SECTION FILL (`StandardsCarousel.astro`) — a genuinely
+   NEW case, not a pattern-match to any of the above: every prior use
+   of `bg-ink` in this codebase was a translucent overlay (Hero's own
+   `bg-ink/28` tint), a small UI mark, or a button fill, never an
+   opaque, section-level background before this. Checked fresh, not
+   assumed safe just because Ink is the sitewide DEFAULT ring colour:
+   an Ink ring on an Ink background is a literal 1:1 contrast ratio,
+   completely invisible — the most extreme version of the exact problem
+   `.on-dark` exists to solve, and it needs the swap just as much as any
+   accent fill above. Paper ring on Ink: ~19.44:1 (the same pairing
+   already documented on `:focus-visible` above, colours swapped —
+   trivially safe). */
 .on-dark :focus-visible,
 .on-dark:focus-visible {
   outline-color: var(--color-paper);

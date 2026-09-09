@@ -1,0 +1,35 @@
+---
+/**
+ * Functional carousel-navigation icon only — not a brand/service mark,
+ * same category as Phone.astro/Email.astro (breaks the six-service-icon
+ * stroke language on purpose, since it needs to read instantly as a
+ * universal directional pictogram, not a bespoke silhouette). Right-
+ * pointing by default; pass `class="rotate-180"` for the left-pointing
+ * variant rather than maintaining two mirrored path strings.
+ *
+ * Feather Icons' real "chevron-right" glyph verbatim (`viewBox="0 0 24
+ * 24"`, `stroke-width="2"`, round caps/joins) — same "reuse a real,
+ * widely-deployed icon rather than a fresh hand-drawn shape" precedent
+ * Phone.astro already established, avoiding this project's own
+ * documented risk of a hand-transcribed shape reading ambiguously (see
+ * OvernightSecurity.astro's own history) for a glyph this simple and
+ * this well-known.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class={className}
+  aria-hidden="true"
+>
+  <polyline points="9 18 15 12 9 6"></polyline>
+</svg>
