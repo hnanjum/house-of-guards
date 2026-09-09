@@ -58,6 +58,20 @@ import educationPhoto from "../../assets/sectors/education.png";
  * tab on one row (six short labels fit comfortably at that width, no
  * scrolling engages there in practice).
  *
+ * CENTERING — `justify-center-safe` on the tablist itself (Tailwind
+ * v4.1+'s `justify-content: safe center`), on every breakpoint, not a
+ * conditional. Plain `justify-center` was rejected: per the CSS Box
+ * Alignment spec, an OVERFLOWING flex line centred with the bare
+ * `center` keyword can clip its own start content out of scroll range
+ * in some engines — `safe center` is the spec's own defined fallback,
+ * behaving like `flex-start` (scrollable from position 0, nothing
+ * clipped) whenever the row genuinely overflows (below `sm:`), and
+ * like true centring whenever it doesn't (`sm:`+, where all six tabs
+ * already fit on one line per TAB BAR above) — exactly the "centre
+ * when it fits, scroll normally when it doesn't, don't force
+ * left-alignment either way" behaviour asked for, with no JS/media-
+ * query branching needed to get it.
+ *
  * MOBILE TAB SCROLL — REVERSED from PR #22's own original decision,
  * on direct instruction, not a case of that earlier reasoning having
  * been wrong. PR #22 chose an unconditionally-wrapping row specifically BECAUSE no
@@ -79,6 +93,16 @@ import educationPhoto from "../../assets/sectors/education.png";
  * overflows there. See MOTION below for the one-time auto-nudge
  * animation added on top of this as a genuine nice-to-have, not a
  * required part of the fix.
+ *
+ * The edge-fade is deliberately never allowed to sit ON TOP of the tab a
+ * visitor just selected — `sectorsGridTabs.ts`'s own `ensureTabVisible()`
+ * (called from `activateSector` on every click/keyboard selection, not
+ * just on load) scrolls the newly-active tab fully into view whenever
+ * the row is actually scrollable, so the fade's translucent edge band
+ * never obscures the active tab itself. Checked specifically against
+ * the two edge cases most likely to clip — Retail (first tab, sits at
+ * the row's own left fade at rest) and Education (last tab, sits at the
+ * right fade) — see that function's own comment for the full mechanism.
  *
  * TAB VISUAL MECHANISM — reuses `NavLink.astro`'s own established
  * technique verbatim (a `border-b-2` that's transparent at rest, coloured
@@ -124,74 +148,48 @@ import educationPhoto from "../../assets/sectors/education.png";
  *   which is itself large (hue, saturation, and presence/absence, not a
  *   single subtle shift).
  *
- * TAB FILL — two of six tabs (NOT ServicesGrid's own real 3:3 split —
- * see below), Electric Blue and Magenta, reusing `ServicesGrid.astro`'s
- * exact per-item `fill` naming convention. `events.fill = "electric-
- * blue"` — Electric Blue is this site's "visible/energetic presence"
- * hue (Manned Guarding, Overnight Security in ServicesGrid); Events is
- * the most publicly visible, crowd-facing sector here, the closest
- * thematic match. `corporate.fill = "magenta"` — Magenta is the
- * "premium/discreet" hue (Close Protection in ServicesGrid); Corporate
- * reads as the closest match, a higher-trust, longer-running B2B
- * register. Deliberately NOT Retail (`DEFAULT_SLUG`, the tab shown
- * active on load) — keeps the initial page state on a plain/light tab,
- * so a first paint never has to resolve "active indicator on a
- * coloured fill" before any interaction has happened.
+ * TAB TITLES — REVERSED from PR #23's own tab-fill scheme, on direct
+ * review feedback that the tab-fill treatment itself was wrong, not a
+ * case of PR #23's own reasoning being flawed in isolation. Every tab
+ * now looks IDENTICAL regardless of sector — the whole Paper-based
+ * dual-vocabulary indicator PR #23 built (see the git history for its
+ * own since-removed INDICATOR comment, and `sectorsGridTabs.ts`'s own
+ * `git log` for the `FILL_ACTIVE_CLASSES`/`FILL_INACTIVE_CLASSES`/
+ * `isFilled` branch it added) has been deleted outright, not left
+ * dormant — no `data-fill` attribute on the tab `<button>` any more,
+ * no per-fill class branch, nothing for a tab to key off. The scheme
+ * above (transparent → Ink/55 hover → solid Amber active) is now the
+ * ONLY vocabulary the tab bar has, applying uniformly to all six tabs
+ * including Corporate and Events — colour moved to the CONTENT PANEL
+ * instead, see PANEL FILL below.
  *
- * RATIO — genuinely 2-of-6 here, NOT a literal match to
- * `ServicesGrid.astro`'s own real fill count, flagged rather than silently
- * conflated: that section is actually 3 coloured (2 Electric Blue + 1
- * Magenta) : 3 light, not 2:4. Built to the explicit "2 of 6" instruction
- * instead — one Electric Blue, one Magenta, ServicesGrid's exact two
- * hues, just not its exact proportion.
+ * PANEL FILL — the same two sectors PR #23 had coloured (Corporate →
+ * Magenta, Events → Electric Blue, same thematic reasoning as before:
+ * Magenta is this site's "premium/discreet" hue — Close Protection in
+ * ServicesGrid, the closest register match for a higher-trust B2B
+ * sector; Electric Blue is the "visible/energetic presence" hue —
+ * Manned Guarding/Overnight Security, the closest match for the most
+ * publicly visible, crowd-facing sector here) — now fill the swapping
+ * CONTENT PANEL's own background instead of the tab. Genuinely a SOLID
+ * fill, not a tint, reusing `ServicesGrid.astro`'s exact already-
+ * verified fill/foreground pairing directly (`bg-electric-blue text-
+ * paper` / `bg-magenta text-paper`) rather than recomputing contrast
+ * from scratch — same numbers as before (white on Electric Blue
+ * ~5.17:1, white on Magenta ~7.26:1, both AA+ with real margin), since
+ * contrast is a pure function of the two colours and doesn't change
+ * with WHICH element carries the fill. Deliberately NOT `on-dark`
+ * despite otherwise matching ServicesGrid's own pairing verbatim — see
+ * `PANEL_FILL_CLASS`'s own comment below for why this is a real,
+ * necessary divergence (a focusable `Button` lives inside this panel;
+ * ServicesGrid's own cards have no focusable content at all).
  *
- * INDICATOR — the PR #22 scheme (Ink-hover/Amber-active) assumed every
- * tab sits on Paper; it breaks the moment a tab has its own coloured
- * fill (Ink is invisible on a dark fill, and Amber isn't universally
- * safe either — see below). Rather than force one hue to work
- * everywhere, coloured and light tabs use the SAME grammar (translucent
- * mark = hover, solid mark = active) with a DIFFERENT foreground hue
- * per background — light tabs keep Ink/Amber unchanged, coloured tabs
- * use Paper instead, reusing their own already-established text colour
- * as the indicator rather than introducing a third hue:
- *   - Coloured tab, active: solid `border-paper` — reuses
- *     `ServicesGrid.astro`'s own already-derived white-on-fill numbers (~5.17:1
- *     Electric Blue, ~7.26:1 Magenta — both AA+, real margin), no fresh
- *     derivation needed since contrast is a pure function of the two
- *     colours, unaffected by border-vs-text context.
- *   - Coloured tab, inactive/hover: Paper at 70% opacity (NOT the light
- *     tabs' own 55% value) — computed FRESH for this new
- *     alpha-over-a-coloured-fill context, not assumed to carry over
- *     from Ink/55's own unrelated derivation: Paper at 55% opacity
- *     blended over Electric Blue only reaches ≈2.63:1 (fails 3:1); at
- *     70% it reaches ≈3.35:1 (passes, real margin) — checked against
- *     Magenta too at the same 70%, ≈4.22:1 (passes with MORE margin,
- *     since Magenta's own lower luminance means any given light blend
- *     contrasts harder against it). 70% is therefore the real floor
- *     for BOTH fills, not a value picked for one and assumed safe for
- *     the other.
- *   - Amber was tried FIRST as a universal indicator (matching light
- *     tabs' own active hue, so one colour would mean "selected"
- *     everywhere) and rejected on real, freshly-computed numbers, not
- *     assumed: Amber vs Magenta ≈3.38:1 (passes), but Amber vs Electric
- *     Blue ≈2.41:1 (fails) — the SAME category of gap already accepted
- *     twice elsewhere on this site (header-nav underline ~2.15:1,
- *     MissionBand underline ~2.15:1), but a THIRD instance felt like
- *     compounding a known pattern rather than genuinely solving this
- *     one, especially when a fully-compliant alternative (Paper) was
- *     available without inventing anything new. Not treated as a closed
- *     decision — flagged to the user with both real options before
- *     implementing, this is the one they confirmed.
- *   - `.on-dark` applied directly to each coloured tab `<button>`
- *     (matches `ServicesGrid.astro`'s own per-card placement, not a
- *     wrapper) — the default Ink focus ring is invisible on these
- *     fills, same reasoning as every other Electric-Blue/Magenta
- *     surface on this site.
- *   Structurally, hover/active classes stay mutually exclusive per tab
- *     regardless of fill (see the paragraph above this one) — a
- *     coloured tab's own hover/active classes swap the SAME way a light
- *     tab's do, just drawing from the Paper-based pair instead of the
- *     Amber/Ink one.
+ * RATIO — still genuinely 2-of-6, NOT a literal match to
+ * `ServicesGrid.astro`'s own real fill count (that section is actually
+ * 3 coloured : 3 light, not 2:4) — unchanged from PR #23, only which
+ * ELEMENT carries the colour moved.
+ *
+ * All four remaining sectors (Retail, Distribution, Healthcare,
+ * Education) keep the plain `surface-alt`/Ink panel unchanged.
  *
  * PANEL — the two-column MissionBand shape reused directly (image first
  * in DOM/first column, copy second, `items-center` vertically balancing
@@ -200,45 +198,45 @@ import educationPhoto from "../../assets/sectors/education.png";
  * `items-center` is unprefixed on both this panel AND MissionBand's own
  * — a correction from this comment's own earlier draft, which had
  * wrongly claimed an `md:`-prefixed version of that same class, caught
- * during this session's own dead-CSS audit rather than left standing
- * once found. The identical inaccuracy exists in `MissionBand.astro`'s
- * own comment too (also never real markup there) — genuinely
- * out-of-scope to fix in this pass, flagged rather than silently left
- * for a future session to rediscover. Background is `surface-alt`
- * (a light, neutral, non-accent surface — explicitly NOT a full-colour
- * block fill, matching the brief), padded, no border/shadow — this is
- * ONE panel, not a repeated card grid, so it doesn't trip the "no
- * identical bordered/shadowed card grids" hard rule either way, but it's
- * also just not bordered/shadowed to begin with, matching ServicesGrid's
- * own light-card treatment.
+ * during PR #23's own dead-CSS audit rather than left standing once
+ * found. The identical inaccuracy exists in `MissionBand.astro`'s own
+ * comment too (also never real markup there) — genuinely out-of-scope
+ * to fix here, flagged rather than silently left for a future session
+ * to rediscover. Background is conditional (see PANEL FILL above) —
+ * `surface-alt` for four of six sectors, a solid Electric-Blue/Magenta
+ * fill for the other two — padded, no border/shadow either way. This
+ * is ONE panel, not a repeated card grid, so it doesn't trip the "no
+ * identical bordered/shadowed card grids" hard rule regardless of
+ * which background it happens to carry.
  *
- * CAPTION — plain sentence case (e.g. "Retail security"), Ink,
- * DELIBERATELY NOT tracked-caps/uppercase. CLAUDE.md's hard rule bans
- * tracked-caps eyebrow labels above headings; MissionBand's own "Our
- * mission" caption is the one existing exception, and it exists ONLY
- * because that exact label text was named in a direct, explicit
- * instruction invoking the rule's own override clause. This task's brief
- * asked for a "caption" as part of the panel's content order and named
- * Ink (not Amber) as its required colour — it did not name specific
- * tracked-caps copy or invoke the override clause the way MissionBand's
- * brief did, so this caption stays a plain, quiet label rather than a
- * third tracked-caps element added on inference. Flag if the tracked-caps
- * treatment was actually wanted here too — it's a one-line change
- * (uppercase tracking-[0.14em]), just not the default without a fresh,
- * explicit ask, per CLAUDE.md's own "don't read one exception as licence
- * for a third" instruction.
+ * CAPTION — plain sentence case (e.g. "Retail security"), DELIBERATELY
+ * NOT tracked-caps/uppercase. CLAUDE.md's hard rule bans tracked-caps
+ * eyebrow labels above headings; MissionBand's own "Our mission"
+ * caption is the one existing exception, and it exists ONLY because
+ * that exact label text was named in a direct, explicit instruction
+ * invoking the rule's own override clause — this caption stays plain,
+ * matching PR #22's original decision, unchanged by this pass. Colour
+ * is no longer hardcoded to Ink on this `<p>` itself — it inherits
+ * `text-ink`/`text-paper` from the panel wrapper's own fill class
+ * (see COLOUR below), same inheritance mechanism `ServicesGrid.astro`'s
+ * own card heading/body already use rather than every child re-stating
+ * its own colour.
  *
- * COLOUR — every pairing on this panel re-derived fresh, not assumed from
- * elsewhere on the site (new geometry: a photo-heavy two-column panel on
- * `surface-alt`, not a solid accent fill or plain Paper):
- *   - Caption/headline/body text: Ink on `surface-alt` (#f5f5f5) —
- *     ~17.8:1 (AAA), the same number global.css's own `surface-alt` token
- *     comment already derives for Ink-on-this-fill (ServicesGrid's light
- *     cards use the identical pairing) — restated here for this new
- *     context rather than silently assumed to carry over unchanged.
+ * COLOUR — every pairing on the panel's own two backgrounds:
+ *   - `surface-alt` (four sectors): caption/headline/body text Ink on
+ *     `surface-alt` (#f5f5f5) — ~17.8:1 (AAA), the same number
+ *     global.css's own `surface-alt` token comment already derives for
+ *     Ink-on-this-fill (ServicesGrid's light cards use the identical
+ *     pairing).
+ *   - Electric Blue / Magenta (two sectors): white text on the fill —
+ *     ~5.17:1 / ~7.26:1, `ServicesGrid.astro`'s own already-verified
+ *     numbers, reused directly rather than re-derived (see PANEL FILL
+ *     above).
  *   - Button: the unmodified `Button.astro` `primary` variant (Amber
- *     fill, Ink text, ~9.05:1 AAA) — no one-off button styling, same
- *     component every other primary CTA on the site uses.
+ *     fill, Ink text, ~9.05:1 AAA) on EVERY panel regardless of its own
+ *     background — no one-off button styling, same component every
+ *     other primary CTA on the site uses, sitewide convention, no
+ *     exception for a coloured panel either.
  *
  * HEADLINE SIZE — `text-h3` (28px), not `text-h2` (40px, MissionBand's own
  * size). This section already has its own `text-h2` main heading ("Who we
@@ -313,18 +311,26 @@ interface Sector {
   blurb: string;
   photo: ImageMetadata;
   alt: string;
-  /** Undefined = plain/light tab (four of six). Set on exactly two
-   * sectors — see this file's own TAB FILL comment above for which and
-   * why. Reuses `ServicesGrid.astro`'s exact naming convention
-   * (`fill`) for a per-item colour assignment. */
+  /** Undefined = plain Surface Alt panel (four of six). Set on exactly
+   * two sectors — see this file's own PANEL FILL comment above for
+   * which and why. Drives the CONTENT PANEL now, not the tab button —
+   * see TAB TITLES for why the tab itself no longer branches on this. */
   fill?: TabFill;
 }
 
-// Same shape as `ServicesGrid.astro`'s own `FILL_CLASS` — keyed off
-// each SECTORS entry's own `fill`, never derived from index/position.
-const TAB_FILL_CLASS: Record<TabFill, string> = {
-  "electric-blue": "on-dark bg-electric-blue text-paper",
-  magenta: "on-dark bg-magenta text-paper",
+// Reuses `ServicesGrid.astro`'s own already-verified fill/foreground
+// pairing verbatim (its Close Protection / Manned Guarding-Overnight
+// Security cards) — deliberately NOT `on-dark`, unlike that component's
+// own version. See this file's own PANEL FILL comment for why: this
+// panel's inner fill div contains a real focusable `Button` whose own
+// ring must stay Ink (Button.astro's own documented ~9.05:1 pairing) —
+// `.on-dark`'s `:focus-visible` descendant selector would silently
+// override that to Paper, which fails outright against Amber
+// (~2.15:1). ServicesGrid's cards can afford `.on-dark` defensively
+// because they have no focusable content at all; this panel can't.
+const PANEL_FILL_CLASS: Record<TabFill, string> = {
+  "electric-blue": "bg-electric-blue text-paper",
+  magenta: "bg-magenta text-paper",
 };
 
 const SECTORS: Sector[] = [
@@ -403,7 +409,7 @@ const DEFAULT_SLUG = SECTORS[0].slug;
       role="tablist"
       aria-label="Sectors we operate in"
       data-sectors-tablist
-      class="sectors-tablist-scroll mt-12 flex flex-nowrap items-end gap-x-8 gap-y-3 overflow-x-auto sm:flex-wrap sm:overflow-visible"
+      class="sectors-tablist-scroll mt-12 flex flex-nowrap items-end justify-center-safe gap-x-8 gap-y-3 overflow-x-auto sm:flex-wrap sm:overflow-visible"
     >
       {
         SECTORS.map((sector) => {
@@ -418,16 +424,9 @@ const DEFAULT_SLUG = SECTORS[0].slug;
               tabindex={isActive ? 0 : -1}
               data-sector-tab
               data-slug={sector.slug}
-              data-fill={sector.fill ?? ""}
               class:list={[
-                "text-caption border-b-2 pb-3 shrink-0 transition-colors duration-200 ease-out",
-                sector.fill
-                  ? [
-                      TAB_FILL_CLASS[sector.fill],
-                      "px-4 pt-2",
-                      isActive ? "border-paper" : "border-transparent hover:border-paper/70",
-                    ]
-                  : ["text-ink", isActive ? "border-amber" : "border-transparent hover:border-ink/55"],
+                "text-caption text-ink border-b-2 pb-3 shrink-0 transition-colors duration-200 ease-out",
+                isActive ? "border-amber" : "border-transparent hover:border-ink/55",
               ]}
             >
               {sector.name}
@@ -453,7 +452,12 @@ const DEFAULT_SLUG = SECTORS[0].slug;
               data-slug={sector.slug}
               hidden={!isActive}
             >
-              <div class="bg-surface-alt grid grid-cols-1 items-center gap-10 p-8 md:grid-cols-2 md:gap-14 md:p-12">
+              <div
+                class:list={[
+                  "grid grid-cols-1 items-center gap-10 p-8 md:grid-cols-2 md:gap-14 md:p-12",
+                  sector.fill ? PANEL_FILL_CLASS[sector.fill] : "bg-surface-alt text-ink",
+                ]}
+              >
                 <div class="aspect-[3/2] overflow-hidden">
                   <Image
                     src={sector.photo}
@@ -468,9 +472,9 @@ const DEFAULT_SLUG = SECTORS[0].slug;
                 </div>
 
                 <div class="text-left">
-                  <p class="text-caption text-ink">{sector.caption}</p>
-                  <h3 class="text-h3 text-ink mt-3">{sector.headline}</h3>
-                  <p class="text-body text-ink mt-4 max-w-md">{sector.blurb}</p>
+                  <p class="text-caption">{sector.caption}</p>
+                  <h3 class="text-h3 mt-3">{sector.headline}</h3>
+                  <p class="text-body mt-4 max-w-md">{sector.blurb}</p>
                   <div class="mt-8">
                     <Button href={`/sectors/${sector.slug}`}>Learn more</Button>
                   </div>
