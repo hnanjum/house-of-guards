@@ -1,0 +1,208 @@
+---
+import { Image } from "astro:assets";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Button from "../components/ui/Button.astro";
+import officerPhoto from "../assets/about/officer-sia-badge.png";
+
+/**
+ * About page — first build. `/about` was already a live, nav-linked
+ * route (Header.astro, NavDrawer.tsx, and MissionBand.astro's own "More
+ * about us" button all already point here) with no page file behind it
+ * until now.
+ *
+ * CONTENT — supplied verbatim by the user (the intro copy, the three
+ * bullets, and the Mission/Services/Vision sections), lightly adapted
+ * only for on-page flow: the Services paragraph's flat comma-separated
+ * service list is broken out into a wrapped inline row for readability
+ * (same sentence, same words, no descriptors invented per service —
+ * see the SERVICES section comment below for why 3 of the 9 named
+ * services have no matching icon file and are rendered as plain text
+ * rather than forcing a mismatched icon set).
+ *
+ * IMAGE — `src/assets/about/officer-sia-badge.png` (1024×1536, real
+ * geometry confirmed via `sharp` metadata, not guessed), a real,
+ * final, House-of-Guards-branded photograph supplied by the user — a
+ * uniformed officer, front-facing, wearing an SIA licence badge on a
+ * lanyard, blurred Bradford street/plaza background. Not a placeholder
+ * — flagged here only for provenance, same convention as
+ * `hero-officer.png`/`mission-team.png`. Deliberately paired with the
+ * "SIA licensed and DBS checked officers" bullet in the same section —
+ * the badge is legible in the photo itself, so the image corroborates
+ * the claim rather than just illustrating the page generically.
+ * Rendered at its own native 2:3 ratio (`aspect-[2/3]`), uncropped —
+ * `object-cover` at a matching ratio performs no real crop, it's a
+ * robustness net only, same discipline as every other real photo on
+ * this site.
+ *
+ * COLOUR — deliberately restrained to ONE accent moment, not the full
+ * four-colour rebrand vocabulary. This page is a new, non-homepage
+ * section, so per CLAUDE.md's own hard-rule text it only gets Electric
+ * Blue/Magenta if a fresh, explicit instruction extends the palette
+ * here — the task brief that produced this page named "Electric Blue,
+ * Magenta, Amber-only-CTA" as available tokens, which is exactly that
+ * kind of explicit extension. Used narrowly: Electric Blue for ONE
+ * full-bleed band (Our Mission), Amber for the one CTA button, nothing
+ * else — Magenta is deliberately NOT used anywhere on this page; there
+ * was no second, distinct colour moment the content actually called
+ * for, and reaching for Magenta just because it was available would be
+ * exactly the "colour on every section because it's there" default
+ * this brief asked to avoid. CLAUDE.md's own palette-scope note is
+ * updated in the same commit to record About as a further named,
+ * narrow exception (Electric Blue only, one band), matching how
+ * SectorsGrid's own carve-out was documented.
+ *
+ * Mission band: white/Paper text on Electric Blue reuses the
+ * already-derived ~5.17:1 (AA) pairing from global.css's own token
+ * comment — no new contrast maths needed, same fill/foreground
+ * combination StatStrip/Header's info bar/ServicesGrid's coloured
+ * cards already use. `.on-dark` is applied defensively (no focusable
+ * element inside the band today, matching ServicesGrid's own
+ * precedent for a fill with no interactive content).
+ *
+ * MOTION — exactly one deliberate moment, not motion on every section,
+ * per the brief's own explicit ask. Only the Mission band gets a
+ * scroll reveal (`[data-reveal]`, reusing the plain generic
+ * `scrollReveal.ts` module directly — the same one StatStrip and
+ * StandardsCarousel already reuse unmodified, no new bespoke motion
+ * module needed for a single plain fade/rise band). The intro section
+ * and the Services/Vision sections are static — no entrance animation,
+ * so the one motion beat this page has actually reads as deliberate
+ * rather than default page furniture.
+ *
+ * ALIGNMENT — left throughout, the sitewide default. No section on
+ * this page centres itself; there was no instruction or established
+ * precedent (beyond SectorsGrid's own narrow, differently-shaped
+ * heading-only exception) that would justify one here.
+ *
+ * SERVICES — the source paragraph names 9 services, but only 6 of this
+ * project's bespoke service icons exist (`src/icons/services/*`,
+ * matching ServicesGrid.astro's own 6 cards). Rather than force a
+ * mismatched icon set (6 icons for 9 names) or invent 3 new bespoke
+ * icons as unrequested scope, the service list renders as plain text —
+ * a wrapped row of names separated by a thin hairline dot, no icons at
+ * all on this page. Flagged here rather than silently deciding either
+ * way.
+ *
+ * CTA TARGET — `ClosingCta.astro` (the homepage's contact/quote
+ * section) has no `id` attribute anywhere in its markup to hash-link
+ * to, and `/contact` has no page file yet (a known, disclosed gap —
+ * see CLAUDE.md's own "Not started" list). The Vision section's button
+ * therefore points at `/` (home), which does carry the real quote
+ * form further down the page — a real, working link, not a dead one.
+ * `ClosingCta.astro` itself is untouched by this page.
+ */
+---
+
+<BaseLayout
+  title="About"
+  description="House of Guards is a young, Bradford-based physical security company founded in 2023 — SIA-licensed, DBS-checked officers delivering manned guarding, close protection, and CCTV monitoring across West Yorkshire."
+>
+  <section class="bg-paper">
+    <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-28">
+      <h1 class="text-h1 text-ink max-w-2xl">About House of Guards</h1>
+      <p class="text-h3 text-ink mt-3 max-w-2xl">A young company with experienced people</p>
+
+      <div class="mt-12 grid grid-cols-1 items-start gap-12 md:grid-cols-2 md:gap-16 lg:gap-20">
+        <div class="text-left">
+          <p class="text-body-lg text-ink max-w-md">
+            House of Guards is a new establishment formed in 2023, working across the
+            sectors listed on our Services page. We are growing steadily in both staff
+            and contracts, and we continue to recruit skilled SIA licensed officers,
+            CCTV monitoring operators and stewards.
+          </p>
+          <p class="text-body text-ink mt-5 max-w-md">
+            Most of our work takes place in West Yorkshire, though some shifts run
+            further afield with transport provided. Our staff receive regular training
+            on how to sharpen their work, because professionalism is central to how we
+            operate — and to what we expect from every member of the crew.
+          </p>
+
+          <ul class="mt-8 max-w-md divide-y divide-hairline border-t border-hairline">
+            <li class="py-4 text-body text-ink">SIA licensed and DBS checked officers</li>
+            <li class="py-4 text-body text-ink">First aid trained personnel</li>
+            <li class="py-4 text-body text-ink">Bespoke shift patterns, arranged around you</li>
+          </ul>
+        </div>
+
+        <div class="aspect-[2/3] overflow-hidden md:max-w-sm md:justify-self-end">
+          <Image
+            src={officerPhoto}
+            alt="A House of Guards security officer in a branded jacket, wearing an SIA licence badge on a lanyard, standing on a Bradford street"
+            class="h-full w-full object-cover"
+            widths={[320, 480, 640, 768]}
+            sizes="(min-width: 768px) 24rem, 100vw"
+            format="webp"
+            quality={82}
+            loading="eager"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="on-dark bg-electric-blue" data-reveal>
+    <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-24">
+      <h2 class="text-h2 text-paper max-w-2xl">Our mission</h2>
+      <p class="text-body-lg text-paper mt-5 max-w-2xl">
+        To meet our clients' needs to perfection in a professional working
+        environment, and to recruit staff who share those values. We aim to give
+        full assurance in the safety our guards provide, and to become a leading
+        supplier of reliable close protection officers in the North.
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-paper">
+    <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-24">
+      <h2 class="text-h2 text-ink max-w-2xl">Our services</h2>
+      <p class="text-body-lg text-ink mt-5 max-w-2xl">
+        We deliver:
+      </p>
+      <ul class="mt-4 flex max-w-2xl flex-wrap items-center gap-x-3 gap-y-2" aria-label="Services we offer">
+        {[
+          "Corporate security",
+          "Close protection",
+          "CCTV monitoring",
+          "Manned guarding",
+          "Retail security",
+          "Construction site security",
+          "Overnight security",
+          "Private property security",
+          "Event stewarding",
+        ].map((service, i) => (
+          <>
+            {i > 0 && <span class="text-stone select-none" aria-hidden="true">·</span>}
+            <li class="text-body text-ink">{service}</li>
+          </>
+        ))}
+      </ul>
+      <p class="text-body text-ink mt-5 max-w-2xl">
+        Bespoke arrangements are available, and our specialists are operational
+        24 hours a day.
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-paper">
+    <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-28">
+      <h2 class="text-h2 text-ink max-w-2xl">Our vision</h2>
+      <p class="text-body-lg text-ink mt-5 max-w-md">
+        To offer the best quality for the right price. We invest in our people so
+        they can outperform the rest, commit to ongoing improvement in every area,
+        and build a team of experts who understand our core values and want to
+        deliver on them.
+      </p>
+      <div class="mt-8">
+        <Button href="/">Get in touch</Button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { initScrollReveal } from "../lib/scrollReveal";
+
+    document.addEventListener("astro:page-load", () => {
+      initScrollReveal();
+    });
+  </script>
+</BaseLayout>

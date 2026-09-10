@@ -82,6 +82,15 @@ note's own edit date/PR reference before trusting a stale count.
   RETIRED from all six of these — neither appears in any of their real
   rendered markup, confirmed via a full repo grep before each PR
   describing itself as done.
+- **`about.astro` (PR #38) is a SEVENTH, narrower exception** — the
+  first interior page built, not a homepage section. Uses Electric
+  Blue only, for exactly one full-bleed band (the "Our mission"
+  section), plus Amber's own sitewide button-only use for its one CTA
+  — Magenta and Cyan-Blue are deliberately untouched, a real choice to
+  keep this page to one accent moment rather than reaching for every
+  available colour just because the task brief listed them as
+  available. See that file's own top-of-file comment for the full
+  reasoning.
 - **`--color-guard-green-secondary` has been fully REMOVED from
   `global.css`**, not just retired-in-place. `ClosingCta.astro`'s own
   phone-link hover decoration was the ONLY remaining reference anywhere
@@ -736,17 +745,15 @@ treatment for these icons without a real reason to.
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number below is confirmed on
-`origin/main` as of THIS entry — **every PR through #36 is confirmed
-MERGED** (checked fresh via `gh pr list --state all --limit 8` and
-`git log origin/main --oneline` immediately before writing this
-paragraph, not assumed from an earlier revision of this file's own
-text — PRs #34/#35/#36 in particular had ALREADY landed on `main` with
-no corresponding entry in this file at all, not even a stale "not yet
-merged" placeholder, since this file simply hadn't been touched since
-PR #33; discovered only because that check was run fresh rather than
-assumed from this file's own, by-then-outdated text — see the next
-paragraph for why this check matters every single time, not just
-once). No current "not yet merged" exception exists as of this entry.
+`origin/main` as of THIS entry — **every PR through #37 is confirmed
+MERGED** (checked fresh via `gh pr list --state all --limit 5`
+immediately before starting PR #38's own branch, not assumed from an
+earlier revision of this file's own text). **PR #38 (this entry) is
+the one live exception** — written as part of the same branch/PR it
+describes, before that PR has merged, per the task's own explicit
+instruction to update this file's history in the same PR. Don't read
+"the newest entry" as automatically meaning "confirmed merged" the way
+every entry below it is; check `gh pr view 38` if that status matters.
 **PR #29's entry still sits ABOVE PR #28's below even though #28's own
 code landed on `main` first** — both were opened
 from the same session as two genuinely independent changes (per
@@ -769,6 +776,104 @@ this paragraph as a snapshot from whenever it was last edited, never as
 a live signal — always run `gh pr list --state all --limit 5` (or
 similar) fresh before assuming anything about merge state, this
 paragraph included.
+
+- **PR #38 — the first interior page: `src/pages/about.astro`,
+  satisfying the already-live `/about` nav link (Header, NavDrawer, and
+  `MissionBand.astro`'s own "More about us" button all already pointed
+  here with no page file behind it until this PR).** A genuinely
+  different kind of task from every prior homepage-section PR in this
+  log — reference-driven design work on a brand-new page, not an edit
+  to an already-shipped section — so a design plan was written and
+  confirmed with the user BEFORE any code, per the task's own explicit
+  instruction (six colour tokens, type roles, an ASCII wireframe,
+  alignment guidance, and an explicit list of generic-AI-default
+  patterns to avoid — tracked-caps eyebrows, em-dash label fragments,
+  01/02/03 numbering, identical rounded-shadow cards, fade-on-every-
+  section, motion on every hover).
+
+  **CONTENT** — supplied verbatim by the user (the "young company"
+  intro, three bullets, Mission/Services/Vision sections) and used as
+  given, per the task's own "do not rewrite the substance" instruction.
+  One structural adaptation, disclosed rather than silent: the Services
+  section's flat, comma-separated 9-service sentence is broken into a
+  wrapped inline list for readability — same words, no per-service
+  descriptors invented, since only 6 of the 9 named services have a
+  matching bespoke icon file (`src/icons/services/*`, the same 6
+  `ServicesGrid.astro` uses) and forcing a 6-icon/9-name mismatch or
+  inventing 3 new icons as unrequested scope both felt worse than
+  plain text — flagged in the page's own top-of-file comment rather
+  than silently decided.
+
+  **IMAGE** — a real, final, House-of-Guards-branded photograph
+  supplied by the user via their Downloads folder (the most recent file
+  there, per direct instruction) — not AI-generated, not a placeholder:
+  a uniformed officer, front-facing, wearing a visible SIA licence
+  badge on a lanyard, blurred Bradford street/plaza background.
+  Deliberately paired with the "SIA licensed and DBS checked officers"
+  bullet in the same section, since the badge is legible in the photo
+  itself — the image corroborates that specific claim rather than
+  illustrating the page generically. Copied into
+  `src/assets/about/officer-sia-badge.png`, real geometry confirmed via
+  `sharp` metadata before laying out the column (1024×1536, exactly
+  2:3), rendered through `astro:assets`' `<Image />` at its own native
+  ratio (`aspect-[2/3]`) — `object-cover` performs no real crop,
+  confirmed via a real rendered `getBoundingClientRect()` check (see
+  VERIFICATION below), not assumed from the ratio match alone.
+
+  **COLOUR — deliberately restrained to ONE accent moment, not the full
+  four-colour vocabulary.** This is a new, non-homepage page, so per
+  the hard-rule text's own "similarly explicit instruction" clause it
+  only gets Electric Blue/Magenta at all because the task brief that
+  produced it named them directly as available tokens — but "available"
+  isn't "required": Electric Blue is used for exactly one full-bleed
+  band (Our Mission, reusing the already-derived white-on-Electric-Blue
+  ~5.17:1 pairing, no new contrast maths needed), Amber for the one CTA
+  button, and Magenta is deliberately UNUSED anywhere on this page —
+  there was no second, distinct colour moment the content actually
+  called for, and reaching for a second accent purely because it was
+  listed as available would be exactly the "colour on every section
+  because it's there" default the brief asked to avoid. The SCOPE note
+  above is updated in this same commit to record About as a seventh,
+  narrow palette exception.
+
+  **MOTION — exactly one deliberate moment.** Only the Mission band
+  carries a scroll reveal (`[data-reveal]`, reusing the plain generic
+  `scrollReveal.ts` module directly and unmodified — the same one
+  StatStrip/StandardsCarousel already reuse, no new bespoke motion
+  module needed for a single fade/rise band). The intro section and the
+  Services/Vision sections are deliberately static, per the brief's own
+  "one deliberate motion moment is enough, not motion on everything."
+
+  **ALIGNMENT** — left throughout, the sitewide default; no section on
+  this page centres anything, and nothing about this page's content
+  justified reaching for SectorsGrid's own narrow heading-only
+  exception.
+
+  **CTA target** — `ClosingCta.astro` (the homepage's own contact/quote
+  section) has no `id` anywhere in its markup to hash-link to, and
+  `/contact` has no page file yet (a known, pre-existing gap — see
+  "Not started" below), so the Vision section's "Get in touch" button
+  points at `/` (home), which genuinely does carry the real quote form
+  further down that page — a working link, not a dead one.
+  `ClosingCta.astro` itself is untouched by this PR, per explicit scope.
+
+  **VERIFICATION** — `astro check` (0 errors, 43 files, same 2
+  pre-existing `ContactForm.tsx` hints) and a clean `astro build`, plus
+  the dead-CSS-from-comments audit this project's own standing
+  convention requires (a small script cross-checking every backtick-
+  quoted, Tailwind-utility-shaped token in this file's own comment
+  against its real markup usage — zero orphaned tokens found). Real
+  rendered geometry was also checked, not just compiled-output text,
+  per the standing convention for anything involving grid/flex parent
+  behaviour: the real `astro build` output was served from a throwaway
+  scratch Node `http` server on a random port (never `astro dev`/
+  `astro preview`), and the intro section's two-column grid was
+  measured via `getBoundingClientRect()` at both 1280px (two real
+  544px columns, image at its exact native 2:3 ratio — genuinely zero
+  crop, not assumed) and 375px (single column, image stacking below
+  the text per DOM order, zero horizontal overflow). The scratch server
+  and its script were torn down before committing, per the standing
+  convention.
 
 - **PR #36 — reverts PR #35's row-alignment change on `ClosingCta.astro`
   back to `lg:items-stretch`, keeping PR #35's OTHER change (the smaller
@@ -2586,8 +2691,18 @@ anywhere is `Button.astro`'s own dormant `secondary` variant. See the
 Design system section above for the exact, current scope boundary — it
 has moved three times now, don't assume an older framing still holds.
 
-**Not started**: the interior pages — About, Careers, Our Policies,
-Gallery, Contact, plus the six new `/sectors/<slug>` pages SectorsGrid's
+**Built, as of PR #38**: `src/pages/about.astro` — the first interior
+page, satisfying the already-live `/about` nav link. Intro section
+(headline + subhead + two paragraphs + a hairline-divided fact list,
+two-column with a real SIA-badge officer photo), an Electric-Blue
+"Our mission" band (the page's one deliberate colour + motion moment),
+a plain "Our services" section (the 9 named services as a wrapped
+inline list, no icons — see PR #38's own history entry for why), and
+"Our vision" with a `Button` CTA to `/`. See that PR's own entry above
+for the full account.
+
+**Not started**: the remaining interior pages — Careers, Our Policies,
+Gallery, Contact — plus the six new `/sectors/<slug>` pages SectorsGrid's
 own "Learn more" buttons now link to (`retail`/`distribution`/
 `corporate`/`events`/`healthcare`/`education`) — none of these routes
 exist yet (confirmed via a real `astro build` that a dead internal link
