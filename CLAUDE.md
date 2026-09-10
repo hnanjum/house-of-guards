@@ -734,13 +734,18 @@ treatment for these icons without a real reason to.
 
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
-log` alone. Newest first; each PR number is on `origin/main` — **NO
-CURRENT EXCEPTION as of this entry: every PR through #30 is confirmed
-MERGED** (checked fresh via `gh pr list --state all` and `git log
-origin/main` at the start of the session that added the `ClosingCta`
-entry directly below, not assumed from this file's own text — see this
-paragraph's own note two sentences down for why that check matters
-every time, not just once). This paragraph's own PREVIOUS revision
+log` alone. Newest first; each PR number is on `origin/main` — WITH ONE
+CURRENT EXCEPTION: **PR #31 (the `ClosingCta` rebuild entry directly
+below) is NOT YET MERGED as of this entry** — open, awaiting review,
+per this project's own standing "open a PR, don't merge it yourself"
+convention. Everything it describes lives only on its own branch until
+the user merges it; don't assume its code is live on `main` just
+because it's documented here. Every PR through #30 IS confirmed MERGED
+(checked fresh via `gh pr list --state all` and `git log origin/main`
+at the start of the session that added the `ClosingCta` entry, not
+assumed from this file's own text — see this paragraph's own note two
+sentences down for why that check matters every time, not just once).
+This paragraph's own PREVIOUS revision
 claimed "PR #29 is NOT YET MERGED as of this entry" — that flag had
 gone stale by the time it was checked, the same recurring pattern this
 paragraph already describes below; corrected here rather than left
@@ -763,7 +768,7 @@ a live signal — always run `gh pr list --state all --limit 5` (or
 similar) fresh before assuming anything about merge state, this
 paragraph included.
 
-- **PR #__NEXT__ — ClosingCta rebuilt: a two-column "Contact Now" +
+- **PR #31 — ClosingCta rebuilt: a two-column "Contact Now" +
   "Get A Quote" band, replacing the old centred heading+Button+phone-
   link CTA outright, not converted piece by piece.** Investigated
   `ContactForm.tsx` (the site's one contact-form React island) before
