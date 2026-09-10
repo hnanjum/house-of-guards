@@ -83,13 +83,14 @@ import officerPhoto from "../assets/about/officer-sia-badge.png";
  * all on this page. Flagged here rather than silently deciding either
  * way.
  *
- * CTA TARGET — `ClosingCta.astro` (the homepage's contact/quote
- * section) has no `id` attribute anywhere in its markup to hash-link
- * to, and `/contact` has no page file yet (a known, disclosed gap —
- * see CLAUDE.md's own "Not started" list). The Vision section's button
- * therefore points at `/` (home), which does carry the real quote
- * form further down the page — a real, working link, not a dead one.
- * `ClosingCta.astro` itself is untouched by this page.
+ * CTA TARGET — `/#quote-form`, landing directly on ClosingCta's own
+ * quote-request card rather than just the homepage top. `/contact` has
+ * no page file yet (a known, disclosed gap — see CLAUDE.md's own "Not
+ * started" list), so `/` is still the right destination; ClosingCta.
+ * astro previously had no `id` anywhere in its markup to hash-link to
+ * (confirmed at first build), so a minimal `id="quote-form"` was added
+ * directly to its floating "Get A Quote" card — the one addition
+ * `ClosingCta.astro` needed, nothing else in that file touched.
  */
 ---
 
@@ -193,7 +194,7 @@ import officerPhoto from "../assets/about/officer-sia-badge.png";
         deliver on them.
       </p>
       <div class="mt-8">
-        <Button href="/">Get in touch</Button>
+        <Button href="/#quote-form">Get in touch</Button>
       </div>
     </div>
   </section>
