@@ -19,32 +19,33 @@ Brand register: **discreet, disciplined, high-trust, understated
 authority** — a private security consultancy or a bespoke law firm, not
 a generic template. Existing tagline: "Security Built on Trust."
 
-## Open issue — check this first
+## Resolved incident (historical) — Cloudflare Workers Builds stall around PR #14
 
-**Cloudflare Workers Builds appears stuck/delayed for this repo as of
-PR #14's merge (`771fa592e95f7cd8c8b1e5542e868b8a384d86f0`).** All
-three GitHub App check-suites on that commit (`vercel`,
+Kept as a brief historical record, not a "check this first" item —
+confirmed resolved and has stayed resolved across every PR since (#15
+through #29, all merged and deployed successfully; `gh api
+repos/hnanjum/house-of-guards/commits/<sha>/check-runs` on the latest
+merge commit reports `Workers Builds: house-of-guards` → `completed`/
+`success`, and the live site at
+`https://house-of-guards.onata-1230.workers.dev/` genuinely serves the
+latest merged content — both re-confirmed directly, not assumed from
+"it's been a while"). What happened, for context if a similar stall
+ever recurs: as of PR #14's merge (`771fa592e95f7cd8c8b1e5542e868b8a
+384d86f0`), all three GitHub App check-suites on that commit (`vercel`,
 `cloudflare-workers-and-pages`, `claude`) sat at `status: "queued"`
-with zero check-runs across two separate checks, ~20 minutes apart —
-not slow-but-progressing, genuinely stuck at zero both times.
-Confirmed via direct `curl` against the live site (not just GitHub's
-own status) that the deployed page still served PR #13's markup
-(`sm:block` present) well after the merge — so this wasn't a GitHub UI
-lag, the build genuinely never ran. All three unrelated apps stalling
-simultaneously points at a GitHub webhook-dispatch problem for that
-push, not something wrong with the code or with Cloudflare's build
-queue specifically. **Per the user's own direction, PR #15 (mobile
-StatStrip dividers + the Tailwind `@source` fix below) was pushed but
-deliberately NOT auto-merged** — left open for the user to merge
-themselves given the deploy uncertainty. **If a future session finds
-more PRs piling up unmerged/undeployed**: check
-`gh api repos/hnanjum/house-of-guards/commits/<sha>/check-runs` for the
-latest merge commit first; if it's now completing normally, resume the
-usual merge → poll → curl-verify flow. If still stuck at zero
-check-runs, don't keep silently re-polling — say so plainly and point
-the user at the Cloudflare dashboard (Workers & Pages →
-house-of-guards → Deployments), which isn't something this session can
-see into.
+with zero check-runs across two separate checks ~20 minutes apart, and
+the live site kept serving PR #13's own markup well after the merge —
+all three unrelated apps stalling simultaneously pointed at a GitHub
+webhook-dispatch problem for that specific push, not the code or
+Cloudflare's build queue. PR #15 was left un-auto-merged at the time
+given that uncertainty; every PR from #15 onward went through the
+normal merge → poll → curl-verify flow without incident. If PRs are
+ever found piling up unmerged/undeployed again, the same diagnostic
+(`gh api .../commits/<sha>/check-runs` on the latest merge commit,
+plus a direct `curl` against the live URL) is the right first step —
+not something this session can see into via the Cloudflare dashboard
+directly (Workers & Pages → house-of-guards → Deployments), so point
+the user there if the check-run genuinely comes back stuck again.
 
 ## Design system
 
@@ -720,31 +721,29 @@ treatment for these icons without a real reason to.
 
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
-log` alone. Newest first; each PR number is on `origin/main` — WITH ONE
-CURRENT EXCEPTION: **PR #29 is NOT YET MERGED as of this entry** (open,
-awaiting review — per this project's own standing "open a PR, don't
-merge it yourself" convention). Everything it describes lives only on
-its own branch until the user merges it; don't assume its code is live
-on `main` just because it's documented here. **PR #29's entry sits
-ABOVE PR #28's below even though #28's own code landed on `main`
-first** — both were opened from the same session as two genuinely
-independent changes (per explicit instruction to treat them that way),
-#28 merged quickly while #29 was still being verified, and this file's
+log` alone. Newest first; each PR number is on `origin/main` — **NO
+CURRENT EXCEPTION as of this entry: every PR through #29 is confirmed
+MERGED** (checked fresh via `gh pr list --state all` and `git log
+origin/main`, not assumed from this file's own text — see this
+paragraph's own note two sentences down for why that check matters
+every time, not just once). **PR #29's entry sits ABOVE PR #28's below
+even though #28's own code landed on `main` first** — both were opened
+from the same session as two genuinely independent changes (per
+explicit instruction to treat them that way), #28 merged quickly while
+#29 was still being verified and later needed its own `main`-merge
+conflict resolved in `CLAUDE.md` before it could land — this file's
 own newest-first ordering tracks each PR's OWN recency, not merge
-order — don't read the position below as implying #29 predates #28.
-(PR #28 was originally flagged here, alongside #29, as "both open, not
-yet merged" — now confirmed merged; the user merged it directly and
-asked for this branch to be rebased onto the resulting `main` and this
-exact CLAUDE.md conflict resolved keeping BOTH PRs' own additions
-rather than either overwriting the other, which is what produced the
-current shape of this whole section. PR #27, flagged as unmerged-as-
-of-its-own-entry in an earlier revision of this paragraph, is also
-confirmed merged — checked live via `gh pr list` fresh at the start of
-that session, not assumed from this file's own text. This "the
-previous entry's own unmerged-flag has gone stale" pattern keeps
-recurring across sessions — PR #23/#24/#25/#26 all hit it too, further
-down this log; check `gh pr list` fresh every time rather than trusting
-this paragraph's own PR number.)
+order, so don't read the position below as implying #29 predates #28.
+
+**This "PR N is not yet merged" flag has gone stale and been silently
+corrected on nearly every session that's touched this file** — PR
+#23/#24/#25/#26/#27/#28/#29 all hit it at some point (either their own
+entry claimed unmerged when it wasn't, or a PREVIOUS entry's own flag
+was still sitting here claiming an already-merged PR was open). Treat
+this paragraph as a snapshot from whenever it was last edited, never as
+a live signal — always run `gh pr list --state all --limit 5` (or
+similar) fresh before assuming anything about merge state, this
+paragraph included.
 
 - **PR #29 — "Standards We Refuse to Drop": a NEW homepage carousel
   section, not a conversion of an existing one, despite the original
@@ -1962,9 +1961,10 @@ this paragraph's own PR number.)
   `.md` file is ever added and genuinely needs scanning for some
   reason (it won't be, under the current glob).
 
-  **Deliberately left open, not auto-merged** — see "Open issue"
-  above for why; the user is merging PRs themselves for now given the
-  Cloudflare Workers Builds stall.
+  **Deliberately left open, not auto-merged at the time** — see the
+  "Resolved incident" note near the top of this file for why (the
+  Cloudflare Workers Builds stall around PR #14); confirmed resolved by
+  PR #16 onward, back to the normal merge → poll → curl-verify flow.
 
 - **PR #7–#14 — Hero rebuilt from scratch, then StatStrip rebuilt
   three times over.** Condensed summary; see this file's own earlier
