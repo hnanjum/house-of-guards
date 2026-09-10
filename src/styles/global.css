@@ -41,26 +41,44 @@
   --color-ink: #0d0d0d; /* near-black text, secondary button fill, icon strokes */
   --color-paper: #ffffff; /* the default background; also the text colour on every dark fill below */
 
-  /* FOUR-COLOUR REBRAND (Header / Hero / StatStrip / ServicesGrid ONLY)
-     — Electric Blue, Magenta, Amber, Cyan-Blue. Guard Green Secondary
-     and Guard Green Deep (both kept below, unchanged in value) are
-     retired from these four sections specifically — neither is
-     referenced anywhere in Header.astro, Hero.astro, StatStrip.astro,
-     or ServicesGrid.astro any more. They are NOT retired sitewide:
-     MissionBand.astro (bare Guard Green Deep fill) and ClosingCta.astro
-     (a Guard-Green-Secondary phone-link hover decoration) still use
-     them, unchanged, on purpose — both sections are pending a separate
-     future redesign and were explicitly out of scope for this pass.
-     Don't delete either token while those two sections still reference
-     it; do treat every OTHER site of `guard-green-secondary`/
-     `guard-green-deep` as a bug if one turns up (there shouldn't be
-     any left). */
+  /* FOUR-COLOUR REBRAND — this comment described the ORIGINAL, narrower
+     scope of this rebrand (Header / Hero / StatStrip / ServicesGrid
+     only) and had gone stale across two later passes without being
+     corrected here — fixed now rather than left contradicting the
+     CURRENT scope, which is the Design system section of CLAUDE.md's
+     own "SCOPE OF THE CURRENT PALETTE" note (read that first, it's the
+     authoritative live description; this comment is the shorter
+     token-file-local version of the same boundary).
+     Electric Blue, Magenta, Amber, Cyan-Blue now run across SIX
+     sections: Header, Hero, StatStrip, ServicesGrid.astro,
+     MissionBand.astro (Amber only), and ClosingCta.astro (Electric Blue
+     only) — plus a narrower, panel-only carve-out on SectorsGrid.astro
+     (Electric Blue/Magenta on four of its six swapping content panels;
+     see CLAUDE.md's own hard-rules section for that one's exact scope).
+     Guard Green Secondary has now been retired and REMOVED entirely —
+     its last real reference, ClosingCta.astro's own phone-link hover,
+     is gone once that section was rebuilt (see this token's own
+     now-deleted comment further down this block for the history).
+     Guard Green Deep is retired from every section too, including
+     MissionBand.astro (PR #20 rebuilt it onto plain Paper/Ink/Amber) —
+     the ONLY remaining reference anywhere in the codebase is
+     `Button.astro`'s dormant `secondary`-variant hover, a real
+     class-string with zero real call sites (see that token's own
+     comment below). Don't delete `guard-green-deep` while that dormant
+     reference still exists; do treat any OTHER live site of either
+     Guard Green token as a bug if one turns up (there shouldn't be
+     any). */
 
   /* ELECTRIC BLUE — the new primary block/background colour. Header's
-     info bar, StatStrip's fill, and half of ServicesGrid's checkerboard
-     (Manned Guarding, Overnight Security) all use this as a solid,
-     OPAQUE fill; Hero's text-panel scrim uses it translucent (85%) over
-     the hero photograph. Real numbers, both contexts checked
+     info bar, StatStrip's fill, half of ServicesGrid's checkerboard
+     (Manned Guarding, Overnight Security), and — as of ClosingCta's own
+     rebuild — that section's left contact panel all use this as a
+     solid, OPAQUE fill; Hero's text-panel scrim uses it translucent
+     (85%) over the hero photograph. ClosingCta's own icon-in-circle
+     badges (white/Paper circle, Electric-Blue-stroked icon) reuse the
+     already-derived icon-stroke-on-Paper number a few paragraphs down
+     directly, not a fresh derivation — it's the identical two colours
+     already checked there. Real numbers, both contexts checked
      separately since an opaque fill and a translucent overlay-on-photo
      are genuinely different pairings, not one number covering both:
        - Relative luminance, opaque: L≈0.1531 — notably LIGHTER than
@@ -83,7 +101,8 @@
          itself a non-text UI mark) — clears 3:1 but with a thinner
          margin than is comfortable to trust blind. `.on-dark` (ring
          swaps to Paper, ~5.17:1) stays applied everywhere this fill is
-         opaque (Header's info bar, StatStrip) for the stronger margin,
+         opaque (Header's info bar, StatStrip, ClosingCta's contact
+         panel) for the stronger margin,
          matching the same "swap to on-dark whenever the default ring's
          margin is thin" precedent Guard Green Secondary itself set —
          re-confirmed fresh here, not assumed to still be needed just
@@ -226,28 +245,42 @@
      colour-only accent directly on white. */
   --color-cyan-blue: #0ea5e9;
 
-  /* GUARD GREEN SECONDARY — RETIRED from Header, Hero, StatStrip, and
-     ServicesGrid as of this rebrand (see the four-colour note above).
-     Still live, unchanged, for ClosingCta.astro's own phone-link hover
-     decoration only — kept defined here purely so that one reference
-     doesn't break; do not reach for this token in any new work inside
-     the four rebranded sections. Original numbers (still accurate,
-     nothing about the token itself changed): white/Paper on this fill
-     ~6.36:1 (AA), Ink on this fill ~3.06:1 (fails 4.5:1 outright), this
-     fill as a bare mark on Paper is the same ~6.36:1 as the fill
-     pairing (contrast is symmetric in the two colours compared). */
-  --color-guard-green-secondary: #366c00;
+  /* --color-guard-green-secondary (#366c00) — RETIRED and now fully
+     REMOVED (not deprecated-in-place), matching this file's own
+     standing "retired tokens are deleted outright" convention. Kept
+     defined through several rebrand passes purely because
+     `ClosingCta.astro`'s own phone-link hover decoration was its one
+     remaining real reference anywhere in the codebase — that reference
+     is gone now that `ClosingCta.astro` was rebuilt as a two-column
+     contact + quote-request band (Electric Blue only, no Guard Green),
+     confirmed via a full repo grep before deleting the token that
+     nothing else referenced the class name any more. If this exact
+     name turns up in a future change request, it's gone; check `git
+     log` on this file for what replaced it — this global.css comment
+     stays here as the historical record of the numbers, same as the
+     retired `services-accent-yellow`/`guard-yellow`/etc. tokens'
+     own comments do below. Original numbers (kept for reference):
+     white/Paper on this fill ~6.36:1 (AA), Ink on this fill ~3.06:1
+     (fails 4.5:1 outright), this fill as a bare mark on Paper is the
+     same ~6.36:1 as the fill pairing (contrast is symmetric in the two
+     colours compared). */
 
-  /* GUARD GREEN DEEP — RETIRED from Header, Hero, StatStrip, and
-     ServicesGrid as of this rebrand. Still live, unchanged, for
-     MissionBand.astro's full-bleed fill and as `secondary` Button
-     variant's own hover colour (that variant is currently unused
-     anywhere in the codebase, so this reference is dormant, not
-     actively rendered, but is left as-is rather than repointed at a
-     new-palette colour — it isn't Mission Band/Closing CTA, but it
-     also isn't one of the four rebranded sections' own visible
-     surfaces, and repointing an unused variant's hover colour wasn't
-     part of this pass's scope). White text on it measures ~17.2:1
+  /* GUARD GREEN DEEP — this comment was stale (predated MissionBand's
+     own PR #20 rebuild, which removed its full-bleed fill too, and
+     ClosingCta's own later rebuild, which never used this token at
+     all) — corrected here rather than left describing a state that
+     hasn't been true for several PRs. RETIRED from every homepage
+     section now, including MissionBand.astro (its old centred pull-
+     quote's own full-bleed fill is gone, replaced by a plain Paper
+     two-column layout — see that component's own comment) and
+     ClosingCta.astro (rebuilt on Electric Blue, never referenced this
+     token). The ONLY remaining reference anywhere in the codebase is
+     `Button.astro`'s dormant `secondary`-variant hover — a real
+     class-string in that file's own source, but zero real call sites
+     render it, so nothing on the live site actually shows this colour
+     today. Kept defined for that one dormant reference only — deleting
+     the token would silently break that variant's compiled CSS the
+     moment it's ever activated. White text on it measures ~17.2:1
      (AAA). */
   --color-guard-green-deep: #081f18;
   --color-stone: #6e6e6e; /* secondary text on Paper only: captions, meta, credential lines. ~4.6:1 on paper — 14px+ only */
@@ -489,8 +522,10 @@ select {
    that the default Ink ring stayed comfortably clear of the 3:1 floor
    on its own (~11.06:1 / ~6.24:1) — `.on-dark` would have made things
    WORSE on either (white-on-Yellow was only ~1.76:1). Guard Green
-   Secondary (retired from Header/Hero/StatStrip/ServicesGrid this
-   pass, still live for ClosingCta) was the opposite case: Ink on it
+   Secondary (now fully retired and removed — see this token's own
+   now-deleted comment further up this block for the history; its last
+   real reference was ClosingCta.astro's own phone-link hover, gone
+   once that section was rebuilt) was the opposite case: Ink on it
    only ~3.06:1, too thin to trust, white ~6.36:1 comfortable — so it
    carried `.on-dark`.
    This rebrand's own two block colours split the same way Guard

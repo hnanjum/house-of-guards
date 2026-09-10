@@ -1,29 +1,202 @@
 ---
-import Button from "../ui/Button.astro";
+import ContactForm from "../ContactForm.tsx";
 import SectionHeading from "../ui/SectionHeading.astro";
+import Phone from "../../icons/Phone.astro";
+import Email from "../../icons/Email.astro";
+import Location from "../../icons/Location.astro";
 
 /**
- * The closing CTA, right before the footer — kept on Paper rather than
- * a third green band, so the page doesn't turn into a green wash (two
- * bold sections already satisfies the brief). Distinctness comes from
- * layout, not colour: this is the second of the two sanctioned
- * centered-alignment exceptions ("the final footer CTA line"),
- * against a left-aligned page throughout.
+ * Full rebuild of the closing CTA — the OLD centred "Ready to talk
+ * about your requirement?" heading + Button + phone-link band is
+ * removed outright, not kept alongside the new markup. Two-column
+ * contact + quote-request layout: left = a solid Electric Blue contact
+ * panel, right = a floating white "Get A Quote" card holding
+ * `ContactForm.tsx`, overlapping the panel's own edge on desktop.
+ *
+ * ALIGNMENT — this is a REAL, deliberate change to a documented hard
+ * rule, not an oversight. CLAUDE.md's own "Left-aligned by default"
+ * bullet named `ClosingCta` as "exactly ONE" sanctioned whole-SECTION
+ * centred-alignment exception sitewide (heading AND content together,
+ * centred as one block) — this rebuild drops that to ZERO: both the
+ * left panel and the right card are left-aligned, the sitewide default,
+ * matching every other section on the site. CLAUDE.md's own hard-rules
+ * text is updated in this same change so the doc and the code stay in
+ * agreement, the same discipline this file's own history already
+ * follows for every prior alignment change (see StatStrip #13,
+ * MissionBand PR #20's own "dropped from two to one" entry).
+ *
+ * PALETTE SCOPE — this is ALSO a real, deliberate extension of the
+ * Electric-Blue/Magenta/Amber palette to a SIXTH section, on direct,
+ * explicit instruction (the task's own brief named "Electric Blue" for
+ * the contact panel by name) — exactly the kind of "similarly explicit
+ * instruction extends the new palette there" moment CLAUDE.md's own
+ * hard-rule text anticipates. Electric Blue ONLY here — Magenta is
+ * unused, per the same instruction. CLAUDE.md's Design system section
+ * is updated in this change to name this section alongside Header/
+ * Hero/StatStrip/ServicesGrid/MissionBand.
+ *
+ * CONTACT PANEL — `on-dark bg-electric-blue text-paper`, a full opaque
+ * fill contained within its own grid cell (NOT full-viewport-bleed —
+ * matches `ServicesGrid.astro`'s own established per-cell-fill
+ * convention, not `StatStrip`/the header info bar's own edge-to-edge
+ * band; a viewport-edge fill mixed with a centred-container overlap
+ * grid for the floating card would mean juggling absolute positioning
+ * and z-index across breakpoints for no real visual gain, exactly the
+ * kind of "depends on the parent, looks fine in isolation" risk
+ * CLAUDE.md's own standing-conventions section warns about). White/
+ * Paper text on the opaque fill: the SAME already-derived ~5.17:1 (AA)
+ * as every other Electric Blue fill on this site — reused directly
+ * since contrast is a pure function of the two colours involved, not
+ * re-derived (see global.css's own Electric Blue token comment).
+ * `.on-dark` is required: the panel's tel:/mailto: links are real
+ * focusable elements sitting directly on the fill, and the default Ink
+ * ring is only ~3.76:1 here — the same conclusion StatStrip/the header
+ * info bar already reached on the identical fill.
+ *
+ * The panel's own "Contact Now" heading is a plain `<h2 class="text-h2
+ * text-paper">`, NOT `SectionHeading` — that component always forces
+ * `text-ink` on its heading tag with no override available (see its own
+ * comment), which would be ~3.76:1 on this fill, below the 4.5:1
+ * normal-text floor. Same reason, same fix `Hero.astro`'s own `<h1>`
+ * already uses on its Electric-Blue-scrim panel — this file follows
+ * that existing precedent rather than inventing a new one. The card's
+ * own "Get A Quote" heading DOES use `SectionHeading` (default `h3`,
+ * left-aligned, Ink) — it sits on a plain Paper card, where that
+ * component's own hardcoded Ink is exactly the right colour.
+ *
+ * ICON-IN-CIRCLE BADGES — a genuinely NEW shape on this site, flagged
+ * plainly rather than silently introduced: every icon badge elsewhere
+ * (StatStrip, ServicesGrid) is a PLAIN mark with no enclosing shape at
+ * all, and `rounded-full` doesn't otherwise exist anywhere in this
+ * codebase (`Button.astro`'s own `rounded-none` is explicit precisely
+ * because sharp corners are the sitewide default — see that
+ * component's own comment). This is a real, deliberate, SCOPED
+ * exception to that default, the same shape of exception MissionBand's
+ * own tracked-caps "Our mission" caption already is to a different hard
+ * rule — built on a direct, explicit instruction naming "icon-in-circle
+ * treatment" specifically, not a reopened general licence to add
+ * rounded shapes elsewhere. White/Paper circle fill, Electric-Blue-
+ * stroked icon (`text-electric-blue`, inheriting via `currentColor` the
+ * same way every icon on this site already does) — contrast for the
+ * icon mark is the SAME already-derived "Electric Blue as an icon-
+ * stroke mark on Paper: ~5.17:1" pairing global.css's own Electric Blue
+ * token comment already documents, reused directly rather than
+ * re-derived (identical two colours, same result).
+ *
+ * FLOATING CARD OVERLAP — pure CSS Grid, no absolute positioning and no
+ * negative margins for the horizontal overlap: a 12-column grid at
+ * `lg:`+, panel `lg:col-start-1 lg:col-span-7` (columns 1–7), card
+ * wrapper `lg:col-start-6 lg:col-span-7` (columns 6–12) — a genuine
+ * 2-column (~16.7% of the row) horizontal overlap expressed as
+ * grid-line positions, directly inspectable via each element's own
+ * `getBoundingClientRect()`. `lg:row-start-1` is set EXPLICITLY on
+ * both, for a DIFFERENT reason than the column-start values: a
+ * shared row is what makes the overlap possible at all (two items on
+ * different rows can't overlap by definition).
+ *
+ * A REAL BUG was found and fixed here via an actual rendered check
+ * (a static HTML harness built from the real `astro build` output,
+ * viewed in a real browser — measuring both elements' true
+ * `getBoundingClientRect()`/`gridColumnStart`/`gridColumnEnd`, not
+ * assumed from the class names), the same shape of "correct-looking
+ * class string, wrong actual render" trap CLAUDE.md's own `Divider`/
+ * `self-stretch` history warns about — read this before changing
+ * either element's grid placement again. The FIRST attempt gave the
+ * panel only `lg:col-span-7` with no `col-start` (relying on
+ * auto-placement to land it at columns 1–7) while the card kept its
+ * explicit `lg:col-start-6`. This rendered wrong: CSS Grid's own
+ * placement algorithm places items with a FULLY definite position on
+ * BOTH axes (the card — explicit row AND column) *before* items that
+ * are definite on only ONE axis (the panel — explicit row, but only a
+ * span on columns), regardless of DOM order. The card claimed columns
+ * 6–12 first; by the time the panel's own row-locked-but-column-auto
+ * placement ran, those columns were already occupied, and the grid was
+ * forced to invent brand-new IMPLICIT columns past the explicit 12 to
+ * find 7 free consecutive tracks for the panel — pushing it to columns
+ * 13–19 instead of 1–7, nowhere near the card. Confirmed directly via
+ * `getComputedStyle(...).gridTemplateColumns` reporting 19 tracks
+ * instead of the expected 12, and via each element's own resolved grid
+ * line range. Fixed by giving the panel an explicit `lg:col-start-1`
+ * too, making BOTH elements fully locked on both axes — removing the
+ * ambiguity that triggered the placement-order quirk, since neither
+ * element's outcome now depends on the other's DOM order at all.
+ * Re-verified after the fix: panel occupies grid lines 1→8, card
+ * occupies grid lines 6→13, `gridTemplateColumns` reports exactly 12
+ * tracks (no implicit ones), and the card's left edge sits inside the
+ * panel's own right portion by the intended ~2-column overlap.
+ *
+ * Vertical placement is `lg:self-center` on the card's own wrapper
+ * against the (default `items-stretch`) grid row — the panel's cell
+ * naturally stretches to the taller of the two columns' content, and
+ * the smaller card box centres within that height, which reads as
+ * "floating" without any negative vertical margin at all (a design
+ * choice, not a limitation — see the PR description for why a vertical
+ * top/bottom overflow was deliberately not added on top of the
+ * horizontal one).
+ *
+ * MOTION — no new bespoke module, per the task's own instruction to
+ * check first. `[data-reveal]` on both the panel and the card wrapper,
+ * read by the SAME generic `initScrollReveal()` (`src/lib/
+ * scrollReveal.ts`) every other section already calls from
+ * `index.astro`'s `astro:page-load` handler — no new wiring needed.
+ * `ContactForm.tsx`'s own Framer Motion is scoped to its internal
+ * submit-status transition only (see that file's own comment) — the
+ * two motion systems don't double up on the same entrance.
  */
 ---
 
 <section class="bg-paper">
-  <div class="mx-auto max-w-2xl px-gutter py-24 text-center md:px-12">
-    <SectionHeading level="h2" align="center">Ready to talk about your requirement?</SectionHeading>
-    <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-      <Button href="/contact">Get a Quote</Button>
-      {/* hover:decoration-guard-green-secondary — non-text accent on Paper, ~6.36:1, clears even the 4.5:1 normal-text floor; see global.css's Guard Green Secondary comment. */}
-      <a
-        href="tel:+441274000000"
-        class="text-body text-ink underline decoration-transparent underline-offset-4 transition-colors duration-200 ease-out hover:decoration-guard-green-secondary"
+  <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 lg:py-28">
+    <div class="grid grid-cols-1 lg:grid-cols-12 lg:items-stretch">
+      <div
+        data-reveal
+        class="on-dark bg-electric-blue flex flex-col justify-center p-10 sm:p-14 lg:col-start-1 lg:col-span-7 lg:row-start-1 lg:p-16 lg:pr-24"
       >
-        01274 000 000
-      </a>
+        <h2 class="text-h2 text-paper">Contact Now</h2>
+        <p class="text-body text-paper/85 mt-4 max-w-md">
+          Speak to our team today for a no-obligation consultation on your security requirement — we respond
+          promptly to every enquiry.
+        </p>
+
+        <ul class="mt-10 space-y-6">
+          <li>
+            <a href="tel:+441274000000" class="group flex items-center gap-4">
+              <span class="grid size-12 shrink-0 place-items-center rounded-full bg-paper">
+                <Phone class="text-electric-blue size-5" />
+              </span>
+              <span class="text-body text-paper group-hover:text-paper/70 transition-colors duration-200 ease-out">
+                01274 000 000
+              </span>
+            </a>
+          </li>
+          <li>
+            <a href="mailto:info@houseofguards.co.uk" class="group flex items-center gap-4">
+              <span class="grid size-12 shrink-0 place-items-center rounded-full bg-paper">
+                <Email class="text-electric-blue size-5" />
+              </span>
+              <span class="text-body text-paper group-hover:text-paper/70 transition-colors duration-200 ease-out">
+                info@houseofguards.co.uk
+              </span>
+            </a>
+          </li>
+          <li class="flex items-center gap-4">
+            <span class="grid size-12 shrink-0 place-items-center rounded-full bg-paper">
+              <Location class="text-electric-blue size-5" />
+            </span>
+            <span class="text-body text-paper">Bradford, West Yorkshire</span>
+          </li>
+        </ul>
+      </div>
+
+      <div data-reveal class="relative z-10 py-10 lg:col-span-7 lg:col-start-6 lg:row-start-1 lg:self-center lg:py-0">
+        <div class="bg-paper p-8 shadow-2xl sm:p-10 lg:p-12">
+          <SectionHeading level="h3">Get A Quote</SectionHeading>
+          <p class="text-caption text-stone mt-2">
+            Tell us about your requirement and a member of our team will get back to you with a tailored quote.
+          </p>
+          <ContactForm client:visible />
+        </div>
+      </div>
     </div>
   </div>
 </section>
