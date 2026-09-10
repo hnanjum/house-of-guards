@@ -125,26 +125,28 @@ import Location from "../../icons/Location.astro";
  * tracks (no implicit ones), and the card's left edge sits inside the
  * panel's own right portion by the intended ~2-column overlap.
  *
- * Vertical placement is `lg:self-center` on the card's own wrapper.
- * The grid ROW itself now uses `lg:items-start`, NOT the grid's own
- * stretch default — a later, deliberate change from an earlier revision
- * of this file (see the SIZE INVESTIGATION note below for the real
- * measurement that drove it): the panel no longer inflates to match the
- * card's own taller height, it sizes to its own real content instead,
- * and the card — still the taller of the two, since it holds the whole
- * form — drives the row's own track height and simply sits flush across
- * it (`self-center` on an item that's already exactly as tall as the
- * row it's centring within is a no-op, not a visible shift). The
- * practical effect: the card now visibly extends past the panel's own,
- * now-shorter bottom edge onto the plain `bg-paper` section background
- * below it — an accepted, expected consequence of the panel no longer
- * stretching, not a broken overlap. The overlap that actually matters
- * for this section's own visual identity — the card's LEFT edge cutting
- * into the panel's own right portion — is purely a function of the
- * horizontal grid-line placement above and is untouched by this change;
- * re-verified after it via the same real-`getBoundingClientRect()`
- * method the original placement bug below was caught with, not assumed
- * safe just because the columns themselves weren't edited.
+ * Vertical placement is `lg:self-center` on the card's own wrapper
+ * against the grid row's own `lg:items-stretch` — the panel's cell
+ * stretches to match the card's own taller height, and the smaller card
+ * box centres within that height, which reads as "floating" without any
+ * negative vertical margin at all.
+ *
+ * A later revision of this file briefly changed the row's own alignment
+ * property to its "start" value (the panel sizing to its own, shorter
+ * real content instead of stretching), on a real, measured finding that
+ * the stretched panel left
+ * a large block of empty solid Electric Blue below its own contact list
+ * — see the SIZE INVESTIGATION note below for that measurement. That
+ * change was reverted back to `lg:items-stretch` on direct instruction,
+ * keeping only this same pass's OTHER change (the smaller panel/form
+ * text) — worth recording plainly rather than silently dropped, so a
+ * future session doesn't rediscover the same "empty space below the
+ * list" finding and assume it was never investigated: it was, and the
+ * stretched panel was the explicitly chosen outcome once seen live, not
+ * an oversight. The horizontal overlap (the card's LEFT edge cutting
+ * into the panel's own right portion) is unaffected either way — it's
+ * purely a function of the grid-line placement above, independent of
+ * this row-alignment property.
  *
  * MOTION — no new bespoke module, per the task's own instruction to
  * check first. `[data-reveal]` on both the panel and the card wrapper,
@@ -201,24 +203,30 @@ import Location from "../../icons/Location.astro";
  * its own real content height by the grid row's alignment default,
  * leaving a large block of solid, empty Electric Blue with nothing in
  * it — a real, measured contributor to the section reading "heavy," not
- * a guess about visual weight. Fixed in two steps, each measured
- * separately: dropping the panel's own body/list text one type-scale
+ * a guess about visual weight. Investigated as two separate, separately-
+ * measured fixes: dropping the panel's own body/list text one type-scale
  * tier (matching `ContactForm.tsx`'s own identical drop) took the
  * section to 781px on its own — already under both neighbours — and
- * changing the row's own alignment (see the FLOATING CARD OVERLAP
- * section above) removed the empty colour block without changing the
- * section's own total height further (the card, not the panel, was
- * already driving that height, and still is). The panel's own `<h2>`
- * was deliberately NOT reduced — checked against every other homepage
- * section's own heading class first, not assumed oversized: it already
- * matches the exact same heading step every other section uses for its
- * own `<h2>`, so it was never actually the outlier here.
+ * changing the row's own alignment to stop the stretch (removing the
+ * empty colour block) was tried as a second, independent fix on top of
+ * that. **The text-size drop is the change that shipped and stayed.**
+ * The row-alignment change was reverted straight back to
+ * `lg:items-stretch` (see the FLOATING CARD OVERLAP section above) on
+ * direct instruction, once seen live — the panel matching the card's
+ * own height again was the preferred look after all, even knowing it
+ * leaves that same measured empty-space finding in place; this isn't an
+ * unexamined regression, it's a deliberate call made WITH the
+ * measurement already in hand. The panel's own `<h2>` was deliberately
+ * NOT reduced — checked against every other homepage section's own
+ * heading class first, not assumed oversized: it already matches the
+ * exact same heading step every other section uses for its own `<h2>`,
+ * so it was never actually the outlier here.
  */
 ---
 
 <section class="bg-paper">
   <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12 md:py-20">
-    <div class="grid grid-cols-1 lg:grid-cols-12 lg:items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-12 lg:items-stretch">
       <div
         data-reveal
         class="on-dark bg-electric-blue flex flex-col justify-center p-8 sm:p-10 lg:col-start-1 lg:col-span-7 lg:row-start-1 lg:p-12 lg:pr-16"
