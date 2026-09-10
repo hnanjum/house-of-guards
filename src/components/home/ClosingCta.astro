@@ -125,14 +125,26 @@ import Location from "../../icons/Location.astro";
  * tracks (no implicit ones), and the card's left edge sits inside the
  * panel's own right portion by the intended ~2-column overlap.
  *
- * Vertical placement is `lg:self-center` on the card's own wrapper
- * against the (default `items-stretch`) grid row — the panel's cell
- * naturally stretches to the taller of the two columns' content, and
- * the smaller card box centres within that height, which reads as
- * "floating" without any negative vertical margin at all (a design
- * choice, not a limitation — see the PR description for why a vertical
- * top/bottom overflow was deliberately not added on top of the
- * horizontal one).
+ * Vertical placement is `lg:self-center` on the card's own wrapper.
+ * The grid ROW itself now uses `lg:items-start`, NOT the grid's own
+ * stretch default — a later, deliberate change from an earlier revision
+ * of this file (see the SIZE INVESTIGATION note below for the real
+ * measurement that drove it): the panel no longer inflates to match the
+ * card's own taller height, it sizes to its own real content instead,
+ * and the card — still the taller of the two, since it holds the whole
+ * form — drives the row's own track height and simply sits flush across
+ * it (`self-center` on an item that's already exactly as tall as the
+ * row it's centring within is a no-op, not a visible shift). The
+ * practical effect: the card now visibly extends past the panel's own,
+ * now-shorter bottom edge onto the plain `bg-paper` section background
+ * below it — an accepted, expected consequence of the panel no longer
+ * stretching, not a broken overlap. The overlap that actually matters
+ * for this section's own visual identity — the card's LEFT edge cutting
+ * into the panel's own right portion — is purely a function of the
+ * horizontal grid-line placement above and is untouched by this change;
+ * re-verified after it via the same real-`getBoundingClientRect()`
+ * method the original placement bug below was caught with, not assumed
+ * safe just because the columns themselves weren't edited.
  *
  * MOTION — no new bespoke module, per the task's own instruction to
  * check first. `[data-reveal]` on both the panel and the card wrapper,
@@ -173,18 +185,46 @@ import Location from "../../icons/Location.astro";
  * alone (the same failure class CLAUDE.md's own standing convention
  * warns about — checked directly against the compiled `dist/` output
  * before shipping, not assumed).
+ *
+ * SIZE INVESTIGATION (a later, separate pass) — a live look after the
+ * padding pass above still read this section as oversized. Measured,
+ * not guessed: at 1280px the section was 824px tall against
+ * `ServicesGrid.astro`/`SectorsGrid.astro`'s own 803px — closer than
+ * before but still the tallest homepage section — and two real, distinct
+ * causes were traced, not assumed: (1) every piece of text in this
+ * section (the panel's own heading body copy and contact-list item
+ * text, PLUS every `ContactForm.tsx` field — see that file's own
+ * comment for its half of this) was running at the site's own prose
+ * body-copy size, not the smaller size `ServicesGrid.astro` already
+ * established as this project's own precedent for dense, multi-item
+ * content; (2) this panel was being force-stretched roughly 150px past
+ * its own real content height by the grid row's alignment default,
+ * leaving a large block of solid, empty Electric Blue with nothing in
+ * it — a real, measured contributor to the section reading "heavy," not
+ * a guess about visual weight. Fixed in two steps, each measured
+ * separately: dropping the panel's own body/list text one type-scale
+ * tier (matching `ContactForm.tsx`'s own identical drop) took the
+ * section to 781px on its own — already under both neighbours — and
+ * changing the row's own alignment (see the FLOATING CARD OVERLAP
+ * section above) removed the empty colour block without changing the
+ * section's own total height further (the card, not the panel, was
+ * already driving that height, and still is). The panel's own `<h2>`
+ * was deliberately NOT reduced — checked against every other homepage
+ * section's own heading class first, not assumed oversized: it already
+ * matches the exact same heading step every other section uses for its
+ * own `<h2>`, so it was never actually the outlier here.
  */
 ---
 
 <section class="bg-paper">
   <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12 md:py-20">
-    <div class="grid grid-cols-1 lg:grid-cols-12 lg:items-stretch">
+    <div class="grid grid-cols-1 lg:grid-cols-12 lg:items-start">
       <div
         data-reveal
         class="on-dark bg-electric-blue flex flex-col justify-center p-8 sm:p-10 lg:col-start-1 lg:col-span-7 lg:row-start-1 lg:p-12 lg:pr-16"
       >
         <h2 class="text-h2 text-paper">Contact Now</h2>
-        <p class="text-body text-paper/85 mt-3 max-w-md">
+        <p class="text-caption text-paper/85 mt-3 max-w-md">
           Speak to our team today for a no-obligation consultation on your security requirement — we respond
           promptly to every enquiry.
         </p>
@@ -195,7 +235,7 @@ import Location from "../../icons/Location.astro";
               <span class="grid size-12 shrink-0 place-items-center rounded-full bg-paper">
                 <Phone class="text-electric-blue size-5" />
               </span>
-              <span class="text-body text-paper group-hover:text-paper/70 transition-colors duration-200 ease-out">
+              <span class="text-caption text-paper group-hover:text-paper/70 transition-colors duration-200 ease-out">
                 01274 000 000
               </span>
             </a>
@@ -205,7 +245,7 @@ import Location from "../../icons/Location.astro";
               <span class="grid size-12 shrink-0 place-items-center rounded-full bg-paper">
                 <Email class="text-electric-blue size-5" />
               </span>
-              <span class="text-body text-paper group-hover:text-paper/70 transition-colors duration-200 ease-out">
+              <span class="text-caption text-paper group-hover:text-paper/70 transition-colors duration-200 ease-out">
                 info@houseofguards.co.uk
               </span>
             </a>
@@ -214,7 +254,7 @@ import Location from "../../icons/Location.astro";
             <span class="grid size-12 shrink-0 place-items-center rounded-full bg-paper">
               <Location class="text-electric-blue size-5" />
             </span>
-            <span class="text-body text-paper">Bradford, West Yorkshire</span>
+            <span class="text-caption text-paper">Bradford, West Yorkshire</span>
           </li>
         </ul>
       </div>
