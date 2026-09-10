@@ -10,8 +10,42 @@ type Status = "idle" | "submitting" | "success" | "error";
  * nothing about the card chrome around it (heading, padding, shadow,
  * background) — that's `ClosingCta.astro`'s job.
  *
- * POLISH PASS (this revision) — field set replaced entirely per a new,
- * explicit spec, and the whole component pushed toward a genuinely
+ * HEIGHT FOLLOW-UP (a later, separate pass on top of the polish pass
+ * below) — the previous session's `ClosingCta.astro` padding pass
+ * (matching its OUTER section padding to `StandardsCarousel.astro`/
+ * `SectorsGrid.astro`) still left the section reading too tall on a
+ * live look. Measured, not guessed: at 1280px the section was 929px
+ * tall, ~126px taller than either of those two neighbours (803px) —
+ * and the CARD's own content (582px of form, not the panel, which just
+ * stretches to match via the grid's default `items-stretch`) was the
+ * real driver, not the outer section padding already addressed. Two
+ * real, separate causes found: (1) `fieldBaseClass`'s floating-label
+ * padding was a generous 24px top / 8px bottom everywhere, including on
+ * the `message` textarea, which doesn't need as much top clearance once
+ * a value is entered; (2) a genuine bug — the `service` select was
+ * meant to override that padding down to a smaller top value, but the
+ * override never took effect (see `selectFieldClass`'s own comment
+ * below for the mechanism — deliberately not re-quoting either side of
+ * that old/orphaned override here as bare class-shaped tokens, since
+ * this project's own standing convention already warns about exactly
+ * this failure mode and that comment covers the mechanism in full),
+ * silently costing it 14px it didn't need. Fixed by: tightening
+ * `fieldBaseClass` to its current, real values (see the constant itself
+ * just below), giving `service` its own dedicated, non-conflicting
+ * class, dropping the field grid's own row gap one step, reducing the
+ * `message` textarea's default `rows` (4 → 3, it can still grow/
+ * scroll), and trimming the submit button's own top margin/vertical
+ * padding by one step each. Re-measured after:
+ * 824px — ~105px shorter, now within ~21px of `ServicesGrid.astro`/
+ * `SectorsGrid.astro`'s own 803px rather than towering 126px above
+ * them. That residual ~21px reflects this form genuinely carrying more
+ * fields (11, versus the original 5) than either of those two sections'
+ * own six-card/six-tab content — not chased further, per this pass's
+ * own explicit "don't force it smaller than the content allows, say so
+ * plainly" instruction.
+ *
+ * POLISH PASS (an earlier revision) — field set replaced entirely per a
+ * new, explicit spec, and the whole component pushed toward a genuinely
  * higher-end feel, not just a mechanical field swap. Three real,
  * disclosed decisions worth recording:
  *
@@ -126,7 +160,30 @@ const SERVICE_OPTIONS: ServiceOption[] = [
 ];
 
 const fieldBaseClass =
-  "peer w-full border border-hairline bg-paper px-4 pt-6 pb-2 text-body text-ink transition-colors duration-200 ease-out focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20";
+  "peer w-full border border-hairline bg-paper px-4 pt-5 pb-1.5 text-body text-ink transition-colors duration-200 ease-out focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20";
+
+/**
+ * A dedicated, standalone class string for the `service` select — NOT
+ * `fieldBaseClass` plus a padding override. An earlier draft tried the
+ * override approach (`fieldBaseClass` plus a smaller top/bottom padding
+ * pair appended after it), a real bug caught during this pass's own
+ * height investigation: Tailwind resolves two same-specificity
+ * utilities targeting the same CSS property by their position in the
+ * GENERATED stylesheet, not by their order in the class string —
+ * `fieldBaseClass`'s own top-padding utility silently won over the
+ * intended smaller one, leaving the select with the floating-label
+ * fields' own generous top padding despite the select using a static
+ * label above and never needing that clearance at all (deliberately
+ * not re-quoting either the old winning value or the old intended-but-
+ * losing one here as bare class-shaped tokens — neither has a real call
+ * site left anywhere in this file now, and this project's own standing
+ * convention already warns about exactly this failure mode). Confirmed
+ * via `getComputedStyle` before the fix (a 24px top padding, not the
+ * intended ~10px) and after (this dedicated
+ * class has no conflicting declaration to lose to).
+ */
+const selectFieldClass =
+  "peer w-full appearance-none border border-hairline bg-paper py-2.5 pr-10 pl-4 text-body text-ink transition-colors duration-200 ease-out focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20";
 
 const staticLabelClass = "text-caption text-ink mb-1.5 block";
 
@@ -134,8 +191,8 @@ function floatingLabelClass(anchorTop: boolean) {
   const base =
     "pointer-events-none absolute left-4 text-stone transition-all duration-200 ease-out peer-focus:text-micro peer-focus:text-electric-blue peer-[&:not(:placeholder-shown)]:text-micro peer-[&:not(:placeholder-shown)]:text-stone";
   return anchorTop
-    ? `${base} top-4 text-body peer-focus:top-2 peer-[&:not(:placeholder-shown)]:top-2`
-    : `${base} top-1/2 -translate-y-1/2 text-body peer-focus:top-2 peer-focus:translate-y-0 peer-[&:not(:placeholder-shown)]:top-2 peer-[&:not(:placeholder-shown)]:translate-y-0`;
+    ? `${base} top-3 text-body peer-focus:top-1.5 peer-[&:not(:placeholder-shown)]:top-1.5`
+    : `${base} top-1/2 -translate-y-1/2 text-body peer-focus:top-1.5 peer-focus:translate-y-0 peer-[&:not(:placeholder-shown)]:top-1.5 peer-[&:not(:placeholder-shown)]:translate-y-0`;
 }
 
 function FloatingInput({
@@ -264,9 +321,9 @@ export default function ContactForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6">
+    <form onSubmit={handleSubmit} className="mt-5">
       <motion.div
-        className="grid grid-cols-1 gap-5 sm:grid-cols-2"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
@@ -298,13 +355,7 @@ export default function ContactForm() {
               Service required
             </label>
             <div className="relative">
-              <select
-                id="service"
-                name="service"
-                required
-                defaultValue=""
-                className={`${fieldBaseClass} appearance-none pt-2.5 pr-10 pb-2.5`}
-              >
+              <select id="service" name="service" required defaultValue="" className={selectFieldClass}>
                 <option value="" disabled>
                   Please pick a service
                 </option>
@@ -321,7 +372,7 @@ export default function ContactForm() {
 
         <FieldShell>
           <div className="sm:col-span-2">
-            <FloatingTextarea id="message" name="message" label="Details of your requirement" required rows={4} />
+            <FloatingTextarea id="message" name="message" label="Details of your requirement" required rows={3} />
           </div>
         </FieldShell>
       </motion.div>
@@ -332,7 +383,7 @@ export default function ContactForm() {
         whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
         whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
         transition={{ duration: 0.15, ease: "easeOut" }}
-        className="relative isolate mt-7 inline-flex w-full items-center justify-center overflow-hidden bg-amber px-6 py-3.5 text-caption text-ink after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(115deg,transparent_35%,rgba(255,255,255,0.5)_50%,transparent_65%)] after:-translate-x-full after:transition-transform after:duration-700 after:ease-out hover:after:translate-x-full focus-visible:after:translate-x-full motion-reduce:after:hidden motion-reduce:hover:brightness-95 disabled:pointer-events-none disabled:opacity-60"
+        className="relative isolate mt-5 inline-flex w-full items-center justify-center overflow-hidden bg-amber px-6 py-3 text-caption text-ink after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(115deg,transparent_35%,rgba(255,255,255,0.5)_50%,transparent_65%)] after:-translate-x-full after:transition-transform after:duration-700 after:ease-out hover:after:translate-x-full focus-visible:after:translate-x-full motion-reduce:after:hidden motion-reduce:hover:brightness-95 disabled:pointer-events-none disabled:opacity-60"
       >
         {status === "submitting" ? "Sending…" : "Submit enquiry"}
       </motion.button>
