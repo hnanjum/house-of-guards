@@ -735,27 +735,18 @@ treatment for these icons without a real reason to.
 
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
-log` alone. Newest first; each PR number is on `origin/main` — WITH ONE
-CURRENT EXCEPTION: **PR #31 (the `ClosingCta` rebuild entry directly
-below) is NOT YET MERGED as of this entry** — open, awaiting review,
-per this project's own standing "open a PR, don't merge it yourself"
-convention. Everything it describes lives only on its own branch until
-the user merges it; don't assume its code is live on `main` just
-because it's documented here. Every PR through #30 IS confirmed MERGED
-(checked fresh via `gh pr list --state all` and `git log origin/main`
-while resolving THIS FILE'S OWN merge conflict against `main` — PR #30
-landed on `main` after PR #31's branch was created, touching this exact
-paragraph, which is the real reason a conflict existed here at all —
-not assumed from this file's own text; see this paragraph's own note
-two sentences down for why that check matters every time, not just
-once). This paragraph's own PREVIOUS revision (on PR #31's own branch,
-before this merge) claimed "PR #29 is NOT YET MERGED as of this
-entry" — that flag had gone stale by the time it was checked (PR #29
-merged, then PR #30 ALSO merged, in between), the same recurring
-pattern this paragraph already describes below; corrected here rather
-than left contradicting reality. **PR #29's entry still sits ABOVE PR
-#28's below even though #28's own code landed on `main` first** — both
-were opened
+log` alone. Newest first; each PR number below is confirmed on
+`origin/main` as of THIS entry — **every PR through #32 is confirmed
+MERGED** (checked fresh via `gh pr view <n> --json state,mergeable` and
+`git log origin/main --oneline` immediately before writing this
+paragraph, not assumed from an earlier revision of this file's own
+text — PR #32 in particular was already merged by the time this
+paragraph was written, discovered only because that check was run
+fresh rather than trusted from memory; see the next paragraph for why
+this check matters every single time, not just once). No current
+"not yet merged" exception exists as of this entry. **PR #29's entry
+still sits ABOVE PR #28's below even though #28's own code landed on
+`main` first** — both were opened
 from the same session as two genuinely independent changes (per
 explicit instruction to treat them that way), #28 merged quickly while
 #29 was still being verified and later needed its own `main`-merge
@@ -765,13 +756,150 @@ order, so don't read the position below as implying #29 predates #28.
 
 **This "PR N is not yet merged" flag has gone stale and been silently
 corrected on nearly every session that's touched this file** — PR
-#23/#24/#25/#26/#27/#28/#29 all hit it at some point (either their own
-entry claimed unmerged when it wasn't, or a PREVIOUS entry's own flag
-was still sitting here claiming an already-merged PR was open). Treat
+#23/#24/#25/#26/#27/#28/#29/#31/#32 all hit it at some point (either
+their own entry claimed unmerged when it wasn't, or a PREVIOUS entry's
+own flag was still sitting here claiming an already-merged PR was
+open — PR #32's own case: this entry's own first draft, written before
+this check, assumed #32 was still open the way every prior same-session
+PR in this file had been at write time, and was corrected once `gh pr
+view` came back `MERGED`). Treat
 this paragraph as a snapshot from whenever it was last edited, never as
 a live signal — always run `gh pr list --state all --limit 5` (or
 similar) fresh before assuming anything about merge state, this
 paragraph included.
+
+- **PR #32 — a polish pass on PR #31's own `ContactForm`/`ClosingCta`
+  work, not a rebuild: the form's field set replaced entirely per a
+  new, explicit 11-option spec, and both files pushed toward a
+  genuinely higher-end feel plus a tighter section footprint.**
+
+  **SERVICE LIST MISMATCH — flagged, not silently resolved.** The new
+  11-option `service` dropdown includes five options (Retail Security,
+  Private Property Security, Crowd Management & Stewarding, Event &
+  Sports Security, Bespoke/other) that `ServicesGrid.astro`'s own six
+  cards don't list anywhere else on the site. Scoped to this ONE
+  dropdown per direct instruction — it's fine for an enquiry form to
+  offer a broader net than the site's own service pages currently
+  describe. `ServicesGrid.astro`/`SectorsGrid.astro` are untouched;
+  don't read this dropdown as implying those five are now offered
+  sitewide.
+
+  **FIELDS** — First name + Last name (two-column on `sm:`+), Business
+  name (full width, optional — kept optional per the previous
+  "Company (optional)" field's own precedent, though the visible label
+  no longer carries an explicit "(optional)" suffix, matching the new
+  spec's own literal option list), Email + Phone (two-column), the
+  11-option Service Required select (placeholder "Please pick a
+  service", options in the exact given order), a full-width "Details of
+  your requirement" textarea, and a submit button. Button copy:
+  "Submit enquiry", not "Get a quote" — a real judgment call, made
+  because the card's own `SectionHeading` directly above the form
+  already reads "Get A Quote"; repeating "quote" on the button too read
+  redundant sitting right underneath it.
+
+  **FLOATING LABELS — pure CSS, zero new controlled-input state.** Every
+  text/email/tel/textarea field uses the standard `placeholder=" "` +
+  `:placeholder-shown` peer technique: a label sits absolutely
+  positioned over the field at rest and floats to a smaller `text-micro`
+  position via `peer-focus:`/`peer-[&:not(:placeholder-shown)]:`
+  variants once the field is focused or already holds a value — works
+  with uncontrolled inputs, survives the existing `form.reset()` call
+  the same way a native placeholder would. The `service` select keeps a
+  static label above instead (the task's own named "comparably refined"
+  alternative) — a floating label doesn't map cleanly onto a `<select>`'s
+  own placeholder-less first `<option>`, and forcing the same mechanism
+  on would need real extra JS state for no real gain; it gets the same
+  focus-glow border treatment as every other field for visual
+  consistency instead.
+
+  **FOCUS STATE** — a scoped, disclosed override of the sitewide default
+  `:focus-visible` Ink outline for JUST these form controls: border
+  transitions to Electric Blue plus a soft ring glow at low opacity
+  replaces the plain outline. Electric Blue specifically because it's
+  already this exact section's own accent (the contact panel's fill) —
+  reusing it here ties the form back to its own surrounding section
+  rather than reaching for a new colour. A decorative border/ring, not
+  text, so it only needs the 3:1 UI-component floor, not 4.5:1 — the
+  same already-derived ~5.17:1 Electric-Blue-on-Paper pairing
+  `global.css`'s own token comment documents, reused directly.
+
+  **MOTION — a real, deliberate change to this file's own previous
+  "don't double up with the card's own `[data-reveal]` fade" reasoning,
+  not an oversight.** `ContactForm.tsx`'s Framer Motion now does two
+  genuinely separate things: the pre-existing status-message transition,
+  plus a new per-field staggered entrance (`whileInView`,
+  `viewport={{ once: true }}`, `staggerChildren`), added on direct
+  instruction. Not actually a double-up with `ClosingCta.astro`'s own
+  GSAP `[data-reveal]` fade: that trigger still owns the whole CARD's
+  own single entrance (the whole white block fading/rising into place as
+  one unit); the Framer stagger is a second, independent, finer-grained
+  layer cascading the eight individual fields in, INSIDE the
+  already-revealed card — two different motion systems each own a
+  genuinely different visual unit, not two systems animating the same
+  thing twice. The submit button also restores `Button.astro`
+  `primary`'s full diagonal shine-sweep hover verbatim (PR #31 had
+  simplified this to a flat `brightness-90` shift, matching
+  `NavDrawer.tsx`'s own precedent at the time) — this pass's own "real
+  hover/press micro-interaction, not a flat colour-swap" ask reversed
+  that simplification — plus adds a Framer Motion `whileTap` press
+  scale on top. Both the shine-sweep (via its existing `motion-reduce:`
+  variant) and the `whileTap`/stagger (via `useReducedMotion()`, the
+  same hook `NavDrawer.tsx` already uses) are skipped outright under
+  `prefers-reduced-motion`.
+
+  **SECTION SIZE** — `ClosingCta.astro`'s own padding tightened across
+  the board (outer wrapper, contact panel, card, contact-list spacing),
+  on direct instruction that the original PR #31 build read too
+  tall/heavy next to its neighbours. Re-measured against both sections
+  directly above this one on the page, not eyeballed from memory:
+  `StandardsCarousel.astro` and `SectorsGrid.astro` both use the exact
+  same `py-24 md:px-12` on their own outer wrapper with no further `lg:`
+  bump — this section's own original `lg:`-breakpoint growth was the one
+  outlier making it read taller than either neighbour. Landed lighter
+  than both neighbours' `py-24` by deliberate choice — this is the LAST
+  section before the footer, not a mid-page content block, so a
+  slightly tighter close reads as a deliberate wind-down rather than
+  matching their fuller weight.
+
+  **A real dead-CSS-from-doc-comment risk, caught and fixed twice in
+  this same pass** — the exact failure class this project's own
+  standing convention already warns about: an early draft of
+  `ClosingCta.astro`'s own updated comment bare-quoted several now-stale
+  padding tokens (`p-16`/`p-12`, `mt-10`/`space-y-6`) that no longer had
+  any real, unprefixed call site anywhere in the file once the padding
+  was tightened; a separate early draft of `ContactForm.tsx`'s own new
+  FOCUS STATE comment bare-quoted `ring-2 ring-electric-blue/20`, which
+  only ever has a real call site as `focus:ring-2 focus:ring-electric-
+  blue/20`. Both confirmed as genuine orphaned rules in the compiled
+  `dist/` output before the fix, confirmed gone after — reworded to
+  prose in both files rather than re-quoting the bare class-shaped
+  strings.
+
+  **Live render verification, disclosed as an honest gap, not assumed
+  away** — the standard static-HTML-harness-plus-real-browser check this
+  project's own standing convention calls for was attempted (a scratch
+  Node server on the real `astro build` output, per that convention) but
+  blocked: the Browser pane was hidden for this session, which meant
+  `document.hasFocus()` stayed `false` and `getComputedStyle()`/
+  `requestAnimationFrame` reads came back stale/frozen regardless of
+  real DOM/CSS changes — a genuinely new variant of the "screenshot
+  tool times out because the window isn't frontmost" limitation this
+  file's own PR #31 entry already hit once. Verified structural
+  correctness instead — compiled CSS selector specificity and cascade
+  order (the peer-variant rules correctly out-specificity the base
+  `top-1/2`/`ring`-less classes they override), the DOM sibling
+  relationship between each `peer` input and its floating label, and
+  live `:not(:placeholder-shown)` pseudo-class matching via
+  `element.matches()` — but a real look at focus/hover/stagger behaviour
+  in an actual live preview is a genuine, disclosed follow-up, not
+  something this pass independently confirmed.
+
+  A real `astro check` (0 errors, same 2 pre-existing `ContactForm.tsx`
+  hints) and clean `astro build` were run, plus direct `dist/`
+  inspection confirming all 11 service options in the correct order/
+  values, correct field names/copy, every focus/floating-label/stagger
+  class compiled with the correct selector, and — per the dead-CSS audit
+  above — zero orphaned rules from either file's own updated comments.
 
 - **PR #31 — ClosingCta rebuilt: a two-column "Contact Now" +
   "Get A Quote" band, replacing the old centred heading+Button+phone-
@@ -2271,8 +2399,13 @@ entry for the full "checked every branch/commit, this never existed
 here" account — closing CTA, a two-column contact + quote-request band
 (a solid Electric Blue left panel with heading/body/icon-in-circle
 phone/email/address contact list, a floating white "Get A Quote" card
-overlapping the panel's edge via CSS Grid line positioning, holding a
-newly-restyled `ContactForm.tsx`), rebuilt from the original centred
+overlapping the panel's edge via CSS Grid line positioning, holding
+`ContactForm.tsx` — an 11-option field spec with floating labels, an
+Electric-Blue focus glow, and a per-field staggered Framer Motion
+entrance as of PR #32's own polish pass, both files' own footprint
+tightened in that same pass to read proportionate to
+`StandardsCarousel.astro`/`SectorsGrid.astro` rather than heavier),
+rebuilt from the original centred
 "Ready to talk about your requirement?" heading+Button+phone-link band,
 which had stayed on the original Guard Green palette through every
 earlier rebrand pass — footer, still on `footer-grey`, its own distinct
