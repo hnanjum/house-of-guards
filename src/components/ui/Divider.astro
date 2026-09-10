@@ -12,25 +12,25 @@
  * a new colour token.
  *
  * `tone="paper-strong"` — a translucent white line, for a bold
- * accent-fill background specifically (StatStrip only — the sole real
- * call site). RECALIBRATED for the Electric-Blue rebrand, not carried
- * forward unchanged: this was originally 60% opacity, tuned against
- * the retired Guard Green Secondary fill (L≈0.115) — checked fresh
- * against Electric Blue (L≈0.1531, meaningfully LIGHTER despite both
- * reading as "a dark saturated accent" at a glance) rather than
- * assumed to still clear the same floor, and it doesn't: at 60%
- * opacity the line-to-fill contrast on Electric Blue is only ~2.85:1
- * — UNDER the 3:1 WCAG 1.4.11 non-text/UI-component floor, a real
- * regression from the old ~3.39:1 pass. Opacity is now **70%**,
- * clearing that floor with real margin again, ~3.35:1 — computed via
- * the same relative-luminance math as every other pairing in this
- * project, not guessed. Since this tone has exactly one real call
- * site (StatStrip, confirmed via a repo grep before changing the
- * shared value rather than forking a second tone) it was safe to
- * recalibrate the token in place instead of adding a parallel
- * `paper-strong-blue` variant — re-verify this same 70% value again,
- * the same way, before ever reusing `paper-strong` against a THIRD
- * fill.
+ * accent-fill background specifically. RECALIBRATED for the
+ * Electric-Blue rebrand, not carried forward unchanged: this was
+ * originally 60% opacity, tuned against the retired Guard Green
+ * Secondary fill (L≈0.115) — checked fresh against Electric Blue
+ * (L≈0.1531, meaningfully LIGHTER despite both reading as "a dark
+ * saturated accent" at a glance) rather than assumed to still clear
+ * the same floor, and it doesn't: at 60% opacity the line-to-fill
+ * contrast on Electric Blue is only ~2.85:1 — UNDER the 3:1 WCAG
+ * 1.4.11 non-text/UI-component floor, a real regression from the old
+ * ~3.39:1 pass. Opacity is now **70%**, clearing that floor with real
+ * margin again, ~3.35:1 — computed via the same relative-luminance
+ * math as every other pairing in this project, not guessed.
+ * **StatStrip was originally the sole real call site; `about.astro`'s
+ * own Mission/Services/Vision three-column band is now a second**,
+ * against the exact same Electric Blue fill — reused directly, no new
+ * contrast maths needed for the second call site since it's the same
+ * fill/opacity pairing already verified above. Re-verify this same 70%
+ * value again, the same way, before ever reusing `paper-strong`
+ * against a THIRD, different fill.
  *
  * `tone="ink"` — a translucent Ink line at 25% opacity. Currently
  * UNUSED anywhere in this codebase (kept as an available option, not
