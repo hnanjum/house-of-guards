@@ -82,16 +82,21 @@ note's own edit date/PR reference before trusting a stale count.
   RETIRED from all six of these — neither appears in any of their real
   rendered markup, confirmed via a full repo grep before each PR
   describing itself as done.
-- **`about.astro` (PR #38, REVISED in PR #39) is a SEVENTH, narrower
-  exception** — the first interior page built, not a homepage section.
-  PR #38's own original build used Electric Blue only, for exactly one
-  full-bleed band. **PR #39 — a visual-weight redesign pass, on direct
-  feedback that the PR #38 build "read flat and thin" — adds Magenta as
-  this page's SECOND colour, its opening section's own full-bleed fill**
-  (the first time Magenta has been used as a full-bleed SECTION fill
-  anywhere on the site — every prior use was a `ServicesGrid.astro` card
-  fill). Cyan-Blue stays fully untouched; Amber keeps its sitewide
-  button-only role for the one CTA. See `about.astro`'s own top-of-file
+- **`about.astro` (PR #38, revised twice since — PR #39 then a same-PR
+  follow-up commit) is a SEVENTH, narrower exception** — the first
+  interior page built, not a homepage section. PR #38's original build
+  used Electric Blue only, for one full-bleed band. PR #39 briefly went
+  further — full-bleed Magenta AND Electric Blue covering the whole
+  page — then was pulled back the same PR, on direct feedback that two
+  consecutive full-bleed colour sections was too much for an interior
+  page. **Current, shipped state: NO full-bleed colour section anywhere
+  on this page** — both sections are plain Paper. Electric Blue/Magenta
+  now appear only inside the services tile grid (reusing
+  `ServicesGrid.astro`'s own per-service fill assignment directly, card-
+  scale only, not a section background) — the same restrained, card-
+  scoped use every other page on the site already follows. Amber keeps
+  its sitewide button-only role for the one CTA; Cyan-Blue stays fully
+  untouched. See `about.astro`'s own top-of-file
   comment for the full reasoning behind both passes.
 - **`--color-guard-green-secondary` has been fully REMOVED from
   `global.css`**, not just retired-in-place. `ClosingCta.astro`'s own
@@ -120,7 +125,7 @@ note's own edit date/PR reference before trusting a stale count.
 | `ink` | `#0D0D0D` | Near-black text, `secondary` button fill, icon strokes, the default focus ring, and — as of `StandardsCarousel.astro` — a full opaque SECTION background for the first time (every prior use was a translucent overlay or a small element, never a whole section; `on-dark` required here, an Ink-on-Ink focus ring is a literal 1:1 ratio) |
 | `paper` | `#FFFFFF` | The default background everywhere; also the text colour on every dark fill below |
 | `electric-blue` | `#2563EB` | **Primary block/background colour** (Header/Hero/StatStrip/ServicesGrid/ClosingCta) — Header's info-bar fill, StatStrip's fill, Hero's text-panel scrim (translucent, 85%), ServicesGrid's Manned Guarding/Overnight Security cards and Corporate Security's icon stroke, and ClosingCta's left contact-panel fill plus its icon-in-circle badges' icon stroke. White/Paper on the opaque fill: ~5.17:1 (AA). Ink on it: ~3.76:1 — clears the 3:1 non-text floor but fails 4.5:1, so text/icons stay white. As an icon-stroke mark on a light card/circle: ~5.17:1 vs Paper (this is the exact pairing ClosingCta's icon badges reuse directly — a white/Paper circle fill), ~4.74:1 vs Surface Alt — both clear 3:1 with real margin. See `global.css`'s own token comment for the full derivation, including Hero's own two-step translucent-panel composite (~4.53:1, a genuine but thin pass, flagged in that file) |
-| `magenta` | `#A5195C` | **Secondary block/background colour** — `ServicesGrid.astro`'s Close Protection card fill, CCTV Monitoring's and Construction Site Security's icon stroke, and (as of `about.astro`'s PR #39 redesign) `about.astro`'s own opening section, the first time this token has been used as a full-bleed SECTION fill rather than a card-scale fill. White on the fill: ~7.26:1 (AAA, the strongest fill pairing in this rebrand — same number, reused directly, no new maths for the About page). Ink on it: ~2.68:1 — fails even the lenient 3:1 floor outright, so this fill never carries Ink. As an icon-stroke mark on a light card: ~7.26:1 vs Paper, ~6.66:1 vs Surface Alt |
+| `magenta` | `#A5195C` | **Secondary block/background colour, card-scale only** — `ServicesGrid.astro`'s Close Protection card fill, CCTV Monitoring's and Construction Site Security's icon stroke, and (as of `about.astro`'s own services tile grid) the same Close Protection tile reused there directly. PR #39 briefly used this as a full-bleed SECTION fill on `about.astro`'s opening — reverted the same PR once that read as too much colour for a whole page; this token has never shipped as a section-scale fill on the live site. White on the fill: ~7.26:1 (AAA, the strongest fill pairing in this rebrand). Ink on it: ~2.68:1 — fails even the lenient 3:1 floor outright, so this fill never carries Ink. As an icon-stroke mark on a light card: ~7.26:1 vs Paper, ~6.66:1 vs Surface Alt |
 | `amber` | `#F59E0B` | **The sole button/CTA colour, sitewide, no exceptions** — `Button.astro`'s `primary` variant, `NavDrawer.tsx`'s hand-matched CTA, `MissionBand.astro`'s "More about us" button (the same unmodified `primary` variant, not a one-off), and (as a bare non-text mark ONLY) the header nav's active-link underline, MissionBand's own underline rule, and — as of `StandardsCarousel.astro` — the active/centred card's own thin border+shadow. Ink on this fill: ~9.05:1 (AAA) — buttons therefore use INK text, a genuine reversal from Guard Green Secondary's own white-text pairing. White on it: ~2.15:1, fails even 3:1. **Bare-mark contrast on PAPER (the nav underline, MissionBand's own underline rule) is ~2.15:1, below the 3:1 WCAG 1.4.11 floor — flagged in PR #17, reviewed by the user against this exact number, and explicitly KEPT AS-IS as an accepted tradeoff for that USE (a decorative mark). This is a settled decision for bare marks on Paper, not an open item — don't "fix" it without a fresh, explicit ask.** Bare-mark contrast on the NEW `bg-ink` fill (`StandardsCarousel.astro`'s active-card border) is a different, much stronger pairing — ~9.05:1, the same ratio as Ink-on-Amber above, re-derived fresh rather than assumed to share the Paper case's own thin ~2.15:1 (see global.css's own Amber token comment for both derivations side by side). **AMBER IS NEVER SAFE AS RUNNING TEXT COLOUR ON PAPER — this was tried once and reverted.** `MissionBand.astro`'s caption initially shipped with Amber text too (PR #20's own first commit), flagged at the time as a genuinely different, more severe case than the bare-mark precedent (text needs the 4.5:1 floor, not 3:1, and ~2.15:1 fails both) — confirmed on review to be a real contrast-failure BUG, not a style preference, and corrected outright to Ink (a follow-up commit on the same PR). Don't reach for Amber as a `text-*` foreground colour anywhere on this site; every safe use of this token is either a fill (with Ink text on top) or a bare non-text mark. See `NavLink.astro`'s, `MissionBand.astro`'s, and `StandardsCarousel.astro`'s own comments |
 | `cyan-blue` | `#0EA5E9` | **Rare accent only — never a section/card background fill.** Not applied anywhere in Header/Hero/StatStrip/ServicesGrid as of this rebrand (no per-section spec called for it); defined and fully contrast-checked so it's ready the moment a hover state or icon detail needs it. White on this fill: ~2.77:1 — fails even 3:1, so white is never a safe foreground here, including as a bare mark on Paper (same number, symmetric). Ink on it: ~7.01:1 (AAA) — the only safe foreground for this token |
 | `stone` | `#6E6E6E` | Secondary text on Paper only (captions, meta, credential lines). ~4.6:1 on white — 14px and above only |
@@ -2799,20 +2804,35 @@ anywhere is `Button.astro`'s own dormant `secondary` variant. See the
 Design system section above for the exact, current scope boundary — it
 has moved three times now, don't assume an older framing still holds.
 
-**Built, as of PR #39**: `src/pages/about.astro` — the first interior
-page, satisfying the already-live `/about` nav link. PR #38 built it
-first (four stacked Paper/Electric-Blue sections); PR #39 is a direct
-visual-weight redesign of the same page on live feedback that the
-PR #38 build read flat and thin — same content/photo/CTA link
-throughout both. Current shape, as of PR #39: a full-bleed **Magenta**
-opening section (headline + subhead + two paragraphs + a
-hairline-divided fact list, two-column with the real SIA-badge officer
-photo), and a full-bleed **Electric Blue** three-column band (Our
-Mission / Our Services / Our Vision, divided by `Divider.astro`'s
-`paper-strong` tone — the same mechanism `StatStrip.astro` uses) with
-the services list as hairline-divided rows (no middle-dot separators)
-and a `Button` CTA to `/#quote-form` in the Vision column. See PR #39's
-own entry above for the full account of what changed and why.
+**Built, as of PR #39 (including its own same-PR follow-up commit)**:
+`src/pages/about.astro` — the first interior page, satisfying the
+already-live `/about` nav link. PR #38 built it first (four stacked
+Paper/Electric-Blue sections, read flat and thin); PR #39 first tried
+two full-bleed colour bands (Magenta opening + Electric Blue triptych),
+then reverted both to plain Paper in a follow-up commit on the same PR
+once that read as too much colour for a whole page. Same content/
+photo/CTA link throughout every revision.
+
+**Current, shipped shape**: two plain-Paper sections, no full-bleed
+colour anywhere. Section one — headline (`text-h1 sm:text-display`) +
+subhead + two paragraphs + a hairline-divided fact list, two-column
+with the real SIA-badge officer photo (now given a real considered
+crop — `aspect-[1024/1110]` + `object-[center_21%]`, derived from real
+`sharp`-measured pixel boundaries, ending cleanly at the jacket hem
+rather than showing the whole uncropped frame). Section two — "Our
+mission" and "Our vision" as a two-column pair (a plain `hairline`
+`Divider`, matching `StatStrip.astro`'s mechanism), plus "Our
+services" full-width below them with the SAME heading treatment as its
+two siblings, now a real 6-tile grid reusing `ServicesGrid.astro`'s own
+icon components and per-service `FILL_CLASS`/`ICON_ACCENT_CLASS`
+lookups directly (Electric Blue/Magenta/`surface-alt`, card-scale
+only — the page's one narrow, deliberate use of colour, not a section
+wash) with fresh one-line descriptions per tile, and the 3 remaining
+named services with no matching icon folded into the closing sentence
+below the grid. `Button` CTA to `/#quote-form` stays in the Vision
+column. See PR #39's own entry above for the full account of the first
+redesign pass; this paragraph reflects the shipped state after its
+follow-up commit pulled the colour back out.
 
 **Not started**: the remaining interior pages — Careers, Our Policies,
 Gallery, Contact — plus the six new `/sectors/<slug>` pages SectorsGrid's

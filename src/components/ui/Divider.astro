@@ -23,14 +23,14 @@
  * 1.4.11 non-text/UI-component floor, a real regression from the old
  * ~3.39:1 pass. Opacity is now **70%**, clearing that floor with real
  * margin again, ~3.35:1 — computed via the same relative-luminance
- * math as every other pairing in this project, not guessed.
- * **StatStrip was originally the sole real call site; `about.astro`'s
- * own Mission/Services/Vision three-column band is now a second**,
- * against the exact same Electric Blue fill — reused directly, no new
- * contrast maths needed for the second call site since it's the same
- * fill/opacity pairing already verified above. Re-verify this same 70%
- * value again, the same way, before ever reusing `paper-strong`
- * against a THIRD, different fill.
+ * math as every other pairing in this project, not guessed. StatStrip
+ * remains the sole real call site — `about.astro`'s own Mission/
+ * Services/Vision band briefly reused this tone against Electric Blue
+ * (its PR #39 redesign) but moved back onto plain Paper one PR later,
+ * once that full-bleed fill was reverted for reading too heavy across
+ * the whole page — that section now uses the plain `hairline` default
+ * instead. Re-verify this same 70% value again, the same way, before
+ * ever reusing `paper-strong` against a second real fill.
  *
  * `tone="ink"` — a translucent Ink line at 25% opacity. Currently
  * UNUSED anywhere in this codebase (kept as an available option, not
