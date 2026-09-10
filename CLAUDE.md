@@ -736,17 +736,19 @@ treatment for these icons without a real reason to.
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number below is confirmed on
-`origin/main` as of THIS entry — **every PR through #32 is confirmed
-MERGED** (checked fresh via `gh pr view <n> --json state,mergeable` and
+`origin/main` as of THIS entry — **every PR through #36 is confirmed
+MERGED** (checked fresh via `gh pr list --state all --limit 8` and
 `git log origin/main --oneline` immediately before writing this
 paragraph, not assumed from an earlier revision of this file's own
-text — PR #32 in particular was already merged by the time this
-paragraph was written, discovered only because that check was run
-fresh rather than trusted from memory; see the next paragraph for why
-this check matters every single time, not just once). No current
-"not yet merged" exception exists as of this entry. **PR #29's entry
-still sits ABOVE PR #28's below even though #28's own code landed on
-`main` first** — both were opened
+text — PRs #34/#35/#36 in particular had ALREADY landed on `main` with
+no corresponding entry in this file at all, not even a stale "not yet
+merged" placeholder, since this file simply hadn't been touched since
+PR #33; discovered only because that check was run fresh rather than
+assumed from this file's own, by-then-outdated text — see the next
+paragraph for why this check matters every single time, not just
+once). No current "not yet merged" exception exists as of this entry.
+**PR #29's entry still sits ABOVE PR #28's below even though #28's own
+code landed on `main` first** — both were opened
 from the same session as two genuinely independent changes (per
 explicit instruction to treat them that way), #28 merged quickly while
 #29 was still being verified and later needed its own `main`-merge
@@ -767,6 +769,151 @@ this paragraph as a snapshot from whenever it was last edited, never as
 a live signal — always run `gh pr list --state all --limit 5` (or
 similar) fresh before assuming anything about merge state, this
 paragraph included.
+
+- **PR #36 — reverts PR #35's row-alignment change on `ClosingCta.astro`
+  back to `lg:items-stretch`, keeping PR #35's OTHER change (the smaller
+  panel/form text) as shipped.** Direct instruction, given after seeing
+  PR #35 live: the panel matching the card's own height again — even
+  knowing that leaves PR #35's own measured "~150px of empty solid
+  Electric Blue below the contact list" finding back in place — was the
+  preferred look. Recorded plainly in this file's own comment rather
+  than silently dropped, so a future session doesn't rediscover that
+  same empty-space finding and assume it was never investigated: it
+  was, and this is a deliberate call made WITH the measurement already
+  in hand, not an unexamined regression. `ContactForm.tsx` is untouched
+  by this PR — the text-size drop from PR #35 stays exactly as it
+  shipped there.
+
+  A real dead-CSS-from-doc-comment risk was caught while updating the
+  comment: an early draft bare-quoted the row-alignment class PR #35 had
+  introduced, to describe the now-reverted behaviour — confirmed via
+  grep that it had zero real call site left anywhere in `src/` once
+  reverted, so it would have regenerated as a genuine orphaned rule.
+  Reworded to prose before shipping, the same failure class this file's
+  own standing convention already warns about, caught in the act rather
+  than assumed safe.
+
+  `astro check` (0 errors, same 2 pre-existing hints) and a clean `astro
+  build`, plus direct `dist/` inspection confirming the reverted class
+  compiled and present in the markup again, the removed one genuinely
+  absent from the compiled bundle, and PR #35's kept text-size class
+  still present.
+
+- **PR #35 — a follow-up to PR #34's own height fix: the RAW height
+  number had improved (824px), but a live look confirmed the section
+  still read as visually oversized, so this investigates and fixes the
+  actual causes rather than shaving more padding off the same values
+  again.** Two real, separately-measured fixes, done in order so each
+  one's own contribution was known before moving to the next, per the
+  task's own explicit instruction:
+
+  **Text size** — every piece of text in this section (the panel's own
+  body copy and contact-list item text, PLUS every `ContactForm.tsx`
+  field — labels, input text, select text, textarea) was running at
+  this project's own prose body-copy size, not the smaller size
+  `ServicesGrid.astro` had already established as this project's own
+  precedent for dense, multi-item content (see that component's own
+  `CLAUDE.md` history). Dropped one type-scale tier to match it —
+  `ContactForm.tsx`'s `fieldBaseClass`, `selectFieldClass`, and the
+  floating label's own resting-state size all moved together, so labels
+  and values stay visually matched at every state; `ClosingCta.astro`'s
+  own panel body paragraph and all three contact-list items moved the
+  same tier, for the same reason. The panel's own `<h2>` was
+  deliberately NOT reduced — checked against every other homepage
+  section's own heading class first (`ServicesGrid`/`SectorsGrid`/
+  `StandardsCarousel`/`MissionBand` all use the identical heading step),
+  not assumed oversized; it was never actually the outlier. Measured
+  live, not estimated: this alone took the section from 824px to 781px —
+  genuinely under both `ServicesGrid.astro`/`SectorsGrid.astro`'s own
+  803px for the first time.
+
+  **Panel over-stretching** — the left contact panel was being force-
+  stretched roughly 150px past its own real content height (509px vs.
+  the card's own 664px) by the grid row's default alignment, leaving a
+  large block of solid, empty Electric Blue below the contact list — a
+  real, measured contributor to the section reading "heavy," not a
+  guess about visual weight. Changed the row's own alignment so the
+  panel sized to its own content instead, while the card kept its
+  existing `lg:self-center`. Total section height held at 781px after
+  this change (unchanged from the text-size fix alone, since the card —
+  not the panel — was always the taller, height-driving element,
+  confirmed rather than assumed), but the panel itself dropped from
+  621px (stretched) to 431px (its own real content height), removing
+  the empty colour block. Re-verified the horizontal overlap the same
+  way the original grid-placement bug earlier in this file was caught
+  (real `getBoundingClientRect()` measurement, not compiled-CSS
+  inspection alone): fully intact, 195px, still exactly 12 grid tracks —
+  this row-alignment property only affects the panel's own vertical
+  size, not the column placement the overlap actually depends on.
+  Mobile stacking reconfirmed unaffected (the change was `lg:`-scoped,
+  same as what it replaced) — panel fully above card, correct order, no
+  height mismatch. **This row-alignment half of PR #35 was reverted by
+  PR #36 above, on direct instruction, once seen live — see that entry
+  for why; the text-size half stayed.**
+
+  Two-column field pairing (First/Last, Email/Phone) reconfirmed intact
+  at `sm:` after the font-size change. A real dead-CSS-from-doc-comment
+  risk was caught and fixed in both files before shipping: an earlier
+  draft of each file's own updated comment bare-quoted the grid row's
+  OLD alignment class to describe the previous behaviour — confirmed via
+  grep that only a differently-scoped, unrelated form of that same class
+  name (`StatStrip.astro`'s own real, `sm:`-prefixed usage) had any real
+  call site left, so the bare mention would have regenerated a genuine
+  orphaned rule. Reworded to prose in both files.
+
+  `astro check` (0 errors, same 2 pre-existing hints), a clean `astro
+  build`, and real rendered measurement (not just compiled-class
+  presence) at 1280px (desktop), 700px (`sm:` pairing check), and 375px
+  (mobile stacking).
+
+- **PR #34 — fixes the REAL drivers behind `ClosingCta.astro` still
+  reading too tall after the previous session's own outer-padding pass,
+  found via rendered measurement rather than more blind padding cuts,
+  per the task's own explicit instruction not to guess.** Measured
+  first: at 1280px the section was 929px, ~126px taller than either
+  `ServicesGrid.astro`/`SectorsGrid.astro` (803px each) — and the CARD's
+  own content (the form, NOT the panel, which at the time was still
+  being force-stretched to match it) was the real driver, not the outer
+  section padding already addressed in the prior pass.
+
+  Two real, distinct causes traced, not assumed: (1) `ContactForm.tsx`'s
+  `fieldBaseClass` floating-label padding (24px top / 8px bottom) was
+  generous on every field, including the `message` textarea, which
+  doesn't need as much top clearance once it holds a value; (2) a
+  genuine bug — the `service` select was meant to override that padding
+  down to a smaller top value via an appended override class, but the
+  override never actually took effect: Tailwind resolves two same-
+  specificity utilities targeting the same CSS property by their
+  position in the GENERATED stylesheet, not by their order in the class
+  string, so `fieldBaseClass`'s own top-padding utility silently won —
+  confirmed via `getComputedStyle` before the fix (24px, not the
+  intended ~10px) and after. Fixed by giving `service` its own
+  dedicated, non-conflicting class instead of an override — the general,
+  reusable lesson here (never rely on utility-class ORDER to resolve a
+  same-property conflict) is worth remembering the next time two
+  utilities for the same CSS property ever end up on one element in this
+  codebase.
+
+  Also tightened: the field grid's own row gap one step, the `message`
+  textarea's default `rows` (4 → 3, it can still grow/scroll), the
+  submit button's own top margin/vertical padding one step, and
+  `ClosingCta.astro`'s own card padding one step. Re-measured after:
+  824px — ~105px shorter, within ~21px of `ServicesGrid.astro`/
+  `SectorsGrid.astro`'s own 803px rather than towering 126px above them.
+  That residual ~21px was explicitly NOT chased further at the time —
+  correctly identified as this form genuinely carrying more fields (11
+  vs. the original 5) than either neighbour's own six-card/six-tab
+  content, per the task's own "don't force it smaller than the content
+  allows, say so plainly" instruction. (PR #35 above picked this
+  residual back up from a different angle — visual weight, not raw
+  height — once a live look showed the number alone hadn't fully solved
+  the perception.)
+
+  `astro check` (0 errors, same 2 pre-existing hints), a clean `astro
+  build`, and direct `dist/` inspection confirming the fixed select
+  padding and every new class compiled with zero orphaned dead rules
+  from the retired values. Two-column field pairing reconfirmed intact
+  at `sm:` after the row-gap change.
 
 - **PR #32 — a polish pass on PR #31's own `ContactForm`/`ClosingCta`
   work, not a rebuild: the form's field set replaced entirely per a
@@ -2397,15 +2544,22 @@ GENUINELY NEW section rather than a conversion of an existing one
 despite the original brief describing it that way — see PR #29's own
 entry for the full "checked every branch/commit, this never existed
 here" account — closing CTA, a two-column contact + quote-request band
-(a solid Electric Blue left panel with heading/body/icon-in-circle
-phone/email/address contact list, a floating white "Get A Quote" card
-overlapping the panel's edge via CSS Grid line positioning, holding
-`ContactForm.tsx` — an 11-option field spec with floating labels, an
-Electric-Blue focus glow, and a per-field staggered Framer Motion
-entrance as of PR #32's own polish pass, both files' own footprint
-tightened in that same pass to read proportionate to
-`StandardsCarousel.astro`/`SectorsGrid.astro` rather than heavier),
-rebuilt from the original centred
+(a solid Electric Blue left panel, still stretched to match the card's
+own height per PR #36's own reversion of PR #35's brief experiment
+otherwise — see that entry for why the stretched panel, and the empty
+colour space below its own contact list that comes with it, is a
+deliberate, measured call rather than an oversight — with heading/body/
+icon-in-circle phone/email/address contact list, a floating white "Get
+A Quote" card overlapping the panel's edge via CSS Grid line
+positioning, holding `ContactForm.tsx` — an 11-option field spec with
+floating labels, an Electric-Blue focus glow, and a per-field staggered
+Framer Motion entrance as of PR #32's own polish pass. Both files' own
+footprint has been tightened and re-tightened across PR #32/#34/#35 —
+padding, real height-driver fixes, and (PR #35, kept) a type-scale drop
+on every piece of body/list/field text to `text-caption`, matching
+`ServicesGrid.astro`'s own established precedent for dense content —
+to read proportionate to `StandardsCarousel.astro`/`SectorsGrid.astro`
+rather than heavier), rebuilt from the original centred
 "Ready to talk about your requirement?" heading+Button+phone-link band,
 which had stayed on the original Guard Green palette through every
 earlier rebrand pass — footer, still on `footer-grey`, its own distinct
