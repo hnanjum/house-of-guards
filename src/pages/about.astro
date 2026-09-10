@@ -4,167 +4,187 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Button from "../components/ui/Button.astro";
 import Divider from "../components/ui/Divider.astro";
 import officerPhoto from "../assets/about/officer-sia-badge.png";
+import CorporateSecurity from "../icons/services/CorporateSecurity.astro";
+import CloseProtection from "../icons/services/CloseProtection.astro";
+import CctvMonitoring from "../icons/services/CctvMonitoring.astro";
+import MannedGuarding from "../icons/services/MannedGuarding.astro";
+import ConstructionSecurity from "../icons/services/ConstructionSecurity.astro";
+import OvernightSecurity from "../icons/services/OvernightSecurity.astro";
 
 /**
- * About page — REDESIGN PASS (first build was PR #38; this is a direct
- * follow-up visual-weight revision, not a rewrite of the content). The
- * first build read "flat and thin" on live review: four stacked plain
- * sections, a middle-dot separated service list (the generic-AI tell
- * the original brief was built to avoid), and body text sized larger
- * than the rest of the site. This pass restructures the page into two
- * dense, deliberate full-bleed bands instead of four thin ones — same
- * content, same photo, same CTA link, genuinely different visual
- * weight.
+ * About page — SECOND redesign pass (PR #38 built it, PR #39 gave it two
+ * full-bleed colour bands, THIS pass pulls the colour back out). Direct
+ * feedback on PR #39's live build: two consecutive full-bleed colour
+ * sections covering the whole page is too much — colour should be a
+ * sparing accent, not the background for most of the page.
  *
- * OPENING — Magenta full-bleed, NOT the Ink/dark band the first
- * revision plan proposed. Explicitly overruled by direct instruction:
- * no dark section on this page. Magenta was chosen over plain Paper
- * (the other offered option) because plain Paper is what shipped
- * originally and is exactly what was flagged as reading flat — bigger
- * type alone doesn't fix that, it needs a real colour anchor. Magenta
- * carries the strongest text pairing on the whole site (white ~7.26:1,
- * AAA — already-derived, no new maths) and had never been used as a
- * full-bleed SECTION fill anywhere before this (only ever a card fill
- * in `ServicesGrid.astro`), so it also gives this page its own visual
- * identity rather than repeating Electric Blue twice in a row.
- * `ServicesGrid.astro` already proves Magenta sits fine directly next
- * to Electric Blue (its own Close Protection/Manned Guarding cards sit
- * adjacent) — this page just does the same pairing at full-bleed
- * section scale instead of card scale.
- * `.on-dark` is applied defensively — no focusable element in this
- * section (no button, just text + the photo), matching `ServicesGrid`
- * 's own precedent for a fill with no interactive content.
+ * BACKGROUND — both sections revert to plain Paper. The Magenta/
+ * Electric-Blue full-bleed fills from PR #39 are gone entirely; text
+ * reverts from Paper to Ink, fact-list/services dividers revert from
+ * translucent-Paper (`/15`) to the plain `hairline` token, `.on-dark`
+ * is removed from the opening section (no longer needed — Ink on Paper
+ * is always safe, no new derivation required).
  *
- * CONTENT — unchanged from PR #38, still verbatim per the user's
- * original brief. No copy, photo, or CTA link edited in this pass —
- * pure visual-weight/layout revision.
+ * COLOUR IS NOT GONE, JUST NARROWED TO ONE PLACE — the services tile
+ * grid below. Rather than inventing a new "small colour touch" (a
+ * stray rule or badge), colour now lives ONLY inside the services
+ * tiles, reusing `ServicesGrid.astro`'s own already-built, already-
+ * contrast-verified per-service fill assignment (Electric Blue/
+ * Magenta/`surface-alt`) wholesale — literally imports the same six
+ * icon components and the same `FILL_CLASS`/`ICON_ACCENT_CLASS`
+ * lookups, not a new palette decision. This satisfies both asks in one
+ * move: "reuse the actual component/pattern, don't rebuild one" and
+ * "colour narrowly, not as a section-wide wash" — the tiles ARE the
+ * narrow colour touch, confined to card-sized fills exactly like they
+ * already are on the homepage, not a section background.
  *
- * IMAGE — same asset, same crop, same alt text as PR #38
- * (`src/assets/about/officer-sia-badge.png`, real 2:3 geometry,
- * `object-cover` performs no actual crop).
+ * SERVICES — now a real tile grid, not a plain text column, on direct
+ * instruction. This required moving Services out of the old three-
+ * column Mission/Services/Vision layout — a 3-wide tile grid genuinely
+ * cannot fit inside a 1/3-width column, so Mission and Vision now sit
+ * as a simple two-column pair (a plain hairline `Divider`, matching
+ * `StatStrip.astro`'s mechanism but the DEFAULT `hairline` tone since
+ * this is Paper now, not a colour fill) and Services renders full-width
+ * below them as its own block, reusing the exact same 6 services/icons
+ * `ServicesGrid.astro` already uses. Fresh one-line descriptions were
+ * written for each — matching that component's own tone/register, not
+ * copied verbatim, so the two pages don't read as duplicated content.
+ * The 3 remaining named services from the original copy that have no
+ * matching icon (Retail Security, Private Property Security, Event
+ * Stewarding) are folded into the closing sentence below the tile grid
+ * along with the original "bespoke arrangements... 24 hours a day"
+ * line — nothing from the original copy is dropped, just
+ * redistributed between the tiles and the surrounding prose.
  *
- * SERVICES LIST — the middle-dot inline separators are gone. Replaced
- * with hairline-divided rows, the SAME visual idiom already used for
- * the three-bullet fact list in the opening section (`divide-y` +
- * `border-t`, translucent Paper border rather than the `hairline`
- * token since this now sits on a colour fill) — one consistent
- * "divided list" pattern reused in two places, not two different list
- * styles invented for two sections.
+ * HEADING PARITY — "Our services" now gets the exact same heading
+ * treatment as "Our mission"/"Our vision" (`<h2 class="text-h3
+ * text-ink">`), fixing PR #39's own inconsistency where Services had no
+ * visible heading style matching its siblings.
  *
- * MISSION / SERVICES / VISION — merged into ONE full-bleed Electric
- * Blue band, laid out as three columns divided by `Divider.astro`'s
- * existing `paper-strong` tone. This is StatStrip's own already-built,
- * already-contrast-verified three-column-with-dividers mechanism
- * (`flex flex-col sm:flex-row sm:items-stretch`, vertical `Divider` at
- * `sm:`+, horizontal `<hr>`-style `Divider` on mobile, `my-8` margin
- * doing mobile spacing instead of a flex gap) — reused wholesale
- * rather than inventing a new bordered-card treatment, which would
- * also risk reading as a fourth card-grid pattern on top of
- * `ServicesGrid.astro`'s already-sanctioned one. A plain divided
- * column row isn't a card grid at all (no border/shadow/bg per item),
- * so it sits outside that hard rule entirely, same as StatStrip
- * already does. `paper-strong` was previously calibrated with StatStrip
- * documented as "the sole real call site" — this page is now a SECOND
- * real call site for the exact same Electric Blue fill, so no new
- * contrast maths needed, and `Divider.astro`'s own comment is updated
- * in this same commit so it doesn't keep claiming "sole."
+ * PHOTO — real crop applied, not the previous "show the whole uncropped
+ * frame" treatment. The source is 1024×1536 (2:3); shown at its full
+ * native ratio the frame included ~140px of empty signage/background
+ * above the head and the officer's legs/hands below the waist — busy,
+ * not a considered portrait. Checked the real pixel boundaries via
+ * `sharp` before choosing a window (not guessed): hairline starts
+ * ≈y=105, the jacket's own hem/waistband — a clean, natural crop
+ * boundary, not an awkward mid-joint cut — sits ≈y=1170–1200. Window
+ * used: top=90 (small headroom above the hair), bottom=1200 (right at
+ * the jacket hem), full width (shoulders never approach either edge,
+ * so no horizontal crop needed) — `aspect-[1024/1110]` (the exact
+ * derived ratio, not a rounded guess) with `object-[center_21%]`
+ * (21% ≈ 90⁄426, the fraction of the total vertical crop taken from the
+ * top vs. bottom, so the visible window lands exactly on that
+ * y=90–1200 range). This is a container/object-position choice, not a
+ * pre-cropped second asset — the original file is untouched, matching
+ * this project's own established convention (`Hero.astro`'s
+ * `object-[16%_22%]`) of framing via CSS rather than shipping a second
+ * cropped image.
  *
- * `.on-dark` is DELIBERATELY OMITTED from this section, unlike the
- * Magenta opening above — a real, checked reason, not an oversight:
- * the Vision column holds a genuine focusable `Button` (Amber fill,
- * Ink text). `.on-dark`'s `:focus-visible` descendant selector would
- * force that button's ring to Paper, which fails outright against
- * Amber (~2.15:1, below the 3:1 floor) — the exact bug
- * `SectorsGrid.astro`'s own coloured content panels already found and
- * deliberately avoid for the identical reason (a focusable Amber
- * button inside a colour-filled section). Without `.on-dark`, the
- * button keeps the sitewide default Ink ring, ~9.05:1 against Amber,
- * already safe — matching every other Amber button on the site
- * regardless of what section colour surrounds it.
+ * CONTENT — copy and CTA link (`/#quote-form`) otherwise unchanged from
+ * PR #38/#39, aside from the services-tile descriptions noted above.
  *
- * TYPE — every running paragraph on the page drops from `text-body-lg`
- * (20px) to `text-body` (17px), matching `MissionBand.astro`'s own
- * established body-copy tier rather than the larger size PR #38
- * originally used. One exception: the hero subhead directly under the
- * H1 keeps `text-body-lg` — that's the token's own documented role
- * ("intro paragraphs, pull-quotes"), a legitimate different use, not
- * an inconsistency.
- *
- * HEADLINE — `text-h1 sm:text-display` (56px mobile → 88px desktop).
- * `text-display` is an existing, currently-unused-anywhere-else token
- * (`Hero.astro`'s own H1 was stepped DOWN to `text-h3 sm:text-h2` a
- * while back, per that file's own history) — reusing it here rather
- * than inventing a new size, and it doesn't compete with anything else
- * on the site since nothing else currently uses it.
- *
- * MOTION — still exactly one deliberate moment, same restraint as
- * PR #38's own brief. The scroll reveal (`[data-reveal]`, plain
- * `scrollReveal.ts`, unmodified) now lives on the Electric Blue
- * triptych band; the Magenta opening is static — it's the first thing
- * in view on load, the same "already in view, no scroll trigger
- * needed" logic `Hero.astro` already follows for its own load-visible
- * content.
- *
- * ALIGNMENT — left throughout, unchanged from PR #38.
- *
- * STRUCTURE — two full-bleed sections (Magenta opening, Electric Blue
- * triptych) plus Footer, down from PR #38's four stacked Paper/
- * Electric-Blue sections. Fewer, denser, more deliberate sections is
- * the actual fix for "reads flat and thin," not added decoration on
- * top of the same four-section structure.
- *
- * CTA TARGET — unchanged, `/#quote-form` (ClosingCta's own quote card,
- * anchor added in PR #38's own follow-up commit).
+ * MOTION — unchanged mechanism, still one deliberate moment: the plain
+ * `scrollReveal.ts` reveal now sits on this single Paper section
+ * (Mission/Vision/Services together); the opening section is static,
+ * same "already in view on load" logic as before.
  */
-const SERVICES = [
-  "Corporate security",
-  "Close protection",
-  "CCTV monitoring",
-  "Manned guarding",
-  "Retail security",
-  "Construction site security",
-  "Overnight security",
-  "Private property security",
-  "Event stewarding",
+const SERVICE_TILES: {
+  name: string;
+  body: string;
+  Icon: typeof CorporateSecurity;
+  fill: "electric-blue" | "magenta" | "light";
+  iconAccent?: "electric-blue" | "magenta";
+}[] = [
+  {
+    name: "Corporate Security",
+    body: "Front-of-house presence and access control that reflects your own organisation's standards.",
+    Icon: CorporateSecurity,
+    fill: "light",
+    iconAccent: "electric-blue",
+  },
+  {
+    name: "Close Protection",
+    body: "Discreet, professional protection for individuals and high-net-worth clients.",
+    Icon: CloseProtection,
+    fill: "magenta",
+  },
+  {
+    name: "CCTV Monitoring",
+    body: "Continuous camera monitoring with a fast, considered response when it matters.",
+    Icon: CctvMonitoring,
+    fill: "light",
+    iconAccent: "magenta",
+  },
+  {
+    name: "Manned Guarding",
+    body: "A visible, reassuring presence across retail, corporate and event sites.",
+    Icon: MannedGuarding,
+    fill: "electric-blue",
+  },
+  {
+    name: "Construction Site Security",
+    body: "Guarding plant, materials and part-built structures around the clock.",
+    Icon: ConstructionSecurity,
+    fill: "light",
+    iconAccent: "magenta",
+  },
+  {
+    name: "Overnight Security",
+    body: "Dedicated night cover for premises at their most vulnerable.",
+    Icon: OvernightSecurity,
+    fill: "electric-blue",
+  },
 ];
+
+const FILL_CLASS: Record<string, string> = {
+  "electric-blue": "on-dark bg-electric-blue text-paper",
+  magenta: "on-dark bg-magenta text-paper",
+  light: "bg-surface-alt text-ink",
+};
+
+const ICON_ACCENT_CLASS: Record<string, string> = {
+  "electric-blue": "text-electric-blue",
+  magenta: "text-magenta",
+};
 ---
 
 <BaseLayout
   title="About"
   description="House of Guards is a young, Bradford-based physical security company founded in 2023 — SIA-licensed, DBS-checked officers delivering manned guarding, close protection, and CCTV monitoring across West Yorkshire."
 >
-  <section class="on-dark bg-magenta">
+  <section class="bg-paper">
     <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-28">
-      <h1 class="text-h1 sm:text-display text-paper max-w-3xl">About House of Guards</h1>
-      <p class="text-body-lg text-paper mt-4 max-w-2xl">A young company with experienced people</p>
+      <h1 class="text-h1 sm:text-display text-ink max-w-3xl">About House of Guards</h1>
+      <p class="text-body-lg text-ink mt-4 max-w-2xl">A young company with experienced people</p>
 
       <div class="mt-12 grid grid-cols-1 items-start gap-12 md:grid-cols-2 md:gap-16 lg:gap-20">
         <div class="text-left">
-          <p class="text-body text-paper max-w-md">
+          <p class="text-body text-ink max-w-md">
             House of Guards is a new establishment formed in 2023, working across the
             sectors listed on our Services page. We are growing steadily in both staff
             and contracts, and we continue to recruit skilled SIA licensed officers,
             CCTV monitoring operators and stewards.
           </p>
-          <p class="text-body text-paper mt-5 max-w-md">
+          <p class="text-body text-ink mt-5 max-w-md">
             Most of our work takes place in West Yorkshire, though some shifts run
             further afield with transport provided. Our staff receive regular training
             on how to sharpen their work, because professionalism is central to how we
             operate — and to what we expect from every member of the crew.
           </p>
 
-          <ul class="mt-8 max-w-md divide-y divide-paper/15 border-t border-paper/15">
-            <li class="py-4 text-body text-paper">SIA licensed and DBS checked officers</li>
-            <li class="py-4 text-body text-paper">First aid trained personnel</li>
-            <li class="py-4 text-body text-paper">Bespoke shift patterns, arranged around you</li>
+          <ul class="mt-8 max-w-md divide-y divide-hairline border-t border-hairline">
+            <li class="py-4 text-body text-ink">SIA licensed and DBS checked officers</li>
+            <li class="py-4 text-body text-ink">First aid trained personnel</li>
+            <li class="py-4 text-body text-ink">Bespoke shift patterns, arranged around you</li>
           </ul>
         </div>
 
-        <div class="aspect-[2/3] overflow-hidden md:max-w-sm md:justify-self-end">
+        <div class="aspect-[1024/1110] overflow-hidden md:max-w-sm md:justify-self-end">
           <Image
             src={officerPhoto}
-            alt="A House of Guards security officer in a branded jacket, wearing an SIA licence badge on a lanyard, standing on a Bradford street"
-            class="h-full w-full object-cover"
+            alt="A House of Guards security officer in a branded jacket, wearing an SIA licence badge on a lanyard"
+            class="h-full w-full object-cover object-[center_21%]"
             widths={[320, 480, 640, 768]}
             sizes="(min-width: 768px) 24rem, 100vw"
             format="webp"
@@ -176,12 +196,12 @@ const SERVICES = [
     </div>
   </section>
 
-  <section class="bg-electric-blue" data-reveal>
+  <section class="bg-paper" data-reveal>
     <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-24">
       <div class="flex flex-col gap-0 lg:flex-row lg:items-stretch lg:gap-0">
         <div class="flex flex-1 flex-col text-left">
-          <h2 class="text-h3 text-paper">Our mission</h2>
-          <p class="text-body text-paper mt-4 max-w-sm">
+          <h2 class="text-h3 text-ink">Our mission</h2>
+          <p class="text-body text-ink mt-4 max-w-md">
             To meet our clients' needs to perfection in a professional working
             environment, and to recruit staff who share those values. We aim to give
             full assurance in the safety our guards provide, and to become a leading
@@ -190,36 +210,15 @@ const SERVICES = [
         </div>
 
         <div class="lg:hidden">
-          <Divider orientation="horizontal" tone="paper-strong" class="my-8" />
+          <Divider orientation="horizontal" class="my-8" />
         </div>
         <div class="hidden shrink-0 lg:flex">
-          <Divider orientation="vertical" tone="paper-strong" class="mx-10" />
+          <Divider orientation="vertical" class="mx-10" />
         </div>
 
         <div class="flex flex-1 flex-col text-left">
-          <h2 class="text-h3 text-paper">Our services</h2>
-          <p class="text-body text-paper mt-4 max-w-sm">We deliver:</p>
-          <ul class="mt-3 max-w-sm divide-y divide-paper/15 border-t border-paper/15" aria-label="Services we offer">
-            {SERVICES.map((service) => (
-              <li class="py-2.5 text-body text-paper">{service}</li>
-            ))}
-          </ul>
-          <p class="text-body text-paper mt-4 max-w-sm">
-            Bespoke arrangements are available, and our specialists are operational
-            24 hours a day.
-          </p>
-        </div>
-
-        <div class="lg:hidden">
-          <Divider orientation="horizontal" tone="paper-strong" class="my-8" />
-        </div>
-        <div class="hidden shrink-0 lg:flex">
-          <Divider orientation="vertical" tone="paper-strong" class="mx-10" />
-        </div>
-
-        <div class="flex flex-1 flex-col text-left">
-          <h2 class="text-h3 text-paper">Our vision</h2>
-          <p class="text-body text-paper mt-4 max-w-sm">
+          <h2 class="text-h3 text-ink">Our vision</h2>
+          <p class="text-body text-ink mt-4 max-w-md">
             To offer the best quality for the right price. We invest in our people so
             they can outperform the rest, commit to ongoing improvement in every area,
             and build a team of experts who understand our core values and want to
@@ -229,6 +228,27 @@ const SERVICES = [
             <Button href="/#quote-form">Get in touch</Button>
           </div>
         </div>
+      </div>
+
+      <div class="mt-16">
+        <h2 class="text-h3 text-ink">Our services</h2>
+        <p class="text-body text-ink mt-4 max-w-2xl">We deliver:</p>
+
+        <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {SERVICE_TILES.map(({ name, body, Icon, fill, iconAccent }) => (
+            <div class:list={["flex flex-col items-start p-8 text-left sm:p-10", FILL_CLASS[fill]]}>
+              <Icon class:list={["mb-6 size-12", fill === "light" && iconAccent && ICON_ACCENT_CLASS[iconAccent]]} />
+              <h3 class="text-h3 mb-3">{name}</h3>
+              <p class="text-fine">{body}</p>
+            </div>
+          ))}
+        </div>
+
+        <p class="text-body text-ink mt-8 max-w-2xl">
+          We also provide retail security, private property security and event
+          stewarding. Bespoke arrangements are available, and our specialists are
+          operational 24 hours a day.
+        </p>
       </div>
     </div>
   </section>
