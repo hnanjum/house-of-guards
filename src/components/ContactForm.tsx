@@ -16,8 +16,10 @@ type Status = "idle" | "submitting" | "success" | "error";
  * `SectorsGrid.astro`) still left the section reading too tall on a
  * live look. Measured, not guessed: at 1280px the section was 929px
  * tall, ~126px taller than either of those two neighbours (803px) —
- * and the CARD's own content (582px of form, not the panel, which just
- * stretches to match via the grid's default `items-stretch`) was the
+ * and the CARD's own content (582px of form, not the panel, which at
+ * the time was still being force-stretched to match it — see
+ * `ClosingCta.astro`'s own SIZE INVESTIGATION comment for that half of
+ * the fix, landed in a later pass) was the
  * real driver, not the outer section padding already addressed. Two
  * real, separate causes found: (1) `fieldBaseClass`'s floating-label
  * padding was a generous 24px top / 8px bottom everywhere, including on
@@ -43,6 +45,28 @@ type Status = "idle" | "submitting" | "success" | "error";
  * own six-card/six-tab content — not chased further, per this pass's
  * own explicit "don't force it smaller than the content allows, say so
  * plainly" instruction.
+ *
+ * VISUAL-FOOTPRINT FOLLOW-UP (a later, separate pass on top of the
+ * height follow-up above) — a live look after that pass confirmed the
+ * raw height number had improved but the section still read as visually
+ * oversized. Investigated, not just re-padded: container width matched
+ * every other homepage section exactly (`max-w-7xl` throughout, not the
+ * issue); the real, measured finding was that every field's actual text
+ * — labels and typed values alike — was rendering at this project's own
+ * prose body-copy size, a size `ServicesGrid.astro` had already moved
+ * away from for its own dense, multi-item card content (see that
+ * component's own history in `CLAUDE.md`). Dropped one type-scale tier
+ * to match that established precedent — `fieldBaseClass`,
+ * `selectFieldClass`, and the floating label's own resting-state size
+ * all moved together, so labels and values stay visually matched at
+ * every state. Tested live before committing to it: this alone (with no
+ * further padding change) took the CARD from 664px to 621px and the
+ * whole section from 824px to 781px — genuinely under both
+ * `ServicesGrid.astro` and `SectorsGrid.astro`'s own 803px for the first
+ * time. `ClosingCta.astro`'s own panel text dropped the same tier in the
+ * same pass, for the same reason, plus a second, independent fix to the
+ * panel's own vertical stretching — see that file's own SIZE
+ * INVESTIGATION comment for that half.
  *
  * POLISH PASS (an earlier revision) — field set replaced entirely per a
  * new, explicit spec, and the whole component pushed toward a genuinely
@@ -160,7 +184,7 @@ const SERVICE_OPTIONS: ServiceOption[] = [
 ];
 
 const fieldBaseClass =
-  "peer w-full border border-hairline bg-paper px-4 pt-5 pb-1.5 text-body text-ink transition-colors duration-200 ease-out focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20";
+  "peer w-full border border-hairline bg-paper px-4 pt-5 pb-1.5 text-caption text-ink transition-colors duration-200 ease-out focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20";
 
 /**
  * A dedicated, standalone class string for the `service` select — NOT
@@ -183,7 +207,7 @@ const fieldBaseClass =
  * class has no conflicting declaration to lose to).
  */
 const selectFieldClass =
-  "peer w-full appearance-none border border-hairline bg-paper py-2.5 pr-10 pl-4 text-body text-ink transition-colors duration-200 ease-out focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20";
+  "peer w-full appearance-none border border-hairline bg-paper py-2.5 pr-10 pl-4 text-caption text-ink transition-colors duration-200 ease-out focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20";
 
 const staticLabelClass = "text-caption text-ink mb-1.5 block";
 
@@ -191,8 +215,8 @@ function floatingLabelClass(anchorTop: boolean) {
   const base =
     "pointer-events-none absolute left-4 text-stone transition-all duration-200 ease-out peer-focus:text-micro peer-focus:text-electric-blue peer-[&:not(:placeholder-shown)]:text-micro peer-[&:not(:placeholder-shown)]:text-stone";
   return anchorTop
-    ? `${base} top-3 text-body peer-focus:top-1.5 peer-[&:not(:placeholder-shown)]:top-1.5`
-    : `${base} top-1/2 -translate-y-1/2 text-body peer-focus:top-1.5 peer-focus:translate-y-0 peer-[&:not(:placeholder-shown)]:top-1.5 peer-[&:not(:placeholder-shown)]:translate-y-0`;
+    ? `${base} top-3 text-caption peer-focus:top-1.5 peer-[&:not(:placeholder-shown)]:top-1.5`
+    : `${base} top-1/2 -translate-y-1/2 text-caption peer-focus:top-1.5 peer-focus:translate-y-0 peer-[&:not(:placeholder-shown)]:top-1.5 peer-[&:not(:placeholder-shown)]:translate-y-0`;
 }
 
 function FloatingInput({
