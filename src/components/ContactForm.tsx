@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, type FormEvent, type ReactNode } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -8,72 +8,237 @@ type Status = "idle" | "submitting" | "success" | "error";
  * `ClosingCta.astro`'s own floating "Get A Quote" card — this component
  * owns the FORM itself (fields, labels, submit, status message) and
  * nothing about the card chrome around it (heading, padding, shadow,
- * background) — that's `ClosingCta.astro`'s job, so this stays reusable
- * if a future dedicated `/contact` page ever wants the same form inside
- * a different wrapper.
+ * background) — that's `ClosingCta.astro`'s job.
  *
- * REDESIGNED from a completely bare, zero-`className` version (every
- * field was a plain unstyled native element) — checked first, per
- * direct instruction, rather than assumed either way. Styled to match
- * this project's own established polish level, not a fresh invention:
- * `border-hairline` on inputs (the site's own neutral rule/border
- * token), `text-caption` labels (14px/weight 500 — already this
- * scale's own "meta/label" step, see global.css's own type-scale
- * comment), `text-body` field values. `border-radius: 0` on every
- * native `input`/`textarea`/`select`/`button` is ALREADY a global reset
- * in `global.css` ("Sharp corners is a deliberate, sitewide decision")
- * — nothing here repeats it.
+ * POLISH PASS (this revision) — field set replaced entirely per a new,
+ * explicit spec, and the whole component pushed toward a genuinely
+ * higher-end feel, not just a mechanical field swap. Three real,
+ * disclosed decisions worth recording:
  *
- * Framer Motion stays scoped to just this component's own status-
- * message transitions, per CLAUDE.md's motion-system rule ("Framer
- * Motion is scoped to exactly two React islands... only for their own
- * local interactive transitions"). This does NOT add its own scroll
- * entrance — the CARD it sits inside already gets one generic
- * `[data-reveal]` fade/rise from `ClosingCta.astro`'s own
- * `scrollReveal.ts` wiring; animating the form a second time here would
- * double up on the same entrance with two separate motion systems.
+ * 1. SERVICE LIST MISMATCH, FLAGGED NOT SILENTLY RESOLVED — the new
+ *    11-option dropdown below includes five services (Retail Security,
+ *    Private Property Security, Crowd Management & Stewarding, Event &
+ *    Sports Security, Bespoke/other) that `ServicesGrid.astro`'s own six
+ *    cards don't list anywhere else on the site. This is deliberate,
+ *    scoped to this ONE dropdown, per direct instruction — it's fine for
+ *    an enquiry form to offer a broader net than the site's own service
+ *    pages currently describe. Don't read this list as implying those
+ *    five are now offered sitewide, and don't add them to
+ *    `ServicesGrid.astro`/`SectorsGrid.astro` on this basis alone.
  *
- * SUBMIT BUTTON — a hand-matched clone of `Button.astro`'s `primary`
- * variant (Amber fill, Ink text — "the sole button/CTA colour,
- * sitewide, no exceptions"), not an import: this is a `.tsx` file, it
- * can't import an `.astro` component, the exact same constraint
- * `NavDrawer.tsx`'s own CTA already has. Simplified to a plain
- * `hover:brightness-90` shift rather than porting the primary variant's
- * own `::after` diagonal shine-sweep — matching `NavDrawer.tsx`'s own
- * existing precedent for this exact situation (a hand-matched Amber/Ink
- * CTA outside `Button.astro` itself), not a fresh decision made here.
- * Per CLAUDE.md's own standing instruction ("check NavDrawer.tsx by
- * hand any time Button.astro's primary variant changes"), the same now
- * applies to this file — if `Button.astro`'s `primary` fill/text colour
- * ever changes, check both `NavDrawer.tsx` AND this file by hand.
+ * 2. FLOATING LABELS, PURE CSS — no controlled-input state added for
+ *    this. Every text/email/tel/textarea field uses the standard
+ *    `placeholder=" "` + `:placeholder-shown` trick: the label sits
+ *    absolutely positioned over the field at rest, and floats to a
+ *    smaller `text-micro` position via the `peer-focus:`/
+ *    `peer-[&:not(:placeholder-shown)]:` variants the moment the field
+ *    is focused OR already has a value — zero JS, works with
+ *    uncontrolled inputs, survives a page-level `form.reset()` call the
+ *    same way a native placeholder would. The `service` SELECT uses a
+ *    static label above instead (the task's own "or a comparably refined
+ *    treatment" alternative) — a floating label doesn't map cleanly onto
+ *    a `<select>`'s own placeholder-less first `<option>`, so forcing the
+ *    same mechanism onto it would need real extra JS state for no real
+ *    gain; it gets the same focus-glow border treatment as every other
+ *    field for visual consistency instead.
  *
- * STATUS MESSAGES — deliberately NOT colour-coded green/red. No such
- * tokens exist in this project's palette at all (Ink / Paper / Electric
- * Blue / Magenta / Amber / Cyan-Blue / Stone / Hairline / Footer Grey /
- * Surface Alt, plus the one remaining retired Guard Green Deep token —
- * see global.css's own `@theme` block) — inventing a new ad hoc
- * semantic red/green here would be exactly the "reach for a colour
- * outside the token system" the whole design system exists to prevent.
- * Both messages render as plain `text-ink` body copy with a thin left
- * border for visual weight only: `border-electric-blue` for success
- * (this component's own "primary/informational" accent, reused as a
- * bare non-text mark — the same way `StandardsCarousel.astro`/
- * `SectorsGrid.astro` already reuse Amber as a bare mark rather than a
- * fill; a decorative border isn't running text, so it doesn't need the
- * 4.5:1 text floor), `border-ink` for error (the sitewide neutral).
- * Semantic meaning is carried by the message COPY and the
- * `role="status"`/`role="alert"` attributes, not by colour alone — this
- * also sidesteps WCAG 1.4.1's "don't convey meaning by colour alone"
- * concern rather than accidentally tripping it with an invented red.
+ * 3. FOCUS STATE — a scoped, disclosed override of the sitewide default
+ *    `:focus-visible` Ink outline (see `global.css`'s own
+ *    `:focus-visible` rule) for JUST these form controls: border colour
+ *    transitions to Electric Blue and a soft 2px Electric-Blue ring at
+ *    20% opacity glows in behind it (see `fieldBaseClass` below for the
+ *    real, always-`focus:`-prefixed classes) — no bare/unprefixed
+ *    mention of that ring token here, on purpose, since it has no real
+ *    call site outside the `focus:` state and Tailwind's scanner would
+ *    otherwise regenerate it as genuine dead CSS from this comment alone
+ *    (the exact failure class CLAUDE.md's own standing convention warns
+ *    about — checked directly against the compiled `dist/` output).
+ *    Electric Blue specifically because it's already this
+ *    exact section's own accent (the contact panel's fill) — reusing it
+ *    here ties the form back to its own surrounding section rather than
+ *    reaching for a new colour, the same "re-derive per use, don't
+ *    invent a new hue" discipline the rest of this project's colour
+ *    system follows. This is a decorative border/ring, not text, so it
+ *    only needs the 3:1 UI-component floor, not 4.5:1 — Electric Blue on
+ *    Paper as a bare/border mark is the same already-derived ~5.17:1
+ *    pairing `global.css`'s own Electric Blue token comment documents,
+ *    reused directly.
+ *
+ * FRAMER MOTION — this file is one of exactly two React islands
+ * permitted to use it (see CLAUDE.md's own motion-system rule). Two
+ * genuinely separate uses now, not one: the status-message transition
+ * (unchanged from before) AND a new per-field staggered entrance
+ * (`whileInView`, `viewport={{ once: true }}`, `staggerChildren`),
+ * added on direct instruction. This is a REAL, deliberate change to
+ * this file's own previous "don't double up with the card's own
+ * `[data-reveal]` fade" reasoning — worth being explicit about why it's
+ * not actually a double-up: `ClosingCta.astro`'s own GSAP
+ * `[data-reveal]` still owns the CARD's own single entrance (the whole
+ * white block fading/rising into place as one unit); this stagger is a
+ * second, independent, finer-grained layer operating INSIDE that
+ * already-revealed card, cascading the eight individual fields in
+ * rather than having them all snap in at once with the card. Two
+ * different motion systems each own a genuinely different visual unit,
+ * not two systems animating the same thing twice.
+ *
+ * SUBMIT BUTTON — still a hand-matched clone of `Button.astro`'s
+ * `primary` variant (Amber fill, Ink text, the sitewide sole CTA
+ * colour) — including, now, its diagonal shine-sweep hover mechanic
+ * verbatim (previously simplified away to a plain `brightness-90`
+ * shift; restored here per this pass's own "real hover/press
+ * micro-interaction, not a flat colour-swap" ask, matching
+ * `Button.astro`'s own already-established, already-reduced-motion-safe
+ * mechanism rather than inventing a new one). A `whileTap` scale-down
+ * (Framer Motion, since this component already has it in scope) adds a
+ * real press state on top, skipped outright under
+ * `prefers-reduced-motion` via the same `useReducedMotion()` hook
+ * `NavDrawer.tsx` already uses for the same purpose.
+ *
+ * Label copy: "Submit enquiry", not "Get a quote" — this card's own
+ * `SectionHeading` directly above the form already reads "Get A Quote";
+ * repeating "quote" on the button too reads redundant sitting right
+ * underneath it. "Submit enquiry" was the field spec's own first-listed
+ * option and matches the neutral, professional register the rest of
+ * this form's copy ("Details of your requirement") already uses.
+ *
+ * STATUS MESSAGES — unchanged from the previous pass: deliberately NOT
+ * colour-coded green/red (no such tokens exist in this project's
+ * palette), plain `text-ink` with a thin left-border accent
+ * (`border-electric-blue` success, `border-ink` error) carrying no
+ * contrast requirement of its own — real meaning comes from the message
+ * copy and `role="status"`/`role="alert"`.
  */
 
-const inputClass =
-  "w-full border border-hairline bg-paper px-4 py-2.5 text-body text-ink placeholder:text-stone transition-colors duration-200 ease-out focus:border-ink";
+type ServiceOption = { value: string; label: string };
 
-const labelClass = "text-caption text-ink mb-1.5 block";
+const SERVICE_OPTIONS: ServiceOption[] = [
+  { value: "corporate-security", label: "Corporate Security" },
+  { value: "close-protection", label: "Close Protection" },
+  { value: "cctv-monitoring", label: "CCTV Monitoring" },
+  { value: "manned-guarding", label: "Manned Guarding" },
+  { value: "construction-site-security", label: "Construction Site Security" },
+  { value: "overnight-security", label: "Overnight Security" },
+  { value: "retail-security", label: "Retail Security" },
+  { value: "private-property-security", label: "Private Property Security" },
+  { value: "crowd-management-stewarding", label: "Crowd Management & Stewarding" },
+  { value: "event-sports-security", label: "Event & Sports Security" },
+  { value: "bespoke-other", label: "Bespoke / other" },
+];
+
+const fieldBaseClass =
+  "peer w-full border border-hairline bg-paper px-4 pt-6 pb-2 text-body text-ink transition-colors duration-200 ease-out focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20";
+
+const staticLabelClass = "text-caption text-ink mb-1.5 block";
+
+function floatingLabelClass(anchorTop: boolean) {
+  const base =
+    "pointer-events-none absolute left-4 text-stone transition-all duration-200 ease-out peer-focus:text-micro peer-focus:text-electric-blue peer-[&:not(:placeholder-shown)]:text-micro peer-[&:not(:placeholder-shown)]:text-stone";
+  return anchorTop
+    ? `${base} top-4 text-body peer-focus:top-2 peer-[&:not(:placeholder-shown)]:top-2`
+    : `${base} top-1/2 -translate-y-1/2 text-body peer-focus:top-2 peer-focus:translate-y-0 peer-[&:not(:placeholder-shown)]:top-2 peer-[&:not(:placeholder-shown)]:translate-y-0`;
+}
+
+function FloatingInput({
+  id,
+  name,
+  label,
+  type = "text",
+  required = false,
+  autoComplete,
+}: {
+  id: string;
+  name: string;
+  label: string;
+  type?: string;
+  required?: boolean;
+  autoComplete?: string;
+}) {
+  return (
+    <div className="relative">
+      <input
+        id={id}
+        name={name}
+        type={type}
+        required={required}
+        autoComplete={autoComplete}
+        placeholder=" "
+        className={fieldBaseClass}
+      />
+      <label htmlFor={id} className={floatingLabelClass(false)}>
+        {label}
+      </label>
+    </div>
+  );
+}
+
+function FloatingTextarea({
+  id,
+  name,
+  label,
+  required = false,
+  rows = 4,
+}: {
+  id: string;
+  name: string;
+  label: string;
+  required?: boolean;
+  rows?: number;
+}) {
+  return (
+    <div className="relative">
+      <textarea
+        id={id}
+        name={name}
+        rows={rows}
+        required={required}
+        placeholder=" "
+        className={`${fieldBaseClass} resize-none`}
+      />
+      <label htmlFor={id} className={floatingLabelClass(true)}>
+        {label}
+      </label>
+    </div>
+  );
+}
+
+function ChevronDown() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-ink"
+      aria-hidden="true"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
+function FieldShell({ children }: { children: ReactNode }) {
+  const shouldReduceMotion = useReducedMotion();
+  const variants = shouldReduceMotion
+    ? { hidden: { opacity: 1, y: 0 }, visible: { opacity: 1, y: 0 } }
+    : {
+        hidden: { opacity: 0, y: 14 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" as const } },
+      };
+
+  return (
+    <motion.div variants={variants} className="contents">
+      {children}
+    </motion.div>
+  );
+}
 
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const shouldReduceMotion = useReducedMotion();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -93,74 +258,84 @@ export default function ContactForm() {
     }
   };
 
+  const containerVariants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: shouldReduceMotion ? 0 : 0.07 } },
+  };
+
   return (
     <form onSubmit={handleSubmit} className="mt-6">
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <div>
-          <label htmlFor="name" className={labelClass}>
-            Name
-          </label>
-          <input id="name" name="name" type="text" required autoComplete="name" className={inputClass} />
-        </div>
+      <motion.div
+        className="grid grid-cols-1 gap-5 sm:grid-cols-2"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={containerVariants}
+      >
+        <FieldShell>
+          <FloatingInput id="firstName" name="firstName" label="First name" required autoComplete="given-name" />
+        </FieldShell>
+        <FieldShell>
+          <FloatingInput id="lastName" name="lastName" label="Last name" required autoComplete="family-name" />
+        </FieldShell>
 
-        <div>
-          <label htmlFor="company" className={labelClass}>
-            Company (optional)
-          </label>
-          <input id="company" name="company" type="text" autoComplete="organization" className={inputClass} />
-        </div>
+        <FieldShell>
+          <div className="sm:col-span-2">
+            <FloatingInput id="business" name="business" label="Business name" autoComplete="organization" />
+          </div>
+        </FieldShell>
 
-        <div>
-          <label htmlFor="email" className={labelClass}>
-            Email
-          </label>
-          <input id="email" name="email" type="email" required autoComplete="email" className={inputClass} />
-        </div>
+        <FieldShell>
+          <FloatingInput id="email" name="email" label="Email" type="email" required autoComplete="email" />
+        </FieldShell>
+        <FieldShell>
+          <FloatingInput id="phone" name="phone" label="Phone" type="tel" autoComplete="tel" />
+        </FieldShell>
 
-        <div>
-          <label htmlFor="phone" className={labelClass}>
-            Phone
-          </label>
-          <input id="phone" name="phone" type="tel" autoComplete="tel" className={inputClass} />
-        </div>
+        <FieldShell>
+          <div className="sm:col-span-2">
+            <label htmlFor="service" className={staticLabelClass}>
+              Service required
+            </label>
+            <div className="relative">
+              <select
+                id="service"
+                name="service"
+                required
+                defaultValue=""
+                className={`${fieldBaseClass} appearance-none pt-2.5 pr-10 pb-2.5`}
+              >
+                <option value="" disabled>
+                  Please pick a service
+                </option>
+                {SERVICE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown />
+            </div>
+          </div>
+        </FieldShell>
 
-        <div className="sm:col-span-2">
-          <label htmlFor="service" className={labelClass}>
-            Service required
-          </label>
-          <select id="service" name="service" defaultValue="" className={inputClass}>
-            <option value="" disabled>
-              Select a service
-            </option>
-            <option value="manned-guarding">Manned guarding</option>
-            <option value="event-security">Event security</option>
-            <option value="close-protection">Close protection</option>
-            <option value="mobile-patrols">Mobile patrols</option>
-            <option value="other">Other / not sure</option>
-          </select>
-        </div>
+        <FieldShell>
+          <div className="sm:col-span-2">
+            <FloatingTextarea id="message" name="message" label="Details of your requirement" required rows={4} />
+          </div>
+        </FieldShell>
+      </motion.div>
 
-        <div className="sm:col-span-2">
-          <label htmlFor="message" className={labelClass}>
-            Message
-          </label>
-          <textarea
-            id="message"
-            name="message"
-            rows={4}
-            required
-            className={`${inputClass} resize-none`}
-          />
-        </div>
-      </div>
-
-      <button
+      <motion.button
         type="submit"
         disabled={status === "submitting"}
-        className="bg-amber text-ink hover:brightness-90 mt-6 inline-flex w-full items-center justify-center px-6 py-3 text-caption transition-[filter] duration-200 ease-out disabled:pointer-events-none disabled:opacity-60"
+        whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
+        whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
+        className="relative isolate mt-7 inline-flex w-full items-center justify-center overflow-hidden bg-amber px-6 py-3.5 text-caption text-ink after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(115deg,transparent_35%,rgba(255,255,255,0.5)_50%,transparent_65%)] after:-translate-x-full after:transition-transform after:duration-700 after:ease-out hover:after:translate-x-full focus-visible:after:translate-x-full motion-reduce:after:hidden motion-reduce:hover:brightness-95 disabled:pointer-events-none disabled:opacity-60"
       >
-        {status === "submitting" ? "Sending…" : "Send enquiry"}
-      </button>
+        {status === "submitting" ? "Sending…" : "Submit enquiry"}
+      </motion.button>
 
       <AnimatePresence mode="wait">
         {status === "success" && (
