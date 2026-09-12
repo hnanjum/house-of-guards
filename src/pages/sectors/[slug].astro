@@ -1,0 +1,114 @@
+---
+import { Image } from "astro:assets";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ClosingCta from "../../components/home/ClosingCta.astro";
+import { SECTORS, type Sector } from "../../data/sectors";
+
+/**
+ * The six `/sectors/<slug>` detail pages `SectorsGrid.astro`'s own
+ * "Learn more" buttons already link to (see that component's own LINKS
+ * comment — these routes didn't exist before this PR, a known, disclosed
+ * gap at the time). One template, `getStaticPaths()`-driven from
+ * `src/data/sectors.ts` — the same data `SectorsGrid.astro` uses for its
+ * homepage tab panels, so the two never drift out of sync.
+ *
+ * COPY — deliberately reuses existing, already-reviewed sitewide copy
+ * rather than writing new marketing claims:
+ *   - Hero: `sector.headline` + `sector.blurb`, verbatim from
+ *     `src/data/sectors.ts` (the same text already live on the homepage
+ *     tab panel for this sector).
+ *   - "Why House of Guards" list: the exact three bullets from
+ *     `about.astro`'s own fact list (SIA/DBS, first aid, bespoke shift
+ *     patterns) — reused verbatim, not reworded per sector. The one new
+ *     sentence introducing that list (`WHY_INTRO` below) is a plain
+ *     template wrapper naming the sector, built from facts already
+ *     published elsewhere on the site — not a new marketing claim. Flagged
+ *     here for review rather than silently treated as equivalent to the
+ *     verbatim-reused bullets.
+ *   - Closing CTA: `ClosingCta.astro` embedded directly, unmodified — the
+ *     same section the homepage uses, including its own in-page
+ *     `#quote-form` anchor and contact panel.
+ *
+ * COLOUR — plain Paper throughout, no full-bleed accent section. The
+ * About-page precedent (PR #39 → #40) already tried and reverted exactly
+ * this — two full-bleed colour sections read as too much for an interior
+ * page — so this template doesn't repeat that. `ClosingCta.astro`'s own
+ * Electric Blue contact panel is the only colour fill on this page, and
+ * it's that component's own existing, already-shipped fill (card/panel-
+ * scale within its own section), not a new one introduced here.
+ *
+ * SEO — unique `<title>`/description per sector, built from
+ * `sector.name`/`sector.blurb` rather than a shared generic string.
+ *
+ * MOTION — one deliberate moment, matching `about.astro`'s own precedent:
+ * `[data-reveal]` on the "Why House of Guards" section only, via the same
+ * generic `initScrollReveal()` every other page already wires up. The
+ * hero and `ClosingCta` (which owns its own `[data-reveal]` already) are
+ * left as-is.
+ */
+export function getStaticPaths() {
+  return SECTORS.map((sector) => ({
+    params: { slug: sector.slug },
+    props: { sector },
+  }));
+}
+
+interface Props {
+  sector: Sector;
+}
+
+const { sector } = Astro.props as Props;
+
+const WHY_INTRO = `Every officer we deploy to a ${sector.name.toLowerCase()} site brings the same standards clients rely on across every sector we serve.`;
+---
+
+<BaseLayout title={`${sector.name} Security`} description={sector.blurb}>
+  <section class="bg-paper">
+    <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-28">
+      <h1 class="text-h1 sm:text-display text-ink max-w-3xl">{sector.name} Security</h1>
+      <p class="text-body-lg text-ink mt-4 max-w-2xl">{sector.headline}</p>
+
+      <div class="mt-12 grid grid-cols-1 items-start gap-12 md:grid-cols-2 md:gap-16 lg:gap-20">
+        <div class="text-left">
+          <p class="text-body text-ink max-w-md">{sector.blurb}</p>
+        </div>
+
+        <div class="aspect-[3/2] overflow-hidden md:justify-self-end">
+          <Image
+            src={sector.photo}
+            alt={sector.alt}
+            widths={[400, 600, 768, 1024]}
+            sizes="(min-width: 768px) 50vw, 100vw"
+            class="h-full w-full object-cover"
+            format="webp"
+            quality={82}
+            loading="eager"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-paper" data-reveal>
+    <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-24">
+      <h2 class="text-h3 text-ink">Why House of Guards</h2>
+      <p class="text-body text-ink mt-4 max-w-2xl">{WHY_INTRO}</p>
+
+      <ul class="mt-8 max-w-md divide-y divide-hairline border-t border-hairline">
+        <li class="py-4 text-body text-ink">SIA licensed and DBS checked officers</li>
+        <li class="py-4 text-body text-ink">First aid trained personnel</li>
+        <li class="py-4 text-body text-ink">Bespoke shift patterns, arranged around you</li>
+      </ul>
+    </div>
+  </section>
+
+  <ClosingCta />
+
+  <script>
+    import { initScrollReveal } from "../../lib/scrollReveal";
+
+    document.addEventListener("astro:page-load", () => {
+      initScrollReveal();
+    });
+  </script>
+</BaseLayout>
