@@ -11,22 +11,26 @@ import { SECTORS, type Sector } from "../../data/sectors";
  * driven from `src/data/sectors.ts` — the same data `SectorsGrid.astro`
  * uses for its homepage tab panels, so the two never drift out of sync.
  *
- * PR #43 — a design/structure pass, DELIBERATELY SHIPPED WITHOUT NEW
- * CONTENT. The brief for this pass came with a "finalized" content draft
- * (`sector-pages-content-draft.md`) meant to fill in an expanded service
- * description, a risks/challenges list, an "how we address this"
- * paragraph, and an FAQ array per sector. That file's own status line
- * claimed every `[[ADD REAL DETAIL]]` placeholder had been resolved — it
- * hadn't; they were still present throughout, including the Healthcare
- * mental-health-crisis FAQ, which the file's own notes flag as its most
- * liability-sensitive claim. Per that file's own explicit instruction
- * ("if any placeholder marker is still present... stop and flag it — do
- * not fill it in yourself"), and confirmed with the user directly: this
- * PR builds the STRUCTURE and DESIGN only — the four new fields on
- * `Sector` (`expandedDescription`/`risks`/`approach`/`faqs`) exist and
- * every section below reads them, but all six sectors currently have them
- * unset, so none of the new sections render on any live page yet. Real
- * copy lands as a fast-follow once it's actually finalized.
+ * PR #43 built the STRUCTURE below deliberately shipped WITHOUT content —
+ * the "finalized" content draft it arrived with
+ * (`sector-pages-content-draft.md`) still had `[[ADD REAL DETAIL]]`
+ * markers throughout, including the Healthcare mental-health-crisis FAQ,
+ * despite its own status line claiming otherwise. Flagged per that file's
+ * own explicit instruction rather than filled in or guessed at. **PR #46
+ * activated it for real**, once a genuinely resolved second draft was
+ * checked line-by-line and confirmed clean — every sector in
+ * `src/data/sectors.ts` now has real `expandedDescription`/`risks`/
+ * `approach`/`faqs` content, so every section below now renders on all
+ * six pages. Two wordings from that draft are carried verbatim, not
+ * paraphrased, per direct instruction: Healthcare's mental-health FAQ
+ * states GENERAL de-escalation training only, not specialised
+ * mental-health-crisis training; and Healthcare's copy offers the
+ * service as available/ready, not as a track record (no prior
+ * healthcare-site experience is claimed anywhere on this page). The
+ * conditional rendering itself is unchanged and still real, not
+ * vestigial — a future sector added before its own copy is ready would
+ * still degrade cleanly the same way these six did between PR #43 and
+ * #46.
  *
  * NEW SECTIONS (each fully conditional on its own data being present):
  *   - Expanded description — a second, longer paragraph below the hero.
@@ -69,8 +73,10 @@ import { SECTORS, type Sector } from "../../data/sectors";
  *     not a formatting nicety — worth fixing once the real number
  *     exists, not before.
  *   - `FAQPage`, conditional on `sector.faqs` — mirrors the accordion
- *     content exactly (`mainEntity`/`Question`/`acceptedAnswer`), so it's
- *     dormant on every page today the same way the accordion markup is.
+ *     content exactly (`mainEntity`/`Question`/`acceptedAnswer`). Live on
+ *     all six pages as of PR #46, now that every sector has real FAQ
+ *     content; stays conditional so a future sector without one yet
+ *     wouldn't ship an empty/wrong `FAQPage` block.
  *
  * INTERNAL LINKS / LOCAL SEO — a short paragraph naming two OTHER sectors
  * (the next two in `SECTORS`, wrapping around — deterministic, not
