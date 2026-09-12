@@ -58,8 +58,10 @@ import { SECTORS, type Sector } from "../../data/sectors";
  * SCHEMA.ORG — two kinds of structured data, both using ONLY facts
  * already live elsewhere on this site:
  *   - `Service`, unconditional — `serviceType`, `description` (the
- *     existing `sector.blurb`), and a `provider` naming Bradford/West
- *     Yorkshire as the service area. Deliberately does NOT include a
+ *     existing `sector.blurb`), a `provider`, and an `areaServed` list
+ *     (West Yorkshire, Manchester, Birmingham — see the `areaServed`
+ *     constant's own comment below for the full, twice-corrected history
+ *     of this field). Deliberately does NOT include a
  *     `telephone` — the phone number in `Header.astro`/`Footer.astro`/
  *     `ClosingCta.astro` (01274 000 000) is a known, already-flagged
  *     placeholder (see `ClosingCta.astro`'s own PR #31 history), and
@@ -138,34 +140,46 @@ const serviceSchema = {
       addressCountry: "GB",
     },
   },
-  // "Bradford and surrounding areas" — current actual coverage, per direct
-  // confirmation, NOT West Yorkshire generally and NOT the broader "North
-  // West"/"the North" phrasing from about.astro's Vision paragraph (that's
-  // stated ambition, not current service area). schema.org's `areaServed`
-  // accepts AdministrativeArea/GeoShape/Place/Text — a bare "Bradford"
-  // Place would drop "surrounding areas" entirely, and a Text string loses
-  // the structured-data benefit, so this uses a `Place` (for the
-  // human-readable name Google's own rich-results docs expect) with a
-  // nested `GeoCircle` (Place.geo accepts GeoShape, and GeoCircle is a
-  // GeoShape) centred on Bradford — the standard schema.org pattern for
-  // "this business serves a radius around a point," not a fabricated
-  // format. The 15km radius is an EDITORIAL DEFAULT, not a confirmed
-  // operational boundary — flagged plainly rather than presented as a
-  // verified fact; adjust it (or replace with a named list of specific
-  // towns) if the real coverage radius differs.
-  areaServed: {
-    "@type": "Place",
-    name: "Bradford and surrounding areas",
-    geo: {
-      "@type": "GeoCircle",
-      geoMidpoint: {
-        "@type": "GeoCoordinates",
-        latitude: 53.7939,
-        longitude: -1.7522,
-      },
-      geoRadius: "15000",
+  // REPLACES the prior "Bradford and surrounding areas" GeoCircle entirely
+  // (second correction to this field — see CLAUDE.md's own PR #44/#45
+  // history for the full account of both). Per direct confirmation: West
+  // Yorkshire (Leeds, Halifax, Huddersfield, Wakefield, Bradford,
+  // Keighley, etc.) is the core named area, PLUS Manchester and
+  // Birmingham as genuine current deployable coverage — not future
+  // expansion. `areaServed` accepts a LIST of Place/AdministrativeArea
+  // entries (schema.org's own documented pattern for a business serving
+  // multiple distinct areas) — one `AdministrativeArea` for the whole of
+  // West Yorkshire (the named towns are illustrative of what that region
+  // covers, not separate schema entries — West Yorkshire alone already
+  // captures all of them), plus one `City` entry each for Manchester and
+  // Birmingham, each disambiguated with `containedInPlace` since both
+  // names exist elsewhere in the world (Manchester, NH; Birmingham, AL).
+  // "North West" as a general region is deliberately NOT added here —
+  // that's still the broader, unconfirmed future-expansion phrasing from
+  // about.astro's Vision paragraph, a separate claim from these three
+  // specific, confirmed areas.
+  areaServed: [
+    {
+      "@type": "AdministrativeArea",
+      name: "West Yorkshire",
     },
-  },
+    {
+      "@type": "City",
+      name: "Manchester",
+      containedInPlace: {
+        "@type": "Country",
+        name: "United Kingdom",
+      },
+    },
+    {
+      "@type": "City",
+      name: "Birmingham",
+      containedInPlace: {
+        "@type": "Country",
+        name: "United Kingdom",
+      },
+    },
+  ],
 };
 
 const faqSchema = hasFaqs
