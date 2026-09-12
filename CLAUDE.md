@@ -749,6 +749,40 @@ treatment for these icons without a real reason to.
 
 ## Recent history
 
+- **PR #45 — the Service schema's `areaServed` on the six `/sectors/<slug>`
+  pages, corrected a SECOND time in as many follow-ups (see PR #43's own
+  Schema.org paragraph below for the first correction's full account,
+  kept there as accurate history rather than rewritten).** Per direct
+  confirmation: West Yorkshire (Leeds, Halifax, Huddersfield, Wakefield,
+  Bradford, Keighley, etc.) is the core named area, PLUS Manchester and
+  Birmingham as genuine CURRENT deployable coverage — not future
+  expansion, and explicitly NOT the same claim as the broader "North
+  West" region, which stays unadded (that's still about.astro's own
+  Vision-paragraph future-expansion phrasing, a separate, unconfirmed
+  claim from these three specific areas).
+
+  This REPLACES the prior "Bradford and surrounding areas"
+  `Place`+`GeoCircle` form entirely, not just its radius — a single-point
+  radius shape can't represent three geographically separate areas (West
+  Yorkshire, then Manchester and Birmingham roughly 30–70 miles further
+  away) without either an enormous, inaccurate radius or three separate
+  circles. `areaServed` now uses schema.org's own documented pattern for
+  this exact case — a LIST of `Place`/`AdministrativeArea` entries: one
+  `AdministrativeArea` for the whole of West Yorkshire (the named towns
+  are illustrative of what that region covers, not separate schema
+  entries — the region alone already captures all of them) plus one
+  `City` each for Manchester and Birmingham. Each city carries a
+  `containedInPlace: {Country: "United Kingdom"}` — real disambiguation,
+  not decoration, since both city names exist elsewhere in the world
+  (Manchester, NH; Birmingham, AL) and an LLM/search engine consuming
+  this structured data has no other signal in this object alone to
+  prefer the UK reading.
+
+  `astro check` (0 errors, same 2 pre-existing hints) and a clean `astro
+  build` (9 pages), plus direct `dist/` inspection confirming the new
+  three-entry array compiles identically (checksum-matched) across all
+  six pages.
+
 - **PR #43 — a design/structure pass on the six `/sectors/<slug>` detail
   pages, deliberately shipped with NO new marketing content.** The brief
   arrived with a "finalized" content draft
@@ -834,7 +868,11 @@ treatment for these icons without a real reason to.
     15km `geoRadius` is an EDITORIAL DEFAULT flagged plainly to the user
     as unconfirmed, not asserted as a verified operational boundary —
     revisit if the real coverage radius (or a specific named list of
-    towns) is ever given. Deliberately does NOT include `telephone` — the
+    towns) is ever given. **This whole Bradford-GeoCircle form was itself
+    REPLACED one PR later (#45) — see that entry above for the current,
+    real `areaServed` shape; this paragraph is kept as accurate history
+    of PR #43's own original shipped version, not the current state.**
+    Deliberately does NOT include `telephone` — the
     number in `Header.astro`/`Footer.astro`/`ClosingCta.astro` (01274 000
     000) is a known, already-flagged placeholder (see `ClosingCta.astro`'s
     own PR #31 history) — shipping a fake number into indexed structured
