@@ -636,6 +636,24 @@ treatment for these icons without a real reason to.
   that's now moot, since it's deleted; if anything else is ever found
   sitting outside this structure, that's the convention to bring it
   back in line with, not a precedent to follow.)
+- **`src/data/`** (new as of PR #43, currently one file —
+  `sectors.ts`) holds content that's genuinely SHARED across more than
+  one component/page rather than owned by a single one — `sectors.ts`
+  is the single source of truth for both `SectorsGrid.astro`'s homepage
+  tab panels and the six `src/pages/sectors/<slug>.astro` detail pages,
+  extracted specifically so the two couldn't drift apart. Not a general
+  "put content here" convention — a component's own copy that only that
+  component uses still lives inline in that component (every other
+  homepage section still declares its own content array in its own
+  file). Reach for `src/data/` only when a second real consumer for the
+  same content actually exists.
+- **`src/pages/sectors/[slug].astro`** (PR #41) is this site's first
+  dynamic route (`getStaticPaths()`), and its own top-of-file comment is
+  a genuinely long-running one — read it before touching this file
+  again, since it accumulates the full account of PR #43's deliberate
+  empty-shell build, PR #44/#45's two `areaServed` corrections, and
+  PR #46's real-content activation, none of which is repeated in full
+  here.
 
 ## Standing conventions
 
@@ -3223,12 +3241,24 @@ column. See PR #39's own entry above for the full account of the first
 redesign pass; this paragraph reflects the shipped state after its
 follow-up commit pulled the colour back out.
 
-**Built, as of PR #41**: the six `/sectors/<slug>` detail pages
+**Built, as of PR #46**: the six `/sectors/<slug>` detail pages
 (`retail`/`distribution`/`corporate`/`events`/`healthcare`/`education`)
 SectorsGrid's own "Learn more" buttons link to — previously dead links,
 now real pages, one shared template driven by `src/data/sectors.ts`
 (the new single source of truth also used by `SectorsGrid.astro` itself).
-See PR #41's own entry above for the full page structure.
+PR #41 built the base page (hero, Why House of Guards, ClosingCta);
+PR #43 added a Risks & Challenges section and a GSAP FAQ accordion plus
+`Service`/`FAQPage` schema.org JSON-LD, shipped deliberately EMPTY at
+the time because the content draft it arrived with still had unresolved
+placeholders; PR #44/#45 corrected the `Service` schema's `areaServed`
+twice as the real service-area claim was refined (current, real shape:
+West Yorkshire as an `AdministrativeArea`, plus `City` entries for
+Manchester and Birmingham — see PR #45's own entry for why a list, not a
+single radius); PR #46 populated all six sectors' Risks/FAQ content for
+real once a genuinely resolved content draft was verified, so every
+section built in PR #43 is now live with real copy on all six pages,
+`FAQPage` schema included. See each PR's own entry above for the full
+account rather than repeating it here.
 
 **Not started**: the remaining interior pages — Careers, Our Policies,
 Gallery, Contact. All still need building.
