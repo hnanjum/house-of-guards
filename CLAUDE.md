@@ -749,6 +749,84 @@ treatment for these icons without a real reason to.
 
 ## Recent history
 
+- **PR #41 — the six `/sectors/<slug>` detail pages** SectorsGrid's own
+  "Learn more" buttons already linked to (see PR #40's "Not started"
+  entry, and PR #22–#28's own history for how those links came to exist
+  with no page behind them) — Retail, Distribution, Corporate, Events,
+  Healthcare, Education, one template via `getStaticPaths()`.
+
+  **DATA EXTRACTION** — `SectorsGrid.astro`'s own inline `SECTORS` array
+  and `Sector`/`TabFill` types are moved out to a new
+  `src/data/sectors.ts`, unchanged in content (same six sectors, same
+  copy, same `fill` sequence from PR #28) — `SectorsGrid.astro` now
+  imports from there (as `SectorFill`, renamed from `TabFill` for
+  clarity now that it's shared data, not a tab-only concept) instead of
+  declaring its own copy, so the homepage tab panels and these six new
+  detail pages read from one source of truth and can't drift apart.
+  This is the first file under `src/data/` — a new, one-file directory.
+
+  **TEMPLATE** (`src/pages/sectors/[slug].astro`) — three sections, no
+  new layout primitives:
+  1. A plain-Paper hero: `sector.name` + "Security" as the `<h1>`
+     (`text-h1 sm:text-display`, matching `about.astro`'s own H1 step),
+     `sector.headline` as the lead line, `sector.blurb` as the body
+     paragraph, `sector.photo` alongside in a two-column layout — all
+     three pieces of copy reused verbatim from `src/data/sectors.ts`,
+     nothing new written for the hero.
+  2. "Why House of Guards" — the exact three differentiator bullets
+     `about.astro` already ships (SIA/DBS, first aid, bespoke shift
+     patterns), reused verbatim, not reworded per sector. The one
+     genuinely NEW piece of copy on this whole page is the single
+     sentence introducing that list (naming the sector by name) — a
+     plain template wrapper around facts already published elsewhere on
+     the site, not a new marketing claim, but flagged here plainly
+     rather than silently treated as equivalent to the verbatim-reused
+     bullets around it.
+  3. `ClosingCta.astro` embedded directly, unmodified — the same
+     component the homepage uses, including its own Electric-Blue
+     contact panel and `ContactForm`. This is the only colour on the
+     page, and it's that component's own pre-existing, already-shipped
+     panel-scale fill — nothing new introduced by this PR.
+
+  **COLOUR RESTRAINT — deliberately checked against the About-page
+  precedent before writing any code.** PR #39 tried two full-bleed
+  colour sections on `about.astro` and PR #40 reverted both once they
+  read as too much for a whole interior page (see those entries above).
+  This template doesn't repeat that: both new sections are plain Paper,
+  the only fill anywhere on the page is `ClosingCta`'s own existing
+  panel, and no sector-specific accent (e.g. each sector's own
+  `fill: "electric-blue" | "magenta"`) was pulled into the hero or the
+  differentiators section — reusing it there would have meant inventing
+  a new "small colour touch" placement with no established precedent,
+  the exact kind of unscoped decision this project's own standing
+  convention asks to flag rather than just make.
+
+  **SEO** — a unique `<title>` (`"{Name} Security"`) and `<meta
+  name="description">` (`sector.blurb`, already-reviewed copy) per page,
+  confirmed in the compiled `dist/` output for all six.
+
+  **MOTION** — one deliberate moment, matching `about.astro`'s own
+  precedent exactly: `[data-reveal]` on the "Why House of Guards"
+  section only, via the same generic `initScrollReveal()` every other
+  page already wires up in its own `astro:page-load` handler. The hero
+  is static; `ClosingCta` keeps its own already-wired `[data-reveal]`
+  unchanged.
+
+  A real `astro check` (0 errors, 44 files, same 2 pre-existing
+  `ContactForm.tsx` hints) and a clean `astro build` were run — 9 pages
+  built, all six `/sectors/<slug>/index.html` present with the correct
+  slugs, unique compiled `<title>`/description per page confirmed via
+  direct `dist/` inspection, and all six "Learn more" hrefs on the
+  homepage confirmed resolving to real pages (previously dead links, a
+  known gap since PR #22). Real rendered geometry was also checked, not
+  assumed from the compiled class names alone, per this project's own
+  standing convention for anything involving a new grid/flex layout: a
+  throwaway scratch Node `http` server (never `astro dev`/`astro
+  preview`) served the real `astro build` output, and the hero's
+  two-column grid was measured via `getBoundingClientRect()` at
+  desktop width — two real ~544px columns, no overlap. Server torn down
+  before committing.
+
 Kept here as a running log so a future session doesn't have to
 reconstruct *why* the current state looks the way it does from `git
 log` alone. Newest first; each PR number below is confirmed on
@@ -2927,13 +3005,15 @@ column. See PR #39's own entry above for the full account of the first
 redesign pass; this paragraph reflects the shipped state after its
 follow-up commit pulled the colour back out.
 
+**Built, as of PR #41**: the six `/sectors/<slug>` detail pages
+(`retail`/`distribution`/`corporate`/`events`/`healthcare`/`education`)
+SectorsGrid's own "Learn more" buttons link to — previously dead links,
+now real pages, one shared template driven by `src/data/sectors.ts`
+(the new single source of truth also used by `SectorsGrid.astro` itself).
+See PR #41's own entry above for the full page structure.
+
 **Not started**: the remaining interior pages — Careers, Our Policies,
-Gallery, Contact — plus the six new `/sectors/<slug>` pages SectorsGrid's
-own "Learn more" buttons now link to (`retail`/`distribution`/
-`corporate`/`events`/`healthcare`/`education`) — none of these routes
-exist yet (confirmed via a real `astro build` that a dead internal link
-doesn't fail the build, so this is a known, disclosed gap, not an
-oversight). All still need building.
+Gallery, Contact. All still need building.
 
 **Going forward, design work on this project is reference-driven, not
 brief-driven.** Expect to be handed actual screenshots/mockups and asked
