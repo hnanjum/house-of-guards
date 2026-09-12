@@ -749,6 +749,51 @@ treatment for these icons without a real reason to.
 
 ## Recent history
 
+- **PR #46 — activates the six `/sectors/<slug>` detail pages' Risks &
+  Challenges / FAQ sections and `FAQPage` schema with REAL content, for
+  the first time.** PR #43 built the structure and deliberately left it
+  empty because the content draft it arrived with still had unresolved
+  `[[ADD REAL DETAIL]]` markers (see that entry below for the full
+  account). This PR's own draft (`sector-pages-content-draft (1).md`)
+  was checked line-by-line before touching any code — every marker
+  genuinely gone this time, confirmed directly rather than trusted from
+  the file's own status line a second time.
+
+  **`src/data/sectors.ts`** — all six sectors now have real
+  `expandedDescription`/`risks`/`approach`/`faqs` content (3 FAQs each).
+  No new fields, no shape change — the four optional fields PR #43 added
+  are simply populated for the first time.
+
+  **Two wordings carried through byte-for-byte, per direct instruction
+  not to strengthen or soften either**:
+  - Healthcare's mental-health-crisis FAQ states officers have GENERAL
+    de-escalation training, explicitly NOT specialised mental-health-
+    crisis training — confirmed present verbatim in both the visible
+    page copy and the `FAQPage` JSON-LD (`acceptedAnswer.text`) on the
+    live compiled page, not just the source data.
+  - Healthcare's copy offers the service as available/ready, not as a
+    track record — House of Guards has no healthcare-site experience
+    yet. Confirmed via a direct scan of the compiled Healthcare page for
+    experience-implying phrases ("track record," "have worked," "have
+    secured," "previously provided," "our experience in healthcare") —
+    none present.
+
+  Every other sector's content is a direct, unmodified transcription of
+  the finalized draft — no rewriting, no "improving" the copy along the
+  way, since that copy was already reviewed and approved as-is.
+
+  `astro check` (0 errors, 45 files, same 2 pre-existing hints) and a
+  clean `astro build` (9 pages). Direct `dist/` inspection confirmed:
+  Risks & Challenges and FAQ sections now render on all six pages (5
+  risk bullets, 3 FAQs each), `FAQPage` JSON-LD present and valid
+  (parsed successfully, `Service`+`FAQPage` both well-formed) on all
+  six, and both Healthcare wordings intact exactly as drafted. A
+  throwaway scratch Node server (never `astro dev`/`astro preview`)
+  confirmed the now-real Risks grid and FAQ accordion render correctly
+  at both mobile (375px — single column, no horizontal overflow) and
+  desktop (1280px — two real ~560px risk columns, three collapsed FAQ
+  rows) widths; server torn down before committing.
+
 - **PR #45 — the Service schema's `areaServed` on the six `/sectors/<slug>`
   pages, corrected a SECOND time in as many follow-ups (see PR #43's own
   Schema.org paragraph below for the first correction's full account,
