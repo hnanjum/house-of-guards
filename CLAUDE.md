@@ -817,15 +817,27 @@ treatment for these icons without a real reason to.
   **Schema.org** — two kinds, both live now, using only facts already
   public elsewhere on the site:
   - `Service` (unconditional, on all six pages) — `serviceType`,
-    `description` (the existing `sector.blurb`), and a `provider`/
-    `areaServed` naming Bradford/West Yorkshire — the ONLY service area
-    confirmed accurate by the user directly (a broader "North West"
-    /"the North" framing was considered and explicitly declined for this
-    structured data — that's stated Vision-page ambition, not current
-    coverage). Deliberately does NOT include `telephone` — the number in
-    `Header.astro`/`Footer.astro`/`ClosingCta.astro` (01274 000 000) is a
-    known, already-flagged placeholder (see `ClosingCta.astro`'s own
-    PR #31 history) — shipping a fake number into indexed structured
+    `description` (the existing `sector.blurb`), and a `provider`. The
+    `provider.address` stays the plain Bradford/West Yorkshire postal
+    address. **`areaServed` was corrected in a same-session follow-up**:
+    the first version used a bare `AdministrativeArea` naming "West
+    Yorkshire" — confirmed by the user to overstate current coverage
+    (the real claim is "Bradford and surrounding areas," narrower than
+    the whole county, and narrower still than the "North West"/"the
+    North" framing from about.astro's Vision paragraph, which is stated
+    ambition, not current coverage). Corrected to a `Place` (name:
+    "Bradford and surrounding areas") with a nested `geo: GeoCircle`
+    (`Place.geo` accepts any `GeoShape`, and `GeoCircle` is one) centred
+    on Bradford — the standard schema.org pattern for "serves a radius
+    around a point," chosen over a bare `Text` string specifically so
+    the geographic claim stays machine-structured, not just a label. The
+    15km `geoRadius` is an EDITORIAL DEFAULT flagged plainly to the user
+    as unconfirmed, not asserted as a verified operational boundary —
+    revisit if the real coverage radius (or a specific named list of
+    towns) is ever given. Deliberately does NOT include `telephone` — the
+    number in `Header.astro`/`Footer.astro`/`ClosingCta.astro` (01274 000
+    000) is a known, already-flagged placeholder (see `ClosingCta.astro`'s
+    own PR #31 history) — shipping a fake number into indexed structured
     data is a real risk, not a formatting nicety.
   - `FAQPage` (conditional on `sector.faqs`) — dormant on every page
     today, the same way the accordion markup itself is.
