@@ -30,6 +30,26 @@ export interface Sector {
    * and this sector's own detail-page hero tile — not a per-sector thematic
    * pick, a fixed positional sequence (see that comment for why). */
   fill?: SectorFill;
+  /**
+   * Detail-page-only content, all currently UNSET on every sector — added
+   * (PR #43) as optional fields ready to receive the finalized copy from
+   * `sector-pages-content-draft.md` once it's actually resolved (that file's
+   * own `[[ADD REAL DETAIL]]` markers were still present throughout when
+   * this PR was built, contradicting its own "approved, ready for build"
+   * status line — flagged and deliberately NOT filled in or guessed at,
+   * least of all the Healthcare mental-health-crisis FAQ). Every detail-page
+   * section reading these fields renders conditionally and disappears
+   * cleanly when they're absent, so shipping the structure now with no data
+   * changes nothing about what's live. See `src/pages/sectors/[slug].astro`
+   * for the conditional rendering and `src/lib/sectorFaqAccordion.ts` for
+   * the FAQ interaction.
+   */
+  expandedDescription?: string;
+  /** Plain bullet points — a real list, not a numbered sequence. */
+  risks?: string[];
+  /** The "how House of Guards addresses this" paragraph pairing with `risks`. */
+  approach?: string;
+  faqs?: { question: string; answer: string }[];
 }
 
 export const SECTORS: Sector[] = [

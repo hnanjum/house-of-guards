@@ -2,67 +2,168 @@
 import { Image } from "astro:assets";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ClosingCta from "../../components/home/ClosingCta.astro";
+import Chevron from "../../icons/Chevron.astro";
 import { SECTORS, type Sector } from "../../data/sectors";
 
 /**
  * The six `/sectors/<slug>` detail pages `SectorsGrid.astro`'s own
- * "Learn more" buttons already link to (see that component's own LINKS
- * comment — these routes didn't exist before this PR, a known, disclosed
- * gap at the time). One template, `getStaticPaths()`-driven from
- * `src/data/sectors.ts` — the same data `SectorsGrid.astro` uses for its
- * homepage tab panels, so the two never drift out of sync.
+ * "Learn more" buttons already link to. One template, `getStaticPaths()`-
+ * driven from `src/data/sectors.ts` — the same data `SectorsGrid.astro`
+ * uses for its homepage tab panels, so the two never drift out of sync.
  *
- * COPY — deliberately reuses existing, already-reviewed sitewide copy
- * rather than writing new marketing claims:
- *   - Hero: `sector.headline` + `sector.blurb`, verbatim from
- *     `src/data/sectors.ts` (the same text already live on the homepage
- *     tab panel for this sector).
- *   - "Why House of Guards" list: the exact three bullets from
- *     `about.astro`'s own fact list (SIA/DBS, first aid, bespoke shift
- *     patterns) — reused verbatim, not reworded per sector. The one new
- *     sentence introducing that list (`WHY_INTRO` below) is a plain
- *     template wrapper naming the sector, built from facts already
- *     published elsewhere on the site — not a new marketing claim. Flagged
- *     here for review rather than silently treated as equivalent to the
- *     verbatim-reused bullets.
- *   - Closing CTA: `ClosingCta.astro` embedded directly, unmodified — the
- *     same section the homepage uses, including its own in-page
- *     `#quote-form` anchor and contact panel.
+ * PR #43 — a design/structure pass, DELIBERATELY SHIPPED WITHOUT NEW
+ * CONTENT. The brief for this pass came with a "finalized" content draft
+ * (`sector-pages-content-draft.md`) meant to fill in an expanded service
+ * description, a risks/challenges list, an "how we address this"
+ * paragraph, and an FAQ array per sector. That file's own status line
+ * claimed every `[[ADD REAL DETAIL]]` placeholder had been resolved — it
+ * hadn't; they were still present throughout, including the Healthcare
+ * mental-health-crisis FAQ, which the file's own notes flag as its most
+ * liability-sensitive claim. Per that file's own explicit instruction
+ * ("if any placeholder marker is still present... stop and flag it — do
+ * not fill it in yourself"), and confirmed with the user directly: this
+ * PR builds the STRUCTURE and DESIGN only — the four new fields on
+ * `Sector` (`expandedDescription`/`risks`/`approach`/`faqs`) exist and
+ * every section below reads them, but all six sectors currently have them
+ * unset, so none of the new sections render on any live page yet. Real
+ * copy lands as a fast-follow once it's actually finalized.
  *
- * COLOUR — plain Paper throughout, no full-bleed accent section. The
- * About-page precedent (PR #39 → #40) already tried and reverted exactly
- * this — two full-bleed colour sections read as too much for an interior
- * page — so this template doesn't repeat that. `ClosingCta.astro`'s own
- * Electric Blue contact panel is the only colour fill on this page, and
- * it's that component's own existing, already-shipped fill (card/panel-
- * scale within its own section), not a new one introduced here.
+ * NEW SECTIONS (each fully conditional on its own data being present):
+ *   - Expanded description — a second, longer paragraph below the hero.
+ *   - Risks & challenges — a plain two-column hairline-divided list, NOT
+ *     a card grid and NOT numbered (it's a real bulleted list, not a
+ *     sequence) — matching `about.astro`'s own fact-list idiom. No icons:
+ *     the six existing service icons (building facade, protective-arc
+ *     figure, camera, footprints, hard hat, crescent) don't map to
+ *     abstract risk concepts like "till security" or "perimeter breach,"
+ *     and forcing a fit would mean picking a new icon concept — flagged
+ *     to the user rather than quietly done. (There's no pre-existing
+ *     "open icon system decision" tracked anywhere in this repo as of
+ *     this PR — if one exists elsewhere, fold it in on that basis
+ *     directly, not from an assumption made here.)
+ *   - FAQ — the ONE section carrying real visual weight on this page, per
+ *     direct instruction. An accordion, not a flat list — see
+ *     `src/lib/sectorFaqAccordion.ts` for the interaction mechanism.
+ *     Rows, not cards: hairline-divided, no shadow, no rounded corners.
+ *     The accent (`sector.fill`'s own Electric-Blue/Magenta, or Amber as
+ *     a bare mark for the two plain sectors — Corporate/Education —
+ *     matching the header-nav/MissionBand-underline precedent for Amber
+ *     as a non-fill mark) appears ONLY as a thin left border on whichever
+ *     row is currently open, via `group-has-[[aria-expanded="true"]]:` —
+ *     no JS-toggled class needed, the CSS keys directly off the same
+ *     `aria-expanded` attribute the accordion module sets. The trigger's
+ *     own chevron (reusing `Chevron.astro`, not a new icon) rotates the
+ *     same way, same variant.
  *
- * SEO — unique `<title>`/description per sector, built from
- * `sector.name`/`sector.blurb` rather than a shared generic string.
+ * SCHEMA.ORG — two kinds of structured data, both using ONLY facts
+ * already live elsewhere on this site:
+ *   - `Service`, unconditional — `serviceType`, `description` (the
+ *     existing `sector.blurb`), and a `provider` naming Bradford/West
+ *     Yorkshire as the service area. Deliberately does NOT include a
+ *     `telephone` — the phone number in `Header.astro`/`Footer.astro`/
+ *     `ClosingCta.astro` (01274 000 000) is a known, already-flagged
+ *     placeholder (see `ClosingCta.astro`'s own PR #31 history), and
+ *     shipping a fake number into indexed structured data is a real risk,
+ *     not a formatting nicety — worth fixing once the real number
+ *     exists, not before.
+ *   - `FAQPage`, conditional on `sector.faqs` — mirrors the accordion
+ *     content exactly (`mainEntity`/`Question`/`acceptedAnswer`), so it's
+ *     dormant on every page today the same way the accordion markup is.
  *
- * MOTION — one deliberate moment, matching `about.astro`'s own precedent:
- * `[data-reveal]` on the "Why House of Guards" section only, via the same
- * generic `initScrollReveal()` every other page already wires up. The
- * hero and `ClosingCta` (which owns its own `[data-reveal]` already) are
- * left as-is.
+ * INTERNAL LINKS / LOCAL SEO — a short paragraph naming two OTHER sectors
+ * (the next two in `SECTORS`, wrapping around — deterministic, not
+ * hand-curated) as real links, plus a natural Bradford/West Yorkshire
+ * mention. Both reuse facts already public elsewhere on the site (no new
+ * claim). A link to a `/services` page was also asked for — no such page
+ * exists yet (`ServicesGrid.astro` is a homepage section, not its own
+ * route) — flagged rather than invented; this paragraph links sectors
+ * only until that page exists.
+ *
+ * MOTION — one deliberate scroll-reveal moment (`[data-reveal]` on
+ * whichever of Risks/Why-Us is present), matching every other interior
+ * page's own restraint; the FAQ accordion's own open/close animation is
+ * interaction-driven, not scroll-triggered, the same category as
+ * `sectorsGridTabs.ts`'s crossfade.
  */
 export function getStaticPaths() {
-  return SECTORS.map((sector) => ({
+  return SECTORS.map((sector, index) => ({
     params: { slug: sector.slug },
-    props: { sector },
+    props: {
+      sector,
+      relatedSectors: [SECTORS[(index + 1) % SECTORS.length], SECTORS[(index + 2) % SECTORS.length]],
+    },
   }));
 }
 
 interface Props {
   sector: Sector;
+  relatedSectors: Sector[];
 }
 
-const { sector } = Astro.props as Props;
+const { sector, relatedSectors } = Astro.props as Props;
 
 const WHY_INTRO = `Every officer we deploy to a ${sector.name.toLowerCase()} site brings the same standards clients rely on across every sector we serve.`;
+
+// Full literal strings, not built via template-literal interpolation —
+// Tailwind's scanner does plain-text matching across the compiled source,
+// not JS evaluation, so a class name assembled at runtime from a variable
+// (e.g. `` `...${accent}` ``) never actually gets generated. Same fixed-
+// lookup pattern `SectorsGrid.astro`'s own `PANEL_FILL_CLASS` already uses.
+// "plain" (Corporate/Education, no `sector.fill`) reuses Amber as a bare,
+// non-fill mark — the same accepted use as the header-nav/MissionBand
+// underline, not a new exception.
+const ACCENT_TRIGGER_CLASS: Record<"electric-blue" | "magenta" | "plain", string> = {
+  "electric-blue": "group-has-[[aria-expanded='true']]:border-electric-blue",
+  magenta: "group-has-[[aria-expanded='true']]:border-magenta",
+  plain: "group-has-[[aria-expanded='true']]:border-amber",
+};
+const accentTriggerClass = ACCENT_TRIGGER_CLASS[sector.fill ?? "plain"];
+
+const hasRisks = Boolean(sector.risks?.length);
+const hasFaqs = Boolean(sector.faqs?.length);
+
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  serviceType: `${sector.name} Security`,
+  name: `${sector.name} Security | House of Guards`,
+  description: sector.blurb,
+  provider: {
+    "@type": "LocalBusiness",
+    name: "House of Guards",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Bradford",
+      addressRegion: "West Yorkshire",
+      addressCountry: "GB",
+    },
+  },
+  areaServed: {
+    "@type": "AdministrativeArea",
+    name: "West Yorkshire",
+  },
+};
+
+const faqSchema = hasFaqs
+  ? {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: sector.faqs!.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: faq.answer,
+        },
+      })),
+    }
+  : null;
 ---
 
 <BaseLayout title={`${sector.name} Security`} description={sector.blurb}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(serviceSchema)} />
+  {faqSchema && <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />}
+
   <section class="bg-paper">
     <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-28">
       <h1 class="text-h1 sm:text-display text-ink max-w-3xl">{sector.name} Security</h1>
@@ -71,6 +172,16 @@ const WHY_INTRO = `Every officer we deploy to a ${sector.name.toLowerCase()} sit
       <div class="mt-12 grid grid-cols-1 items-start gap-12 md:grid-cols-2 md:gap-16 lg:gap-20">
         <div class="text-left">
           <p class="text-body text-ink max-w-md">{sector.blurb}</p>
+          {
+            sector.expandedDescription && (
+              <p class="text-body text-ink mt-5 max-w-md">{sector.expandedDescription}</p>
+            )
+          }
+          <p class="text-caption text-stone mt-6 max-w-md">
+            House of Guards is based in Bradford, covering {sector.name.toLowerCase()} sites across West
+            Yorkshire — alongside <a href={`/sectors/${relatedSectors[0].slug}`} class="text-ink underline decoration-hairline underline-offset-2 hover:decoration-ink">{relatedSectors[0].name.toLowerCase()}</a> and{" "}
+            <a href={`/sectors/${relatedSectors[1].slug}`} class="text-ink underline decoration-hairline underline-offset-2 hover:decoration-ink">{relatedSectors[1].name.toLowerCase()}</a> security.
+          </p>
         </div>
 
         <div class="aspect-[3/2] overflow-hidden md:justify-self-end">
@@ -91,24 +202,82 @@ const WHY_INTRO = `Every officer we deploy to a ${sector.name.toLowerCase()} sit
 
   <section class="bg-paper" data-reveal>
     <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-24">
-      <h2 class="text-h3 text-ink">Why House of Guards</h2>
-      <p class="text-body text-ink mt-4 max-w-2xl">{WHY_INTRO}</p>
+      {
+        hasRisks && (
+          <div>
+            <h2 class="text-h3 text-ink">Risks & challenges in {sector.name.toLowerCase()} security</h2>
+            <ul class="mt-6 grid grid-cols-1 gap-x-12 gap-y-4 md:grid-cols-2">
+              {sector.risks!.map((risk) => (
+                <li class="text-body text-ink border-t border-hairline pt-4">{risk}</li>
+              ))}
+            </ul>
+            {sector.approach && <p class="text-body text-ink mt-8 max-w-2xl">{sector.approach}</p>}
+          </div>
+        )
+      }
 
-      <ul class="mt-8 max-w-md divide-y divide-hairline border-t border-hairline">
-        <li class="py-4 text-body text-ink">SIA licensed and DBS checked officers</li>
-        <li class="py-4 text-body text-ink">First aid trained personnel</li>
-        <li class="py-4 text-body text-ink">Bespoke shift patterns, arranged around you</li>
-      </ul>
+      <div class:list={[hasRisks && "mt-16"]}>
+        <h2 class="text-h3 text-ink">Why House of Guards</h2>
+        <p class="text-body text-ink mt-4 max-w-2xl">{WHY_INTRO}</p>
+
+        <ul class="mt-8 max-w-md divide-y divide-hairline border-t border-hairline">
+          <li class="py-4 text-body text-ink">SIA licensed and DBS checked officers</li>
+          <li class="py-4 text-body text-ink">First aid trained personnel</li>
+          <li class="py-4 text-body text-ink">Bespoke shift patterns, arranged around you</li>
+        </ul>
+      </div>
     </div>
   </section>
+
+  {
+    hasFaqs && (
+      <section class="bg-paper">
+        <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-24">
+          <h2 class="text-h2 text-ink">Frequently asked questions</h2>
+
+          <div class="mt-10 max-w-3xl divide-y divide-hairline border-t border-hairline">
+            {sector.faqs!.map((faq, i) => (
+              <div data-faq-item class="group">
+                <button
+                  type="button"
+                  data-faq-trigger
+                  aria-expanded="false"
+                  aria-controls={`faq-panel-${sector.slug}-${i}`}
+                  id={`faq-trigger-${sector.slug}-${i}`}
+                  class:list={[
+                    "flex w-full items-center justify-between gap-6 py-6 pl-4 -ml-4 text-left border-l-2 border-transparent transition-colors duration-200 ease-out",
+                    accentTriggerClass,
+                  ]}
+                >
+                  <span class="text-body-lg font-semibold text-ink">{faq.question}</span>
+                  <Chevron class="size-4 shrink-0 text-ink transition-transform duration-200 ease-out group-has-[[aria-expanded='true']]:rotate-90" />
+                </button>
+                <div
+                  id={`faq-panel-${sector.slug}-${i}`}
+                  role="region"
+                  aria-labelledby={`faq-trigger-${sector.slug}-${i}`}
+                  data-faq-panel
+                  class="pl-4"
+                >
+                  <p class="text-body text-ink max-w-2xl pb-6">{faq.answer}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   <ClosingCta />
 
   <script>
     import { initScrollReveal } from "../../lib/scrollReveal";
+    import { initSectorFaqAccordion } from "../../lib/sectorFaqAccordion";
 
     document.addEventListener("astro:page-load", () => {
       initScrollReveal();
+      initSectorFaqAccordion();
     });
   </script>
 </BaseLayout>
