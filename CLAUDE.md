@@ -749,6 +749,129 @@ treatment for these icons without a real reason to.
 
 ## Recent history
 
+- **PR #43 — a design/structure pass on the six `/sectors/<slug>` detail
+  pages, deliberately shipped with NO new marketing content.** The brief
+  arrived with a "finalized" content draft
+  (`sector-pages-content-draft.md`) meant to fill in an expanded service
+  description, a risks/challenges list, an "addresses this" paragraph, and
+  an FAQ array per sector. That file's own status line claimed every
+  `[[ADD REAL DETAIL]]` placeholder had been resolved — checked directly
+  against the file's own body and found FALSE: placeholders were still
+  present in every sector, including the Healthcare mental-health-crisis
+  FAQ, which the file's own notes name as its single most liability-
+  sensitive claim. Per that file's own explicit instruction ("if any
+  placeholder marker is still present... stop and flag it — do not fill
+  it in yourself"), this was raised directly rather than guessed at or
+  quietly resolved, and confirmed with the user before any content work:
+  build the STRUCTURE and DESIGN now, real copy lands as a fast-follow.
+
+  **`src/data/sectors.ts`** gains four new optional `Sector` fields —
+  `expandedDescription`, `risks: string[]`, `approach`, `faqs: {question,
+  answer}[]` — all UNSET on every sector as of this PR. Every new section
+  on the detail-page template reads these conditionally and renders
+  nothing when they're absent, so this PR changes zero live content;
+  confirmed directly against the compiled `dist/` output (see
+  VERIFICATION below).
+
+  **New sections on `src/pages/sectors/[slug].astro`** (each fully
+  conditional):
+  - Expanded description — a second paragraph below the hero blurb.
+  - Risks & challenges — a plain two-column hairline-divided list (NOT a
+    card grid, NOT numbered — a real bulleted list, not a sequence,
+    matching `about.astro`'s own fact-list idiom). Deliberately NO icons:
+    the six existing service icons don't map to abstract risk concepts
+    like "till security" or "perimeter breach," and forcing a fit would
+    mean picking a new icon concept — flagged rather than quietly done.
+    (There's no pre-existing "open icon system decision" tracked anywhere
+    in this repo, despite the brief referencing one — noted as a
+    correction rather than assumed to exist.)
+  - **FAQ — the one section carrying real visual weight on the page**, per
+    direct instruction. Built as an accordion (`src/lib/
+    sectorFaqAccordion.ts`), not a flat list — a genuinely new interaction
+    shape for this site, closest in spirit to `sectorsGridTabs.ts` (a
+    click-driven state module) but animating height via GSAP rather than
+    opacity/position. Rows, not cards: hairline-divided, no shadow, no
+    rounded corners. The sector's own accent (`sector.fill`'s Electric-
+    Blue/Magenta, or Amber as a bare mark for the two plain sectors —
+    Corporate/Education, matching the header-nav/MissionBand-underline
+    precedent for Amber as a non-fill mark) appears ONLY as a thin left
+    border on whichever row is currently open — via Tailwind's
+    `group-has-[[aria-expanded='true']]:` variant keyed directly off the
+    same `aria-expanded` attribute the JS sets, no second JS-tracked
+    class needed. The chevron (reusing `Chevron.astro`, not a new icon)
+    rotates the same way.
+
+    **A real bug caught and fixed before shipping**: the first draft
+    built the accent border class via a template-literal interpolation
+    (`` `group-has-[...]:${accent}` ``) — Tailwind's scanner does
+    plain-text matching across source files, not JS evaluation, so an
+    assembled-at-runtime class name never actually gets generated. Fixed
+    with a literal lookup map (`ACCENT_TRIGGER_CLASS`), the same fixed-
+    lookup pattern `SectorsGrid.astro`'s own `PANEL_FILL_CLASS` already
+    uses — confirmed via direct `dist/` inspection that all three literal
+    variants (`border-electric-blue`/`border-magenta`/`border-amber`,
+    plus the chevron's `rotate-90`) compile correctly with the exact
+    `:is(:where(.group):has([aria-expanded=true]) *)` selector Tailwind
+    v4's `has-*` variant support generates.
+
+  **Schema.org** — two kinds, both live now, using only facts already
+  public elsewhere on the site:
+  - `Service` (unconditional, on all six pages) — `serviceType`,
+    `description` (the existing `sector.blurb`), and a `provider`/
+    `areaServed` naming Bradford/West Yorkshire — the ONLY service area
+    confirmed accurate by the user directly (a broader "North West"
+    /"the North" framing was considered and explicitly declined for this
+    structured data — that's stated Vision-page ambition, not current
+    coverage). Deliberately does NOT include `telephone` — the number in
+    `Header.astro`/`Footer.astro`/`ClosingCta.astro` (01274 000 000) is a
+    known, already-flagged placeholder (see `ClosingCta.astro`'s own
+    PR #31 history) — shipping a fake number into indexed structured
+    data is a real risk, not a formatting nicety.
+  - `FAQPage` (conditional on `sector.faqs`) — dormant on every page
+    today, the same way the accordion markup itself is.
+
+  **Internal links / local SEO** — a short paragraph per page naming the
+  next two sectors in `SECTORS` (wrapping around, deterministic, not
+  hand-curated) as real links, plus a Bradford/West Yorkshire mention
+  reusing facts already public elsewhere. A link to `/services` was also
+  asked for — no such page exists (`ServicesGrid.astro` is a homepage
+  section, not its own route) — flagged rather than invented.
+
+  **VERIFICATION — includes a real, documented sandbox-limitation finding,
+  not just pass/fail results.** `astro check` (0 errors, 45 files, same 2
+  pre-existing `ContactForm.tsx` hints) and a clean `astro build` (9 pages)
+  both ran clean. Direct `dist/` inspection confirmed: zero Risks/FAQ
+  markup on any of the six live pages (all fields genuinely unset),
+  `Service` schema present on all six, `FAQPage` schema present on none
+  (dormant), and every new Tailwind class (`border-electric-blue`/
+  `border-magenta`/`border-amber`/`rotate-90`/`divide-hairline`/
+  `underline-offset-2`/`decoration-hairline`) compiled with a real call
+  site. A throwaway scratch Node server (never `astro dev`/`astro
+  preview`) served the real build output with TEMPORARY fixture FAQ/risks
+  data (reverted before committing — confirmed via a clean `git diff`
+  showing zero trace of it) to verify the accordion and risks-grid layout
+  at mobile (375px, single column, no overflow) and desktop (1280px, two
+  real ~560px risk columns) — both correct. **The accordion's own live
+  open/close visual state (the height tween, the accent border, the
+  chevron rotation) could NOT be confirmed via a real repaint in this
+  session**, for a documented, root-caused reason distinct from (but in
+  the same family as) the `document.hasFocus()`/stale-`getComputedStyle`
+  limitation PR #32/#34 already flagged: this session's Browser pane tab
+  ran with `document.visibilityState === "hidden"`, under which Chromium
+  defers incremental style recalculation triggered by attribute mutations
+  on already-painted elements (though NOT the initial style resolution of
+  a newly-inserted node, which is why an isolated same-page repro of the
+  identical CSS mechanism DID show the correct colour immediately).
+  Confirmed instead via `Element.matches()` against the exact compiled
+  selector text on the real live element post-mutation (returns `true` —
+  the browser's own selector engine already agrees the rule applies, only
+  its paint is deferred) and via an isolated, freshly-flushed repro of the
+  identical rule using the identical compiled selector text extracted
+  verbatim from the real `dist/` CSS. A real look at the live visual
+  transition is a genuine, disclosed follow-up once this ships to a
+  context where the tab is actually foregrounded — not something this
+  session could independently confirm.
+
 - **PR #41 — the six `/sectors/<slug>` detail pages** SectorsGrid's own
   "Learn more" buttons already linked to (see PR #40's "Not started"
   entry, and PR #22–#28's own history for how those links came to exist
