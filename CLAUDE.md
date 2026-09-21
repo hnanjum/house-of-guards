@@ -506,7 +506,7 @@ stylistic preference:
   any direction, exactly as before both changes.
 - **Framer Motion is scoped to exactly three React islands** —
   `NavDrawer.tsx`, `ContactForm.tsx` and, as of the Careers page,
-  `ApplicationForm.tsx` (the third added on direct instruction: "same
+  `ApplicationForm.tsx` (PR #48; the third added on direct instruction: "same
   pattern as ContactForm.tsx, with Framer Motion" — `formFields.tsx`,
   the primitives the two forms share, also imports it for the field
   stagger wrapper) — and only for their own local
@@ -772,7 +772,7 @@ treatment for these icons without a real reason to.
 
 ## Recent history
 
-- **Careers PR — `src/pages/careers.astro` (the `/careers` nav link had
+- **PR #48 — `src/pages/careers.astro` (the `/careers` nav link had
   no page behind it until now), a new `ApplicationForm.tsx` island, and
   shared form primitives extracted from `ContactForm.tsx`.** Built from
   the OLD site's Careers page as a CONTENT reference only; none of its
@@ -3332,7 +3332,7 @@ section built in PR #43 is now live with real copy on all six pages,
 `FAQPage` schema included. See each PR's own entry above for the full
 account rather than repeating it here.
 
-**Built, as of the Careers PR**: `src/pages/careers.astro` — see that
+**Built, as of PR #48**: `src/pages/careers.astro` — see that
 PR's own Recent-history entry for the full account. **Its application
 form does not submit anywhere yet** (no endpoint exists; it says so
 instead of faking success), and `ContactForm.tsx` — the homepage/sector
