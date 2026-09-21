@@ -504,11 +504,16 @@ stylistic preference:
   end-state with no `ScrollTrigger` registered at all, so a
   reduced-motion visitor never sees a scroll-position-driven toggle in
   any direction, exactly as before both changes.
-- **Framer Motion is scoped to exactly two React islands** —
-  `NavDrawer.tsx` and `ContactForm.tsx` — and only for their own local
-  interactive transitions (drawer slide, status-message fade). Never use
+- **Framer Motion is scoped to exactly three React islands** —
+  `NavDrawer.tsx`, `ContactForm.tsx` and, as of the Careers page,
+  `ApplicationForm.tsx` (the third added on direct instruction: "same
+  pattern as ContactForm.tsx, with Framer Motion" — `formFields.tsx`,
+  the primitives the two forms share, also imports it for the field
+  stagger wrapper) — and only for their own local
+  interactive transitions (drawer slide, status-message fade, form-field
+  stagger). Never use
   it for whole-page or scroll-driven animation; that stays GSAP's job.
-  Don't add a third Framer Motion island without a real reason — the
+  Don't add a fourth Framer Motion island without a real reason — the
   architecture is deliberately "React islands are rare," not "React
   islands are the default."
 - **Astro View Transitions** (`<ClientRouter />` in `BaseLayout.astro`)
@@ -766,6 +771,73 @@ treatment for these icons without a real reason to.
   weight relationship matters for visual hierarchy.
 
 ## Recent history
+
+- **Careers PR — `src/pages/careers.astro` (the `/careers` nav link had
+  no page behind it until now), a new `ApplicationForm.tsx` island, and
+  shared form primitives extracted from `ContactForm.tsx`.** Built from
+  the OLD site's Careers page as a CONTENT reference only; none of its
+  look carried over.
+
+  **Page** — plain-Paper hero (About/sector-page shell), "Why work for
+  House of Guards?" (two supplied paragraphs, verbatim — the old page's
+  unverified "our crew describe us as a good place to work" line is
+  deliberately absent), then "How to apply" beside the form card. No
+  full-bleed colour anywhere, left-aligned throughout, no JobPosting
+  schema (no confirmed salary/contract/location). Copy written here
+  rather than supplied, flagged in the file: the checklist heading
+  ("What we'll ask for later") and the card heading/one-line
+  "required unless marked optional" note. The "We are hiring" eyebrow is
+  plain sentence-case `text-caption` in Stone — NOT tracked, NOT
+  uppercase, so not an exception to the eyebrow hard rule;
+  `SectionHeading` still has no eyebrow slot. The documents checklist is
+  a hairline-divided list, no icons: the shield/checkmark motif is
+  permanently banned so a tick-list was never available.
+
+  **Form is honest about not being wired up.** `ContactForm.tsx`'s
+  `handleSubmit` is a stub (a `console.log`, then a success message), so
+  nothing submitted through it goes anywhere. `ApplicationForm.tsx` does
+  not copy that: it POSTs JSON to `PUBLIC_APPLICATION_ENDPOINT` (a
+  build-time env var; a Formspree-style URL or a Worker) and shows
+  success ONLY on an `ok` response. With the variable unset — the state
+  this shipped in — the card carries a notice giving the info@ address,
+  and a valid submit shows an alert saying it was not sent and keeps the
+  visitor's input. Failure responses show a not-received message. Both
+  the success path and the failure path were exercised against a scratch
+  server (payload confirmed to be exactly the seven form fields).
+  **No spam protection exists on either form** — needed before an
+  endpoint goes live (Cloudflare Turnstile is the natural fit).
+
+  **Validation** — `noValidate`, custom messages, `aria-invalid` +
+  `aria-describedby` per field, focus to the first invalid field, a
+  count-free summary in a persistent polite live region (a count went
+  stale as fields were fixed — caught in testing), a persistent
+  `role="alert"` region for send failures, re-validation on change/blur
+  once a field has an error. Selects have no default. Errors carry no
+  red (no such token): message text, an Ink border via the
+  `aria-invalid:` variant (an attribute selector, so it out-specifies the
+  resting border; a second border-colour class would have raced on
+  stylesheet order) and the ARIA state. No passport/NI/visa data is
+  collected in the form, and the consent line is plain text — there is no
+  privacy route (`/policies` is linked in the nav with no page behind it),
+  so there is nothing to link.
+
+  **Shared code** — `src/components/formFields.tsx` holds the field
+  primitives moved verbatim out of `ContactForm.tsx` (plus an optional
+  `error` prop and a `SelectField` wrapper); `ContactForm.tsx` now
+  imports them. Verified as a refactor: homepage HTML differs only by
+  five classless wrapper `div`s, and the ClosingCta section still
+  measures 781px / card 621px at 1280px, the figures recorded above.
+  `src/data/contact.ts` (`CONTACT_EMAIL`) is new — no shared contact
+  constant existed; the email was hardcoded in Header, Footer and
+  ClosingCta, which were left untouched. No phone constant was created:
+  `01274 000 000` is still an unconfirmed placeholder.
+
+  Verification: `astro check` 0 errors / same 2 pre-existing hints, clean
+  build (10 pages), dead-CSS sweep (all nine rules the stylesheet gained
+  trace to real call sites, none removed), and rendered geometry at
+  1280/768/375 via a scratch static server. A pre-existing 4px
+  horizontal overflow at exactly 768px exists on `/about/` too — not
+  from this page.
 
 - **PR #46 — activates the six `/sectors/<slug>` detail pages' Risks &
   Challenges / FAQ sections and `FAQPage` schema with REAL content, for
@@ -3260,8 +3332,17 @@ section built in PR #43 is now live with real copy on all six pages,
 `FAQPage` schema included. See each PR's own entry above for the full
 account rather than repeating it here.
 
-**Not started**: the remaining interior pages — Careers, Our Policies,
-Gallery, Contact. All still need building.
+**Built, as of the Careers PR**: `src/pages/careers.astro` — see that
+PR's own Recent-history entry for the full account. **Its application
+form does not submit anywhere yet** (no endpoint exists; it says so
+instead of faking success), and `ContactForm.tsx` — the homepage/sector
+quote form — is itself an unwired stub that `console.log`s and shows a
+success message; both need a real submission mechanism before either
+is genuinely live.
+
+**Not started**: the remaining interior pages — Our Policies, Gallery,
+Contact (`/policies`, `/gallery` and `/contact` are all linked from the
+nav/footer/CTAs with no page behind them yet).
 
 **Going forward, design work on this project is reference-driven, not
 brief-driven.** Expect to be handed actual screenshots/mockups and asked

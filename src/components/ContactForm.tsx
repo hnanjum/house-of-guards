@@ -1,9 +1,24 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useState, type FormEvent } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import {
+  ChevronDown,
+  FieldShell,
+  FloatingInput,
+  FloatingTextarea,
+  selectFieldClass,
+  staticLabelClass,
+} from "./formFields";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
 /**
+ * EXTRACTION NOTE — the field primitives this file's own comments describe
+ * below (`fieldBaseClass`, `selectFieldClass`, the floating-label helpers,
+ * `FloatingInput`/`FloatingTextarea`, `ChevronDown`, `FieldShell`) now live
+ * in `formFields.tsx`, moved verbatim so the Careers form
+ * (`ApplicationForm.tsx`) could reuse them. Everything they describe still
+ * holds; only where they are defined changed.
+ *
  * Isolated interactive island: contact / enquiry form. Rendered inside
  * `ClosingCta.astro`'s own floating "Get A Quote" card — this component
  * owns the FORM itself (fields, labels, submit, status message) and
@@ -182,140 +197,6 @@ const SERVICE_OPTIONS: ServiceOption[] = [
   { value: "event-sports-security", label: "Event & Sports Security" },
   { value: "bespoke-other", label: "Bespoke / other" },
 ];
-
-const fieldBaseClass =
-  "peer w-full border border-hairline bg-paper px-4 pt-5 pb-1.5 text-caption text-ink transition-colors duration-200 ease-out focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20";
-
-/**
- * A dedicated, standalone class string for the `service` select — NOT
- * `fieldBaseClass` plus a padding override. An earlier draft tried the
- * override approach (`fieldBaseClass` plus a smaller top/bottom padding
- * pair appended after it), a real bug caught during this pass's own
- * height investigation: Tailwind resolves two same-specificity
- * utilities targeting the same CSS property by their position in the
- * GENERATED stylesheet, not by their order in the class string —
- * `fieldBaseClass`'s own top-padding utility silently won over the
- * intended smaller one, leaving the select with the floating-label
- * fields' own generous top padding despite the select using a static
- * label above and never needing that clearance at all (deliberately
- * not re-quoting either the old winning value or the old intended-but-
- * losing one here as bare class-shaped tokens — neither has a real call
- * site left anywhere in this file now, and this project's own standing
- * convention already warns about exactly this failure mode). Confirmed
- * via `getComputedStyle` before the fix (a 24px top padding, not the
- * intended ~10px) and after (this dedicated
- * class has no conflicting declaration to lose to).
- */
-const selectFieldClass =
-  "peer w-full appearance-none border border-hairline bg-paper py-2.5 pr-10 pl-4 text-caption text-ink transition-colors duration-200 ease-out focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20";
-
-const staticLabelClass = "text-caption text-ink mb-1.5 block";
-
-function floatingLabelClass(anchorTop: boolean) {
-  const base =
-    "pointer-events-none absolute left-4 text-stone transition-all duration-200 ease-out peer-focus:text-micro peer-focus:text-electric-blue peer-[&:not(:placeholder-shown)]:text-micro peer-[&:not(:placeholder-shown)]:text-stone";
-  return anchorTop
-    ? `${base} top-3 text-caption peer-focus:top-1.5 peer-[&:not(:placeholder-shown)]:top-1.5`
-    : `${base} top-1/2 -translate-y-1/2 text-caption peer-focus:top-1.5 peer-focus:translate-y-0 peer-[&:not(:placeholder-shown)]:top-1.5 peer-[&:not(:placeholder-shown)]:translate-y-0`;
-}
-
-function FloatingInput({
-  id,
-  name,
-  label,
-  type = "text",
-  required = false,
-  autoComplete,
-}: {
-  id: string;
-  name: string;
-  label: string;
-  type?: string;
-  required?: boolean;
-  autoComplete?: string;
-}) {
-  return (
-    <div className="relative">
-      <input
-        id={id}
-        name={name}
-        type={type}
-        required={required}
-        autoComplete={autoComplete}
-        placeholder=" "
-        className={fieldBaseClass}
-      />
-      <label htmlFor={id} className={floatingLabelClass(false)}>
-        {label}
-      </label>
-    </div>
-  );
-}
-
-function FloatingTextarea({
-  id,
-  name,
-  label,
-  required = false,
-  rows = 4,
-}: {
-  id: string;
-  name: string;
-  label: string;
-  required?: boolean;
-  rows?: number;
-}) {
-  return (
-    <div className="relative">
-      <textarea
-        id={id}
-        name={name}
-        rows={rows}
-        required={required}
-        placeholder=" "
-        className={`${fieldBaseClass} resize-none`}
-      />
-      <label htmlFor={id} className={floatingLabelClass(true)}>
-        {label}
-      </label>
-    </div>
-  );
-}
-
-function ChevronDown() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-ink"
-      aria-hidden="true"
-    >
-      <path d="M6 9l6 6 6-6" />
-    </svg>
-  );
-}
-
-function FieldShell({ children }: { children: ReactNode }) {
-  const shouldReduceMotion = useReducedMotion();
-  const variants = shouldReduceMotion
-    ? { hidden: { opacity: 1, y: 0 }, visible: { opacity: 1, y: 0 } }
-    : {
-        hidden: { opacity: 0, y: 14 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" as const } },
-      };
-
-  return (
-    <motion.div variants={variants} className="contents">
-      {children}
-    </motion.div>
-  );
-}
 
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
