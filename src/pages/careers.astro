@@ -1,0 +1,142 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHeading from "../components/ui/SectionHeading.astro";
+import ApplicationForm from "../components/ApplicationForm.tsx";
+
+/**
+ * Careers page — satisfies the already-live `/careers` nav link (Header,
+ * NavDrawer and Footer all pointed here before this file existed). Content
+ * brief came from the OLD site's Careers page as a CONTENT reference only —
+ * none of its look (dark hero, gold palette, uppercase letterspaced labels)
+ * was carried over; this is the current design system throughout.
+ *
+ * SHAPE — reuses the About/sector-page shell rather than inventing one: a
+ * plain-Paper hero (`text-h1 sm:text-display` H1, `text-body-lg` intro, the
+ * same `max-w-7xl px-gutter` wrapper and padding), then plain-Paper
+ * sections below it. NO full-bleed colour anywhere; the only colour on the
+ * page is what the form island brings (Electric-Blue focus glow, Amber
+ * submit button). Left-aligned throughout, the sitewide default.
+ *
+ * EYEBROW — "We are hiring" above the H1, on direct instruction. The hard
+ * rule bans TRACKED-OUT ALL-CAPS eyebrow labels; this is neither tracked
+ * nor uppercase — plain sentence-case `text-caption` in Stone, the same
+ * secondary-text pairing used for captions elsewhere (~4.6:1 on Paper,
+ * fine at 14px). It is written inline here, not added to
+ * `SectionHeading.astro`, which still has no eyebrow slot by design.
+ *
+ * CHECKLIST — a plain hairline-divided list, the same idiom as the fact
+ * lists on `about.astro` and the sector pages. No icons: the shield/
+ * checkmark motif is permanently banned on this site, which rules out the
+ * obvious tick-list, and the wider icon-system question is still open, so
+ * nothing new was introduced.
+ *
+ * COPY — the two "Why work for us" paragraphs and the how-to-apply intro
+ * are the supplied text, verbatim. Deliberately absent: the old page's
+ * claim that "our crew describe us as a good place to work" (unverified).
+ * Two short lines are new and written here, not supplied: the checklist's
+ * own heading ("What we'll ask for later") and the "Your application" card
+ * heading with its one-line reminder that fields are required unless marked
+ * optional.
+ *
+ * FORM — `ApplicationForm.tsx`, in the same floating white card as the
+ * homepage's "Get A Quote" form. Read that component's own comment for the
+ * important part: its submission endpoint is not wired up yet, and it says
+ * so rather than faking a success message.
+ *
+ * NO PRIVACY LINK — the consent line under the form is plain text. There is
+ * no privacy-policy route to link to: `/policies` is in the nav and footer
+ * but has no page file behind it yet (it 404s), so linking it would ship a
+ * dead link. Add the link to `ApplicationForm.tsx`'s consent line when a
+ * real page exists.
+ *
+ * NO JobPosting SCHEMA — no salary, contract type or work-location details
+ * have been confirmed, and structured data with invented values is worse
+ * than none.
+ *
+ * MOTION — the generic `[data-reveal]` fade/rise (`scrollReveal.ts`) on the
+ * two content sections below the hero, wired from this page's own
+ * `astro:page-load` handler like every other page; the hero is already in
+ * view on load so stays static. The form island's own Framer Motion field
+ * stagger runs inside its already-revealed card, same layering as the
+ * homepage form.
+ */
+const DOCUMENTS = [
+  "Personal details and proof of address",
+  "A copy of your passport",
+  "A copy of your visa or share code, where applicable",
+  "Your SIA licence details, if you hold one",
+  "Your National Insurance number",
+  "Two contactable references",
+];
+---
+
+<BaseLayout
+  title="Careers"
+  description="Join House of Guards, a Bradford-based security company. We're looking for SIA-licensed security officers, CCTV monitoring operators and event stewards — apply online."
+>
+  <section class="bg-paper">
+    <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-28">
+      <p class="text-caption text-stone">We are hiring</p>
+      <h1 class="text-h1 sm:text-display text-ink mt-3 max-w-3xl">Careers</h1>
+      <p class="text-body-lg text-ink mt-4 max-w-2xl">
+        We're looking for SIA-licensed security officers, CCTV monitoring operators and event stewards. Most work
+        is in West Yorkshire, with some longer-distance shifts where transport is provided.
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-paper" data-reveal>
+    <div class="mx-auto max-w-7xl px-gutter pb-20 md:px-12 md:pb-24">
+      <SectionHeading level="h2">Why work for House of Guards?</SectionHeading>
+      <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-16">
+        <p class="text-body text-ink max-w-md">
+          We offer work to every member of the team, and every officer is vetted thoroughly in line with SIA
+          regulations. We look for people who communicate well, solve problems calmly, work as part of a team and
+          hold a high standard of customer service.
+        </p>
+        <p class="text-body text-ink max-w-md">
+          Respect matters here. Immature behaviour and bullying are not tolerated, and every member of staff is
+          treated equally regardless of race or gender. We welcome people from all backgrounds and aim to deliver
+          the highest possible standard in the security sector with their help.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-paper">
+    <div class="mx-auto max-w-7xl px-gutter pb-20 md:px-12 md:pb-28">
+      <div class="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+        <div data-reveal class="lg:col-span-5">
+          <SectionHeading level="h2">How to apply</SectionHeading>
+          <p class="text-body text-ink mt-4 max-w-md">
+            Apply online using the form. Once we receive your application, a member of our team will contact you
+            by email to request your documents.
+          </p>
+
+          <h3 class="text-body-lg text-ink mt-8 font-semibold">What we'll ask for later</h3>
+          <ul class="divide-hairline border-hairline mt-4 max-w-md divide-y border-t">
+            {DOCUMENTS.map((item) => <li class="text-body text-ink py-4">{item}</li>)}
+          </ul>
+        </div>
+
+        <div data-reveal class="lg:col-span-7">
+          <div id="apply" class="bg-paper p-6 shadow-2xl sm:p-8 lg:p-9">
+            <SectionHeading level="h3">Your application</SectionHeading>
+            <p class="text-caption text-stone mt-2">
+              All fields are required unless marked optional.
+            </p>
+            <ApplicationForm client:visible />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { initScrollReveal } from "../lib/scrollReveal";
+
+    document.addEventListener("astro:page-load", () => {
+      initScrollReveal();
+    });
+  </script>
+</BaseLayout>
