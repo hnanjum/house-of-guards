@@ -115,7 +115,7 @@ export default function NavDrawer() {
               aria-label="Main navigation"
             >
               <div className="border-hairline flex items-center justify-between border-b px-6 py-5">
-                <span className="text-wordmark text-ink">Harley Garrison</span>
+                <img src="/logo/logo-horizontal.svg" alt="Harley Garrison" width="177" height="40" className="h-8 w-auto" />
                 <button
                   type="button"
                   aria-label="Close menu"
