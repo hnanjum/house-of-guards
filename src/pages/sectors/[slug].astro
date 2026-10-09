@@ -134,11 +134,11 @@ const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
   serviceType: `${sector.name} Security`,
-  name: `${sector.name} Security | House of Guards`,
+  name: `${sector.name} Security | Harley Garrison`,
   description: sector.blurb,
   provider: {
     "@type": "LocalBusiness",
-    name: "House of Guards",
+    name: "Harley Garrison",
     address: {
       "@type": "PostalAddress",
       addressLocality: "Bradford",
@@ -222,7 +222,7 @@ const faqSchema = hasFaqs
             )
           }
           <p class="text-caption text-stone mt-6 max-w-md">
-            House of Guards is based in Bradford, covering {sector.name.toLowerCase()} sites across West
+            Harley Garrison is based in Bradford, covering {sector.name.toLowerCase()} sites across West
             Yorkshire — alongside <a href={`/sectors/${relatedSectors[0].slug}`} class="text-ink underline decoration-hairline underline-offset-2 hover:decoration-ink">{relatedSectors[0].name.toLowerCase()}</a> and{" "}
             <a href={`/sectors/${relatedSectors[1].slug}`} class="text-ink underline decoration-hairline underline-offset-2 hover:decoration-ink">{relatedSectors[1].name.toLowerCase()}</a> security.
           </p>
@@ -261,7 +261,7 @@ const faqSchema = hasFaqs
       }
 
       <div class:list={[hasRisks && "mt-16"]}>
-        <h2 class="text-h3 text-ink">Why House of Guards</h2>
+        <h2 class="text-h3 text-ink">Why Harley Garrison</h2>
         <p class="text-body text-ink mt-4 max-w-2xl">{WHY_INTRO}</p>
 
         <ul class="mt-8 max-w-md divide-y divide-hairline border-t border-hairline">

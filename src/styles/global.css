@@ -27,7 +27,7 @@
  * ---------------------------------------------------------------------
  * Every colour and font-family used anywhere in this project must come
  * from this block. Nothing here is provisional — this is the approved
- * House of Guards palette and type system. No component should ever
+ * Harley Garrison palette and type system. No component should ever
  * reference a literal hex value, an arbitrary Tailwind bracket value
  * (e.g. `text-[17px]`, `bg-[#0d0d0d]`), or a default Tailwind colour
  * (slate, blue, red, etc — all removed below).

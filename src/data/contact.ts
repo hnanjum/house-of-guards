@@ -13,4 +13,4 @@
  * files is a known, unconfirmed placeholder, and putting it in a shared
  * source would make it easier to spread, not easier to fix.
  */
-export const CONTACT_EMAIL = "info@houseofguards.co.uk";
+export const CONTACT_EMAIL = "info@harleygarrison.co.uk";

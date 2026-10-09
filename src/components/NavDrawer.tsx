@@ -115,7 +115,7 @@ export default function NavDrawer() {
               aria-label="Main navigation"
             >
               <div className="border-hairline flex items-center justify-between border-b px-6 py-5">
-                <span className="text-wordmark text-ink">House of Guards</span>
+                <span className="text-wordmark text-ink">Harley Garrison</span>
                 <button
                   type="button"
                   aria-label="Close menu"
