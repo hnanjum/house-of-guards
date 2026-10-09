@@ -1,0 +1,237 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Button from "../components/ui/Button.astro";
+import ClosingCta from "../components/home/ClosingCta.astro";
+import CorporateSecurity from "../icons/services/CorporateSecurity.astro";
+import CloseProtection from "../icons/services/CloseProtection.astro";
+import CctvMonitoring from "../icons/services/CctvMonitoring.astro";
+import MannedGuarding from "../icons/services/MannedGuarding.astro";
+import ConstructionSecurity from "../icons/services/ConstructionSecurity.astro";
+import OvernightSecurity from "../icons/services/OvernightSecurity.astro";
+
+/**
+ * Services page — `/services`, the nav/footer link that had no page
+ * behind it. Built as a quiet, editorial "prospectus": large display
+ * names, hairline rules, generous space, and one dark band to close.
+ *
+ * LAYOUT — a sticky index rail on the left (lg+, hidden below) listing
+ * the six services as anchor links, with the row currently in view
+ * marked via `aria-current` (see `src/lib/servicesPage.ts`); the six
+ * service rows run down the right. Rows, not cards: no border, no
+ * shadow, no fill, just a rule above each — so this is not a new
+ * bordered/shadowed card grid and sits outside that hard rule. Left-
+ * aligned throughout. No numbering (the services are not a sequence),
+ * no tracked-caps labels, no shield/tick motif.
+ *
+ * COLOUR — plain Paper and Ink. Electric Blue / Magenta appear only as
+ * the icon stroke on each row (the same per-service accent
+ * `ServicesGrid.astro` uses, ~5.17:1 and ~7.26:1 against Paper). Amber
+ * is the sitewide button fill plus thin bare-mark rules (accepted
+ * ~2.15:1 on Paper; ~9.05:1 on the Ink band). The closing band is a
+ * full Ink fill with Paper text (~19.44:1) — `on-dark` is set on it
+ * though it holds no focusable element, matching StandardsCarousel.
+ *
+ * PHOTOS — deliberately none. Every existing photo has the old
+ * "HOUSE OF GUARDS" print on the officers' jackets, so adding more
+ * exposure of them to a new page would work against the rebrand. Add
+ * photography here once replacement images exist.
+ *
+ * COPY — each service's lead sentence is the existing `ServicesGrid`
+ * card copy, verbatim. The three "covers" lines per service only
+ * re-split what that sentence (and the About page) already say; no new
+ * capability, number or track-record claim is introduced. The page
+ * intro, the closing-band heading and its short lines are new copy
+ * written for this page — worth a read before launch.
+ */
+
+type Accent = "electric-blue" | "magenta";
+
+const ACCENT_CLASS: Record<Accent, string> = {
+  "electric-blue": "text-electric-blue",
+  magenta: "text-magenta",
+};
+
+const SERVICES: {
+  id: string;
+  name: string;
+  intro: string;
+  covers: string[];
+  Icon: typeof CorporateSecurity;
+  accent: Accent;
+}[] = [
+  {
+    id: "corporate-security",
+    name: "Corporate Security",
+    intro:
+      "Front-of-house officers, access control and CCTV oversight that reflect the standards of your organisation.",
+    covers: ["Front-of-house and reception officers", "Access control and visitor management", "CCTV oversight"],
+    Icon: CorporateSecurity,
+    accent: "electric-blue",
+  },
+  {
+    id: "close-protection",
+    name: "Close Protection",
+    intro: "Discreet personal protection for individuals, families and visiting guests, at home and in transit.",
+    covers: ["Individuals and families", "Visiting guests", "At home and in transit"],
+    Icon: CloseProtection,
+    accent: "magenta",
+  },
+  {
+    id: "cctv-monitoring",
+    name: "CCTV Monitoring",
+    intro: "Round-the-clock camera monitoring with rapid escalation the moment something looks wrong.",
+    covers: [
+      "Camera monitoring around the clock",
+      "Rapid escalation when something looks wrong",
+      "Oversight that supports on-site officers",
+    ],
+    Icon: CctvMonitoring,
+    accent: "electric-blue",
+  },
+  {
+    id: "manned-guarding",
+    name: "Manned Guarding",
+    intro:
+      "Highly trained, SIA licensed guards providing a visible presence from crowd control to mobile patrol.",
+    covers: ["A visible, static presence", "Crowd control and stewarding", "Mobile patrol"],
+    Icon: MannedGuarding,
+    accent: "magenta",
+  },
+  {
+    id: "construction-site-security",
+    name: "Construction Site Security",
+    intro: "Protecting plant, materials and part-built structures on sites that are a magnet for thieves.",
+    covers: ["Plant and machinery", "Materials and stock", "Part-built structures"],
+    Icon: ConstructionSecurity,
+    accent: "electric-blue",
+  },
+  {
+    id: "overnight-security",
+    name: "Overnight Security",
+    intro: "Dedicated night cover for premises that are most vulnerable once the working day ends.",
+    covers: [
+      "Dedicated night cover",
+      "Shift patterns arranged around your site",
+      "Mobile patrol where it suits the premises",
+    ],
+    Icon: OvernightSecurity,
+    accent: "magenta",
+  },
+];
+
+const STANDARDS = [
+  { title: "Licensed and vetted", body: "SIA licensed and DBS checked officers." },
+  { title: "First aid trained", body: "First aid trained personnel." },
+  { title: "Arranged around you", body: "Bespoke shift patterns, built around how your site actually runs." },
+];
+
+const DESCRIPTION =
+  "Manned guarding, close protection, CCTV monitoring, corporate, construction site and overnight security from Harley Garrison, a Bradford-based company serving West Yorkshire.";
+---
+
+<BaseLayout title="Services" description={DESCRIPTION}>
+  <div data-services-page>
+    <section class="bg-paper">
+      <div class="mx-auto max-w-7xl px-gutter pt-20 pb-16 md:px-12 md:pt-28 md:pb-20">
+        <div class="overflow-hidden pb-3 -mb-3">
+          <h1 data-sp-title class="text-h1 sm:text-display text-ink max-w-4xl">Our services</h1>
+        </div>
+        <p data-sp-fade class="text-body-lg text-ink mt-6 max-w-2xl">
+          Discreet, professional security for businesses, private clients and events.
+        </p>
+        <p data-sp-fade class="text-body text-stone mt-4 max-w-xl">
+          Six services, each arranged around the site, the people and the hours that matter to you.
+        </p>
+        <div data-sp-rule class="bg-amber mt-14 h-0.5 w-24 origin-left"></div>
+      </div>
+    </section>
+
+    <section class="bg-paper">
+      <div class="mx-auto max-w-7xl px-gutter pb-20 md:px-12 md:pb-28">
+        <div class="lg:grid lg:grid-cols-[15rem_1fr] lg:gap-16">
+          <aside class="hidden lg:block">
+            <nav aria-label="Services" class="sticky top-32">
+              <ul class="border-hairline border-l">
+                {
+                  SERVICES.map(({ id, name }) => (
+                    <li>
+                      <a
+                        href={`#${id}`}
+                        data-sp-index-link
+                        class="group text-caption text-stone hover:text-ink aria-[current=true]:text-ink relative block py-2.5 pl-5 transition-colors duration-300"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="bg-amber absolute top-1/2 -left-px h-6 w-0.5 -translate-y-1/2 scale-y-0 transition-transform duration-300 group-aria-[current=true]:scale-y-100"
+                        />
+                        {name}
+                      </a>
+                    </li>
+                  ))
+                }
+              </ul>
+            </nav>
+          </aside>
+
+          <div>
+            {
+              SERVICES.map(({ id, name, intro, covers, Icon, accent }) => (
+                <article id={id} data-sp-row class="scroll-mt-28 pt-12 pb-16 md:pt-16 md:pb-20">
+                  <div data-sp-row-rule class="bg-hairline mb-12 h-px w-full origin-left" />
+                  <div data-sp-row-icon>
+                    <Icon class:list={["size-14", ACCENT_CLASS[accent]]} />
+                  </div>
+                  <h2 data-sp-row-part class="text-h2 text-ink mt-8">
+                    {name}
+                  </h2>
+                  <p data-sp-row-part class="text-body-lg text-ink mt-5 max-w-2xl">
+                    {intro}
+                  </p>
+                  <ul class="divide-hairline border-hairline mt-10 max-w-xl divide-y border-t">
+                    {covers.map((item) => (
+                      <li data-sp-row-part class="text-body text-ink py-4">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <div data-sp-row-part class="mt-10">
+                    <Button href="#quote-form">Request {name}</Button>
+                  </div>
+                </article>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="on-dark bg-ink">
+      <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-28">
+        <h2 data-reveal class="text-h2 text-paper max-w-2xl">The same standard behind every service</h2>
+        <div class="mt-14 grid gap-12 md:grid-cols-3 md:gap-10">
+          {
+            STANDARDS.map(({ title, body }) => (
+              <div data-reveal>
+                <div class="bg-amber mb-6 h-0.5 w-12" />
+                <h3 class="text-h3 text-paper">{title}</h3>
+                <p class="text-body text-paper/70 mt-3 max-w-xs">{body}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <ClosingCta />
+  </div>
+
+  <script>
+    import { initServicesPage } from "../lib/servicesPage";
+    import { initScrollReveal } from "../lib/scrollReveal";
+
+    document.addEventListener("astro:page-load", () => {
+      initServicesPage();
+      initScrollReveal();
+    });
+  </script>
+</BaseLayout>
