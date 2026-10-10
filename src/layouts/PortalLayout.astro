@@ -1,0 +1,30 @@
+---
+import "../styles/global.css";
+
+/**
+ * Shell for the signed-in portals (officers / admin / client). Same
+ * tokens and fonts as the public site, but none of its chrome: no
+ * marketing header/footer, no smooth scroll, no view transitions, and
+ * never indexed. The portal app itself renders client-side only.
+ */
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} | Harley Garrison</title>
+  </head>
+  <body class="bg-paper text-ink min-h-dvh">
+    <slot />
+  </body>
+</html>

@@ -3359,3 +3359,30 @@ Full Astro documentation: https://docs.astro.build
 - [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
 - [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
 - [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
+
+## Portals (officers / admin / client)
+
+Started 2026-10-10. Signed-in web apps on subdomains of the same site:
+`officers.harleygarrison.co.uk` (built first), `admin.` and `portal.`
+(clients) to follow. Staff are called **officers** everywhere in the UI;
+the database role is still named `guard` internally.
+
+- **Routing**: `worker/index.ts` (wrangler `main`, `run_worker_first`)
+  maps each subdomain to its section of the static build (`/officers`,
+  `/admin`, `/client`), 404s portal paths on the marketing hosts, and
+  301s `*.harleygarrison.com` to `.co.uk`. Unknown hosts (workers.dev)
+  pass through so previews keep working. Custom domains are attached in
+  the Cloudflare dashboard, deliberately not in `wrangler.jsonc`.
+- **Backend**: Supabase (London). Schema + RLS in
+  `supabase/migrations/`, setup steps in `supabase/README.md`. The
+  publishable key and URL in `src/lib/portalSupabase.ts` are public by
+  design; the secret/service-role key must never enter this repo.
+- **Frontend**: `src/layouts/PortalLayout.astro` (no marketing chrome,
+  noindex) + `client:only` React apps under `src/components/portal/`.
+  `PortalShell.tsx` is the shared auth gate (sign-in, reset, invite
+  set-password, role check). Screens switch by URL hash.
+- **Design**: same tokens and type as the public site. One Electric Blue
+  "duty panel" per screen is the bold moment; Amber is buttons only;
+  everything else Paper/Ink on hairlines. Input borders use Ink at 50%
+  (~3.6:1) because the hairline token is too faint for a form field.
+  No Framer Motion here (the three-island rule stands).
