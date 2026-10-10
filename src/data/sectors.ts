@@ -173,7 +173,7 @@ export const SECTORS: Sector[] = [
     blurb:
       "SIA-licensed teams for corporate functions, private events, and public gatherings — planning access flow and crowd safety before doors open, then managing it calmly throughout.",
     photo: eventsPhoto,
-    alt: "Performers in colourful traditional dress celebrating on a parade float at a busy outdoor street festival.",
+    alt: "A large crowd of spectators gathered behind a metal crowd barrier at a busy outdoor event.",
     fill: "electric-blue",
     expandedDescription:
       "Event security has to handle unpredictable crowd behaviour, entry/exit control, and often high-profile or high-density environments, all under time pressure — events don't have a second chance to get security right on the day. Harley Garrison' team draws on real experience across stadiums, marathons, and pub/club doors, which means officers have worked the specific pressure points of live events, not just static site security.",
@@ -209,7 +209,7 @@ export const SECTORS: Sector[] = [
     blurb:
       "Officers trained to work within clinical environments — supporting staff, managing visitors, and de-escalating incidents without adding to the stress of an already difficult setting.",
     photo: healthcarePhoto,
-    alt: "A clean, brightly lit hospital reception desk beside a lift and a directional sign for the departments on the floor.",
+    alt: "A clean, brightly lit hospital corridor with waiting-area seating outside numbered consulting rooms.",
     fill: "magenta",
     expandedDescription:
       "Healthcare security has to operate within an environment built around patient care and dignity — a heavy-handed security presence can itself become a problem in a hospital, clinic, or care setting. Harley Garrison's first-aid trained officers are a genuine advantage here: security staff who understand basic medical response are better equipped to work alongside clinical teams rather than around them.",
