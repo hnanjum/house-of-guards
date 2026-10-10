@@ -1,9 +1,9 @@
-import retailPhoto from "../assets/sectors/retail.png";
-import distributionPhoto from "../assets/sectors/distribution.png";
-import corporatePhoto from "../assets/sectors/corporate.png";
-import eventsPhoto from "../assets/sectors/events.png";
-import healthcarePhoto from "../assets/sectors/healthcare.png";
-import educationPhoto from "../assets/sectors/education.png";
+import retailPhoto from "../assets/sectors/retail.jpg";
+import distributionPhoto from "../assets/sectors/distribution.jpg";
+import corporatePhoto from "../assets/sectors/corporate.jpg";
+import eventsPhoto from "../assets/sectors/events.jpg";
+import healthcarePhoto from "../assets/sectors/healthcare.jpg";
+import educationPhoto from "../assets/sectors/education.jpg";
 
 /**
  * Single source of truth for sector content — shared by `SectorsGrid.astro`
@@ -62,7 +62,7 @@ export const SECTORS: Sector[] = [
     blurb:
       "Uniformed and covert officers who understand retail environments — deterring theft, managing difficult incidents calmly, and supporting your team through busy trading periods. Visible where it reassures customers, discreet where it doesn't.",
     photo: retailPhoto,
-    alt: "A Harley Garrison officer, back to camera, standing watch on a busy shopping street outside retail storefronts.",
+    alt: "A bright, multi-storey shopping centre with escalators, a reception desk and shoppers walking between stores.",
     fill: "magenta",
     expandedDescription:
       "Retail security sits at the intersection of theft prevention, customer safety, and brand experience — a uniformed presence that looks approachable rather than intimidating matters as much as the deterrent itself. Harley Garrison officers working retail environments are SIA-licensed and first-aid trained, and shift patterns are built around the store's actual footfall (weekend peaks, seasonal surges, late-night restocking) rather than a fixed package that doesn't flex.",
@@ -99,7 +99,7 @@ export const SECTORS: Sector[] = [
     blurb:
       "Access control, vehicle checks, and perimeter patrols for warehouses and distribution centres where stock, vehicles, and shift patterns are constantly in motion. Officers trained to work alongside your operations, not around them.",
     photo: distributionPhoto,
-    alt: "A Harley Garrison officer in a protective vest standing at a distribution yard, with two branded lorries parked at loading bays behind him.",
+    alt: "Two members of staff, one in a hi-vis vest holding a handheld scanner, talking as they walk down a warehouse aisle lined with stocked shelving.",
     fill: "electric-blue",
     expandedDescription:
       "Distribution and warehouse sites carry a different risk profile from retail — large perimeters, high-value stock in transit, shift patterns that often run overnight, and multiple access points (loading bays, staff entrances, vehicle gates) that all need consistent control. Harley Garrison' overnight security service and bespoke shift patterns are built for exactly this kind of site, rather than a generic day-shift-only offering.",
@@ -136,7 +136,7 @@ export const SECTORS: Sector[] = [
     blurb:
       "Front-of-house officers who represent your brand as well as protect it — managing access, visitors, and incidents with the same discretion your clients expect from every other part of the building.",
     photo: corporatePhoto,
-    alt: "A Harley Garrison officer standing beside security turnstiles in a corporate office lobby, with a receptionist at the front desk behind him.",
+    alt: "A large open-plan corporate office with rows of desks, where three colleagues work on laptops at a shared table.",
     expandedDescription:
       "Corporate security is as much about first impressions as it is about protection — a reception-area or building-entrance officer is often the first person a visitor, client, or employee interacts with. Harley Garrison' emphasis on smart uniform presentation and clear reporting is built for environments where professionalism and discretion matter as much as physical presence.",
     risks: [
@@ -173,7 +173,7 @@ export const SECTORS: Sector[] = [
     blurb:
       "SIA-licensed teams for corporate functions, private events, and public gatherings — planning access flow and crowd safety before doors open, then managing it calmly throughout.",
     photo: eventsPhoto,
-    alt: "A Harley Garrison officer wearing a hi-vis armband, standing beside a crowd barrier as a large crowd gathers outside a stadium.",
+    alt: "Performers in colourful traditional dress celebrating on a parade float at a busy outdoor street festival.",
     fill: "electric-blue",
     expandedDescription:
       "Event security has to handle unpredictable crowd behaviour, entry/exit control, and often high-profile or high-density environments, all under time pressure — events don't have a second chance to get security right on the day. Harley Garrison' team draws on real experience across stadiums, marathons, and pub/club doors, which means officers have worked the specific pressure points of live events, not just static site security.",
@@ -209,10 +209,10 @@ export const SECTORS: Sector[] = [
     blurb:
       "Officers trained to work within clinical environments — supporting staff, managing visitors, and de-escalating incidents without adding to the stress of an already difficult setting.",
     photo: healthcarePhoto,
-    alt: "A Harley Garrison officer standing at a hospital reception desk, with a corridor leading toward the outpatients department behind him.",
+    alt: "A clean, brightly lit hospital reception desk beside a lift and a directional sign for the departments on the floor.",
     fill: "magenta",
     expandedDescription:
-      "Healthcare security has to operate within an environment built around patient care and dignity — a heavy-handed security presence can itself become a problem in a hospital, clinic, or care setting. Harley Garrison' first-aid trained officers are a genuine advantage here: security staff who understand basic medical response are better equipped to work alongside clinical teams rather than around them.",
+      "Healthcare security has to operate within an environment built around patient care and dignity — a heavy-handed security presence can itself become a problem in a hospital, clinic, or care setting. Harley Garrison's first-aid trained officers are a genuine advantage here: security staff who understand basic medical response are better equipped to work alongside clinical teams rather than around them.",
     risks: [
       "Aggressive or distressed patients/visitors, including mental health crisis situations",
       "Restricted-area access control (wards, pharmacies, staff-only zones)",
@@ -252,7 +252,7 @@ export const SECTORS: Sector[] = [
     blurb:
       "Site security for schools, colleges, and universities — from daily access management to event cover — delivered by officers who understand the specific duty of care an education setting requires.",
     photo: educationPhoto,
-    alt: "A Harley Garrison officer speaking with a visitor at a school's main entrance gate, with the school building behind them.",
+    alt: "An empty primary school classroom with rows of desks and chairs facing a green chalkboard.",
     expandedDescription:
       "Education security covers everything from day-to-day access control on a school or campus site to event-specific cover for open days, exams, or graduation ceremonies. Officers working in education settings need a particular kind of judgement — visible enough to reassure parents and staff, approachable enough not to feel like a lockdown environment for students.",
     risks: [
