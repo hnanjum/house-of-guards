@@ -6,8 +6,8 @@ import ApplicationForm from "../components/ApplicationForm.tsx";
 import heroPhoto from "../assets/hero/hero-officer.png";
 
 /**
- * Careers page — premium redesign (2026-10-10, owner: "premium layouts", no
- * black section fills, centred on mobile). The PR #48 build (plain Paper
+ * Careers page — premium redesign (2026-10-10, owner: "premium layouts" —
+ * Ink hero + roles band like About, centred on mobile). The PR #48 build (plain Paper
  * sections, form in a floating shadow card) is in CLAUDE.md's history; the
  * content rules from it still hold:
  *
@@ -58,14 +58,14 @@ const DOCUMENTS = [
     <Button href="#apply">Apply now</Button>
   </PageHero>
 
-  <section class="bg-paper">
-    <div class="mx-auto max-w-7xl px-gutter md:px-12">
-      <ul class="grid grid-cols-1 divide-y divide-hairline border-y border-hairline md:grid-cols-3 md:divide-x md:divide-y-0">
+  <section class="on-dark bg-ink text-paper">
+    <div class="mx-auto max-w-7xl px-gutter pb-16 md:px-12 md:pb-20">
+      <ul class="grid grid-cols-1 divide-y divide-paper/15 border-y border-paper/15 md:grid-cols-3 md:divide-x md:divide-y-0">
         {
           ROLES.map((role) => (
             <li class="px-2 py-8 text-center md:px-8 md:first:pl-0 md:last:pr-0 lg:text-left">
-              <p class="text-caption text-stone">Open role</p>
-              <h2 class="text-h4 text-ink mt-2">{role}</h2>
+              <p class="text-caption text-paper/70">Open role</p>
+              <h2 class="text-h4 mt-2">{role}</h2>
             </li>
           ))
         }

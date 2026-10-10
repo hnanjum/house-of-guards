@@ -19,7 +19,7 @@ import overnightPhoto from "../assets/services/overnight.jpg";
 
 /**
  * Services page — premium redesign (2026-10-10, owner: "premium layouts",
- * no black section fills, centred on mobile). Previous version: a sticky
+ * Ink hero and standards band like About, centred on mobile). Previous: a sticky
  * side index beside text-only rows, an Ink standards band, and the full
  * ClosingCta form (now on its own /contact/ page).
  *
@@ -27,7 +27,7 @@ import overnightPhoto from "../assets/services/overnight.jpg";
  * services (the servicesPage.ts module marks the one in view with
  * aria-current) → one editorial split row per service, photo and text
  * alternating sides on lg, stacked and centred on mobile → the shared
- * standards on Surface Alt → QuoteBand.
+ * standards on an Ink band → QuoteBand.
  *
  * Icons are Ink now (previously Electric Blue / Magenta). Photos are the
  * same stock images the homepage cards use, framed with the same
@@ -208,19 +208,19 @@ const DESCRIPTION =
       </div>
     </section>
 
-    <section class="bg-surface-alt">
+    <section class="on-dark bg-ink text-paper">
       <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-24">
         <div data-reveal class="text-center lg:text-left">
-          <p class="text-caption text-ink">Behind every service</p>
-          <h2 class="text-h2 text-ink mx-auto mt-4 max-w-2xl lg:mx-0">The same standard, every shift</h2>
+          <p class="text-caption text-paper/70">Behind every service</p>
+          <h2 class="text-h2 mx-auto mt-4 max-w-2xl lg:mx-0">The same standard, every shift</h2>
         </div>
-        <div class="mt-12 grid grid-cols-1 gap-px bg-hairline md:grid-cols-3">
+        <div class="mt-12 grid grid-cols-1 gap-px bg-paper/15 md:grid-cols-3">
           {
             STANDARDS.map(({ title, body }) => (
-              <div data-reveal class="bg-paper px-8 py-10 text-center md:text-left">
+              <div data-reveal class="bg-ink px-8 py-10 text-center md:text-left">
                 <span aria-hidden="true" class="bg-amber mx-auto block h-0.5 w-8 md:mx-0" />
-                <h3 class="text-h4 text-ink mt-6">{title}</h3>
-                <p class="text-body-sm text-stone mx-auto mt-2 max-w-xs md:mx-0">{body}</p>
+                <h3 class="text-h4 mt-6">{title}</h3>
+                <p class="text-body-sm text-paper/70 mx-auto mt-2 max-w-xs md:mx-0">{body}</p>
               </div>
             ))
           }
