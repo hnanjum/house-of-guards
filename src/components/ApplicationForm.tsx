@@ -71,8 +71,9 @@ type Status = "idle" | "submitting" | "success";
 type FieldName = "fullName" | "email" | "phone" | "location" | "position" | "siaBadge";
 type Errors = Partial<Record<FieldName, string>>;
 
-// Inlined at build time. Undefined until an endpoint exists.
-const ENDPOINT = import.meta.env.PUBLIC_APPLICATION_ENDPOINT as string | undefined;
+// The site's own Worker endpoint (worker/forms.ts) emails the application to
+// operations@. PUBLIC_APPLICATION_ENDPOINT can still override it at build time.
+const ENDPOINT = (import.meta.env.PUBLIC_APPLICATION_ENDPOINT as string | undefined) || "/api/application";
 
 const POSITION_OPTIONS = [
   { value: "sia-security-officer", label: "SIA Security Officer" },
@@ -158,13 +159,6 @@ export default function ApplicationForm() {
     }
     setShowSummary(false);
 
-    if (!ENDPOINT) {
-      // Not wired up. Say so; never show a success message for a
-      // submission that went nowhere, and keep what the visitor typed.
-      setSendError(<UnavailableMessage />);
-      return;
-    }
-
     setStatus("submitting");
     try {
       const response = await fetch(ENDPOINT, {
@@ -172,6 +166,13 @@ export default function ApplicationForm() {
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(Object.fromEntries(new FormData(form))),
       });
+      if (response.status === 503) {
+        // Email sending not switched on yet (no API key on the Worker). Say
+        // so; never show success for a submission that went nowhere.
+        setStatus("idle");
+        setSendError(<UnavailableMessage />);
+        return;
+      }
       if (!response.ok) throw new Error(`Application endpoint responded ${response.status}`);
       form.reset();
       setErrors({});
@@ -209,15 +210,8 @@ export default function ApplicationForm() {
       aria-label="Job application"
       className="mt-5"
     >
-      {!ENDPOINT && (
-        <p className="text-caption text-ink border-ink mb-5 border-l-2 pl-4">
-          Our online application form is not accepting submissions yet. To apply now, email{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className={linkClass}>
-            {CONTACT_EMAIL}
-          </a>
-          .
-        </p>
-      )}
+      {/* Honeypot for bots: hidden from people and assistive tech. */}
+      <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-px w-px opacity-0" />
 
       <motion.div
         className="grid grid-cols-1 gap-4 sm:grid-cols-2"

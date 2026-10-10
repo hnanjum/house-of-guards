@@ -89,6 +89,15 @@ Every change was a direct owner instruction.
   standards band, sector risks band, Careers roles band.
   Services = alternating photo/text rows; sector FAQ accent is Amber for all.
   Policies and Gallery removed from header, mobile menu and footer.
+- **Forms -> email** (2026-10-10): ContactForm (quote) and ApplicationForm
+  (careers) POST to /api/enquiry and /api/application, handled by
+  worker/forms.ts, which emails operations@harleygarrison.co.uk via Resend
+  (Reply-To = visitor). Needs Worker secret RESEND_API_KEY and the domain
+  verified in Resend; without the key the endpoint returns 503 and the
+  forms say NOT sent. Honeypot field "website", same-origin check. Owner
+  chose: both forms -> operations@, email only (no DB copy). Mailboxes:
+  owner wants a free service (Zoho Mail Free planned), so Cloudflare Email
+  Routing (MX) is not used.
 - **MOBILE CENTRING RULE (owner, standing)**: text/content sections
   centre-align on mobile and return to left-aligned once the layout goes
   multi-column (text-center lg:text-left, auto margins on max-width blocks
