@@ -1,0 +1,75 @@
+---
+import { Image } from "astro:assets";
+
+/**
+ * Shared opening section for interior pages (Services, sector pages,
+ * Careers, Get a Quote). Paper background — the owner asked for no black
+ * section fills on these pages. Caption, serif headline, short Amber rule,
+ * lead line, an optional actions slot, and an optional photo framed on the
+ * right with an offset Surface Alt block behind it.
+ *
+ * Mobile centring (standing owner rule): text centres until the layout
+ * splits into two columns at lg, then left-aligns. Without a photo the text
+ * block simply runs full width.
+ *
+ * Contrast: Ink on Paper ~19.4:1; Stone caption/lead on Paper ~4.6:1
+ * (14px+ only); Amber is a bare decorative rule, never text.
+ */
+interface Props {
+  eyebrow: string;
+  title: string;
+  lead?: string;
+  image?: ImageMetadata;
+  imageAlt?: string;
+  imagePosition?: string;
+}
+
+const { eyebrow, title, lead, image, imageAlt = "", imagePosition = "object-center" } = Astro.props;
+const hasActions = Astro.slots.has("default");
+---
+
+<section class="bg-paper">
+  <div
+    class:list={[
+      "mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-gutter pt-16 pb-20 md:px-12 md:pt-24 md:pb-28",
+      image && "lg:grid-cols-12 lg:gap-12",
+    ]}
+  >
+    <div class:list={["text-center lg:text-left", image && "lg:col-span-6"]}>
+      <p class="text-caption text-stone">{eyebrow}</p>
+      <h1 class="text-h1 sm:text-display text-ink mx-auto mt-5 max-w-2xl lg:mx-0">{title}</h1>
+      <span aria-hidden="true" class="mx-auto mt-8 block h-0.5 w-12 bg-amber lg:mx-0"></span>
+      {lead && <p class="text-body-lg text-stone mx-auto mt-8 max-w-xl lg:mx-0">{lead}</p>}
+      {
+        hasActions && (
+          <div class="mt-10 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+            <slot />
+          </div>
+        )
+      }
+    </div>
+
+    {
+      image && (
+        <div class="relative mx-auto w-full max-w-xl lg:col-span-6 lg:max-w-none">
+          <div
+            aria-hidden="true"
+            class="bg-surface-alt absolute -right-3 -bottom-3 hidden h-full w-full sm:block md:-right-5 md:-bottom-5"
+          />
+          <div class="relative aspect-[4/3] overflow-hidden">
+            <Image
+              src={image}
+              alt={imageAlt}
+              widths={[480, 768, 1024, 1400]}
+              sizes="(min-width: 1024px) 45vw, 100vw"
+              class:list={["h-full w-full object-cover", imagePosition]}
+              format="webp"
+              quality={82}
+              loading="eager"
+            />
+          </div>
+        </div>
+      )
+    }
+  </div>
+</section>

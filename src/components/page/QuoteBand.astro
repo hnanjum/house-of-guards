@@ -1,0 +1,44 @@
+---
+import Button from "../ui/Button.astro";
+
+/**
+ * Compact closing call-to-action for interior pages, now that the quote form
+ * lives on its own page (/contact/). Surface Alt band, serif heading, one
+ * line, the Amber primary button and the phone number (still the
+ * 01274 000 000 placeholder used sitewide). Centred on mobile, split on lg.
+ * Ink on Surface Alt ~17.8:1; no Stone on this fill (~4.2:1, too thin).
+ */
+interface Props {
+  heading?: string;
+  body?: string;
+  cta?: string;
+  href?: string;
+}
+
+const {
+  heading = "Talk to us about your site",
+  body = "Tell us about your requirement and we'll come back to you with a tailored quote.",
+  cta = "Get a Quote",
+  href = "/contact/",
+} = Astro.props;
+---
+
+<section class="bg-paper">
+  <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12 md:py-20">
+    <div
+      data-reveal
+      class="bg-surface-alt flex flex-col items-center gap-8 px-6 py-12 text-center sm:px-12 lg:flex-row lg:justify-between lg:px-16 lg:py-14 lg:text-left"
+    >
+      <div>
+        <h2 class="text-h2 text-ink">{heading}</h2>
+        <p class="text-body-sm text-ink mx-auto mt-3 max-w-lg lg:mx-0">{body}</p>
+      </div>
+      <div class="flex shrink-0 flex-col items-center gap-4 sm:flex-row lg:items-center">
+        <Button href={href}>{cta}</Button>
+        <a href="tel:+441274000000" class="text-caption text-ink underline decoration-ink/30 underline-offset-4 hover:decoration-ink">
+          or call 01274 000 000
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

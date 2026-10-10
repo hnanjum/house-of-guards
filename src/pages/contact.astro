@@ -1,0 +1,97 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHero from "../components/page/PageHero.astro";
+import ContactForm from "../components/ContactForm.tsx";
+import Phone from "../icons/Phone.astro";
+import Email from "../icons/Email.astro";
+import Location from "../icons/Location.astro";
+import { CONTACT_EMAIL } from "../data/contact";
+
+/**
+ * Get a Quote page (/contact/) — its own page on owner instruction
+ * (2026-10-10). Every "Get a Quote" button sitewide already pointed at
+ * /contact, which had no page until now.
+ *
+ * PageHero (no photo) → form card (white, hairline border) beside a Surface
+ * Alt panel with the contact details and what happens after you send.
+ *
+ * HONEST LIMITS, carried over from ContactForm.tsx: its submit handler is
+ * still a stub (console.log + success message), so enquiries sent here do
+ * not reach anyone yet. That needs a real endpoint (and spam protection)
+ * before this page is relied on. The phone number is still the
+ * 01274 000 000 placeholder used sitewide.
+ *
+ * Text centres on mobile, left-aligns from lg (standing owner rule); form
+ * fields stay left-aligned. Ink on Surface Alt ~17.8:1; Ink on Paper.
+ */
+const NEXT_STEPS = [
+  "We read every enquiry and respond promptly.",
+  "If needed, we arrange a call or a visit to understand your site.",
+  "You receive a tailored quote, with no obligation.",
+];
+---
+
+<BaseLayout
+  title="Get a Quote"
+  description="Request a no-obligation security quote from Harley Garrison — manned guarding, close protection, CCTV monitoring and more across West Yorkshire."
+>
+  <PageHero
+    eyebrow="Get a Quote"
+    title="Tell us about your requirement"
+    lead="Share a few details about your site and the cover you need, and a member of our team will come back to you with a tailored, no-obligation quote."
+  />
+
+  <section class="bg-paper">
+    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-gutter pb-20 md:px-12 md:pb-28 lg:grid-cols-12 lg:gap-10">
+      <div id="quote-form" class="border-hairline border bg-paper p-6 sm:p-8 lg:col-span-7 lg:p-10">
+        <h2 class="text-h3 text-ink">Your enquiry</h2>
+        <p class="text-caption text-stone mt-2">Required fields are marked by the form as you go.</p>
+        <ContactForm client:visible />
+      </div>
+
+      <aside class="bg-surface-alt p-8 text-center sm:p-10 lg:col-span-5 lg:text-left">
+        <h2 class="text-h3 text-ink">Prefer to talk?</h2>
+        <p class="text-body-sm text-ink mx-auto mt-3 max-w-sm lg:mx-0">
+          Speak to our team directly for a no-obligation consultation.
+        </p>
+
+        <ul class="mt-8 space-y-5">
+          <li>
+            <a href="tel:+441274000000" class="group inline-flex items-center gap-4 lg:flex">
+              <span class="bg-ink grid size-11 shrink-0 place-items-center rounded-full">
+                <Phone class="text-paper size-5" />
+              </span>
+              <span class="text-caption text-ink group-hover:text-ink/70 transition-colors duration-200">01274 000 000</span>
+            </a>
+          </li>
+          <li>
+            <a href={`mailto:${CONTACT_EMAIL}`} class="group inline-flex items-center gap-4 lg:flex">
+              <span class="bg-ink grid size-11 shrink-0 place-items-center rounded-full">
+                <Email class="text-paper size-5" />
+              </span>
+              <span class="text-caption text-ink group-hover:text-ink/70 transition-colors duration-200">{CONTACT_EMAIL}</span>
+            </a>
+          </li>
+          <li class="inline-flex items-center gap-4 lg:flex">
+            <span class="bg-ink grid size-11 shrink-0 place-items-center rounded-full">
+              <Location class="text-paper size-5" />
+            </span>
+            <span class="text-caption text-ink">Bradford, West Yorkshire</span>
+          </li>
+        </ul>
+
+        <h3 class="text-h4 text-ink mt-10 border-t border-ink/15 pt-8">What happens next</h3>
+        <ul class="mt-4 space-y-4">
+          {
+            NEXT_STEPS.map((step) => (
+              <li class="text-body-sm text-ink">
+                <span aria-hidden="true" class="bg-amber mx-auto mb-2 block h-0.5 w-6 lg:mx-0" />
+                {step}
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
