@@ -56,12 +56,15 @@ interface Props {
   variant?: "primary" | "secondary" | "outline-light";
   type?: "button" | "submit" | "reset";
   class?: string;
+  /** sm = compact header CTA (owner: the menu button read too big). */
+  size?: "md" | "sm";
 }
 
-const { href, variant = "primary", type = "button", class: className } = Astro.props;
+const { href, variant = "primary", type = "button", class: className, size = "md" } = Astro.props;
 
 const base =
-  "inline-flex items-center justify-center rounded-none px-5 py-2.5 text-caption transition-colors duration-200 ease-out";
+  "inline-flex items-center justify-center rounded-none text-caption transition-colors duration-200 ease-out " +
+  (size === "sm" ? "px-3.5 py-1.5" : "px-5 py-2.5");
 
 const variants = {
   primary:
