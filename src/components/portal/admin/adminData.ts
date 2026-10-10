@@ -118,6 +118,26 @@ export async function listClients(): Promise<Client[]> {
   return check(await supabase.from("clients").select("id, name").order("name"));
 }
 
+export interface ClientUser {
+  client_id: string;
+  user_id: string;
+  full_name: string;
+  email: string | null;
+  active: boolean;
+}
+
+export async function listClientUsers(): Promise<ClientUser[]> {
+  const rows = check(await supabase.from("client_users").select("client_id, user_id, profiles(full_name, email, active)"));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (rows ?? []).map((r: any) => ({
+    client_id: r.client_id,
+    user_id: r.user_id,
+    full_name: r.profiles?.full_name ?? "",
+    email: r.profiles?.email ?? null,
+    active: r.profiles?.active ?? false,
+  }));
+}
+
 export async function createClient(name: string) {
   check(await supabase.from("clients").insert({ name }).select("id"));
 }

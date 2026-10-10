@@ -24,6 +24,14 @@ Supabase dashboard -> **SQL Editor** -> paste the file -> **Run**.
 | File | Contents |
 |---|---|
 | `20261010000000_stage1_foundation.sql` | profiles/roles, clients, sites, site instructions, shifts, shift assignments, GPS clock events, Row Level Security |
+| `20261011000000_admin_email.sql` | read-only copy of each account's email on `profiles` (for the admin dashboard) |
+| `20261012000000_client_roster.sql` | `client_roster()` — the client portal's only view of officers: own sites only, first name + last initial |
+
+## Edge Functions
+
+| Function | Purpose |
+|---|---|
+| `invite-user` | Admin-only. Creates an officer or client-user account and returns a one-time invite link (no email needed). Deploy via Dashboard → Edge Functions → Via editor; keep "Verify JWT" on. |
 
 ## Security notes
 

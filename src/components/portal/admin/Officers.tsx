@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState, type SyntheticEvent } from "react";
-import { Field, Loading, Notice, PortalButton } from "../ui";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Loading, Notice, PortalButton } from "../ui";
 import { IconPlus, IconSearch } from "./icons";
-import { inviteUser, listOfficers, setOfficerActive, type Officer } from "./adminData";
+import { listOfficers, setOfficerActive, type Officer } from "./adminData";
+import InviteForm from "./InviteForm";
 import { Empty, Page, PageHeader, Panel, Status, Table, td } from "./kit";
 
 /**
@@ -50,7 +51,7 @@ export default function Officers() {
       />
       <Page>
         {error && <Notice kind="error">{error}</Notice>}
-        {inviting && <Invite onClose={() => setInviting(false)} onDone={load} />}
+        {inviting && <InviteForm role="guard" onClose={() => setInviting(false)} onDone={load} />}
 
         <Panel
           flush
@@ -119,82 +120,3 @@ function OfficerRow({ officer, onChanged }: { officer: Officer; onChanged: () =>
   );
 }
 
-function Invite({ onClose, onDone }: { onClose: () => void; onDone: () => Promise<void> }) {
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ name: string; url: string } | null>(null);
-  const [copied, setCopied] = useState(false);
-
-  async function submit(e: SyntheticEvent<HTMLFormElement, SubmitEvent>) {
-    e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    const full_name = String(f.get("name") ?? "").trim();
-    setBusy(true);
-    setError(null);
-    try {
-      const r = await inviteUser({ full_name, email: String(f.get("email") ?? "").trim(), role: "guard" });
-      setResult({ name: full_name, url: r.invite_url });
-      await onDone();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "The invite couldn't be created.");
-    }
-    setBusy(false);
-  }
-
-  if (result) {
-    const message = `Hi ${result.name.split(" ")[0]}, here is your Harley Garrison officer account link. Open it and press "Activate my account": ${result.url}`;
-    return (
-      <Panel title="Invite ready">
-        <div className="space-y-5">
-          <p className="text-body text-ink">
-            Send this link to {result.name}. It works once and expires in 24 hours.
-          </p>
-          <p className="text-caption border-hairline bg-surface-alt text-ink break-all border p-4">{result.url}</p>
-          <div className="flex flex-wrap gap-3">
-            <PortalButton
-              onClick={async () => {
-                await navigator.clipboard.writeText(result.url);
-                setCopied(true);
-              }}
-            >
-              {copied ? "Copied" : "Copy link"}
-            </PortalButton>
-            <a
-              href={`https://wa.me/?text=${encodeURIComponent(message)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-caption border-ink/20 text-ink inline-flex min-h-12 items-center border px-6 hover:border-ink"
-            >
-              Send on WhatsApp
-            </a>
-            <PortalButton tone="quiet" onClick={onClose}>
-              Done
-            </PortalButton>
-          </div>
-        </div>
-      </Panel>
-    );
-  }
-
-  return (
-    <Panel title="Invite an officer">
-      <form onSubmit={submit} className="grid gap-5 md:grid-cols-2">
-        <Field label="Full name" id="name" name="name" required autoComplete="off" />
-        <Field label="Email" id="email" name="email" type="email" required autoComplete="off" hint="They'll sign in with this." />
-        {error && (
-          <div className="md:col-span-2">
-            <Notice kind="error">{error}</Notice>
-          </div>
-        )}
-        <div className="flex gap-3 md:col-span-2">
-          <PortalButton type="submit" disabled={busy}>
-            {busy ? "Creating" : "Create invite"}
-          </PortalButton>
-          <PortalButton tone="quiet" onClick={onClose}>
-            Cancel
-          </PortalButton>
-        </div>
-      </form>
-    </Panel>
-  );
-}
