@@ -1,65 +1,38 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import SectionHeading from "../components/ui/SectionHeading.astro";
+import Button from "../components/ui/Button.astro";
+import PageHero from "../components/page/PageHero.astro";
 import ApplicationForm from "../components/ApplicationForm.tsx";
+import heroPhoto from "../assets/hero/hero-officer.png";
 
 /**
- * Careers page — satisfies the already-live `/careers` nav link (Header,
- * NavDrawer and Footer all pointed here before this file existed). Content
- * brief came from the OLD site's Careers page as a CONTENT reference only —
- * none of its look (dark hero, gold palette, uppercase letterspaced labels)
- * was carried over; this is the current design system throughout.
+ * Careers page — premium redesign (2026-10-10, owner: "premium layouts", no
+ * black section fills, centred on mobile). The PR #48 build (plain Paper
+ * sections, form in a floating shadow card) is in CLAUDE.md's history; the
+ * content rules from it still hold:
  *
- * SHAPE — reuses the About/sector-page shell rather than inventing one: a
- * plain-Paper hero (`text-h1 sm:text-display` H1, `text-body-lg` intro, the
- * same `max-w-7xl px-gutter` wrapper and padding), then plain-Paper
- * sections below it. NO full-bleed colour anywhere; the only colour on the
- * page is what the form island brings (Electric-Blue focus glow, Amber
- * submit button). Left-aligned throughout, the sitewide default.
+ * - The two "Why work for us" paragraphs and the how-to-apply intro are the
+ *   supplied text, verbatim. The old page's unverified "our crew describe us
+ *   as a good place to work" claim stays out.
+ * - "We are hiring" is a plain sentence-case caption, not a tracked-caps
+ *   eyebrow. The documents list has no icons (shield/checkmark banned).
+ * - ApplicationForm.tsx has no live submission endpoint yet and says so
+ *   rather than faking success. No privacy link (no policy page exists).
+ * - No JobPosting schema: no salary/contract/location confirmed.
  *
- * EYEBROW — "We are hiring" above the H1, on direct instruction. The hard
- * rule bans TRACKED-OUT ALL-CAPS eyebrow labels; this is neither tracked
- * nor uppercase — plain sentence-case `text-caption` in Stone, the same
- * secondary-text pairing used for captions elsewhere (~4.6:1 on Paper,
- * fine at 14px). It is written inline here, not added to
- * `SectionHeading.astro`, which still has no eyebrow slot by design.
+ * New here: the three role names (from the intro copy) as a hairline-ruled
+ * band, and "What we look for" — the four qualities named in the supplied
+ * paragraph, pulled out as short labels. The form sits in a white card with
+ * a hairline border on Surface Alt, beside the steps.
  *
- * CHECKLIST — a plain hairline-divided list, the same idiom as the fact
- * lists on `about.astro` and the sector pages. No icons: the shield/
- * checkmark motif is permanently banned on this site, which rules out the
- * obvious tick-list, and the wider icon-system question is still open, so
- * nothing new was introduced.
- *
- * COPY — the two "Why work for us" paragraphs and the how-to-apply intro
- * are the supplied text, verbatim. Deliberately absent: the old page's
- * claim that "our crew describe us as a good place to work" (unverified).
- * Two short lines are new and written here, not supplied: the checklist's
- * own heading ("What we'll ask for later") and the "Your application" card
- * heading with its one-line reminder that fields are required unless marked
- * optional.
- *
- * FORM — `ApplicationForm.tsx`, in the same floating white card as the
- * homepage's "Get A Quote" form. Read that component's own comment for the
- * important part: its submission endpoint is not wired up yet, and it says
- * so rather than faking a success message.
- *
- * NO PRIVACY LINK — the consent line under the form is plain text. There is
- * no privacy-policy route to link to: `/policies` is in the nav and footer
- * but has no page file behind it yet (it 404s), so linking it would ship a
- * dead link. Add the link to `ApplicationForm.tsx`'s consent line when a
- * real page exists.
- *
- * NO JobPosting SCHEMA — no salary, contract type or work-location details
- * have been confirmed, and structured data with invented values is worse
- * than none.
- *
- * MOTION — the generic `[data-reveal]` fade/rise (`scrollReveal.ts`) on the
- * two content sections below the hero, wired from this page's own
- * `astro:page-load` handler like every other page; the hero is already in
- * view on load so stays static. The form island's own Framer Motion field
- * stagger runs inside its already-revealed card, same layering as the
- * homepage form.
+ * Text centres on mobile, left-aligns from lg (standing owner rule); the
+ * form itself stays left-aligned for usability. Hero photo is the homepage
+ * officer image (no lettering on the uniform).
  */
+const ROLES = ["SIA-licensed security officers", "CCTV monitoring operators", "Event stewards"];
+
+const QUALITIES = ["Clear communication", "Calm problem solving", "Teamwork", "High standard of customer service"];
+
 const DOCUMENTS = [
   "Personal details and proof of address",
   "A copy of your passport",
@@ -74,59 +47,80 @@ const DOCUMENTS = [
   title="Careers"
   description="Join Harley Garrison, a Bradford-based security company. We're looking for SIA-licensed security officers, CCTV monitoring operators and event stewards — apply online."
 >
+  <PageHero
+    eyebrow="We are hiring"
+    title="Build your career in security"
+    lead="We're looking for SIA-licensed security officers, CCTV monitoring operators and event stewards. Most work is in West Yorkshire, with some longer-distance shifts where transport is provided."
+    image={heroPhoto}
+    imageAlt="A uniformed security officer standing on duty"
+    imagePosition="object-[16%_22%]"
+  >
+    <Button href="#apply">Apply now</Button>
+  </PageHero>
+
   <section class="bg-paper">
-    <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-28">
-      <p class="text-caption text-stone">We are hiring</p>
-      <h1 class="text-h1 sm:text-display text-ink mt-3 max-w-3xl">Careers</h1>
-      <p class="text-body-lg text-ink mt-4 max-w-2xl">
-        We're looking for SIA-licensed security officers, CCTV monitoring operators and event stewards. Most work
-        is in West Yorkshire, with some longer-distance shifts where transport is provided.
-      </p>
+    <div class="mx-auto max-w-7xl px-gutter md:px-12">
+      <ul class="grid grid-cols-1 divide-y divide-hairline border-y border-hairline md:grid-cols-3 md:divide-x md:divide-y-0">
+        {
+          ROLES.map((role) => (
+            <li class="px-2 py-8 text-center md:px-8 md:first:pl-0 md:last:pr-0 lg:text-left">
+              <p class="text-caption text-stone">Open role</p>
+              <h2 class="text-h4 text-ink mt-2">{role}</h2>
+            </li>
+          ))
+        }
+      </ul>
     </div>
   </section>
 
   <section class="bg-paper" data-reveal>
-    <div class="mx-auto max-w-7xl px-gutter pb-20 md:px-12 md:pb-24">
-      <SectionHeading level="h2">Why work for Harley Garrison?</SectionHeading>
-      <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-16">
-        <p class="text-body text-ink max-w-md">
+    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-gutter py-20 md:px-12 md:py-28 lg:grid-cols-12 lg:gap-16">
+      <div class="text-center lg:col-span-5 lg:text-left">
+        <p class="text-caption text-stone">Working with us</p>
+        <h2 class="text-h2 text-ink mt-4">Why work for Harley Garrison?</h2>
+        <span aria-hidden="true" class="bg-amber mx-auto mt-6 block h-0.5 w-12 lg:mx-0"></span>
+      </div>
+      <div class="text-center lg:col-span-7 lg:text-left">
+        <p class="text-body-sm text-ink mx-auto max-w-xl lg:mx-0">
           We offer work to every member of the team, and every officer is vetted thoroughly in line with SIA
           regulations. We look for people who communicate well, solve problems calmly, work as part of a team and
           hold a high standard of customer service.
         </p>
-        <p class="text-body text-ink max-w-md">
+        <p class="text-body-sm text-stone mx-auto mt-5 max-w-xl lg:mx-0">
           Respect matters here. Immature behaviour and bullying are not tolerated, and every member of staff is
           treated equally regardless of race or gender. We welcome people from all backgrounds and aim to deliver
           the highest possible standard in the security sector with their help.
         </p>
+
+        <h3 class="text-h4 text-ink mt-10">What we look for</h3>
+        <ul class="mt-4 flex flex-wrap justify-center gap-2 lg:justify-start">
+          {QUALITIES.map((q) => <li class="text-caption text-ink border border-hairline px-4 py-2">{q}</li>)}
+        </ul>
       </div>
     </div>
   </section>
 
-  <section class="bg-paper">
-    <div class="mx-auto max-w-7xl px-gutter pb-20 md:px-12 md:pb-28">
-      <div class="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
-        <div data-reveal class="lg:col-span-5">
-          <SectionHeading level="h2">How to apply</SectionHeading>
-          <p class="text-body text-ink mt-4 max-w-md">
-            Apply online using the form. Once we receive your application, a member of our team will contact you
-            by email to request your documents.
-          </p>
+  <section id="apply" class="bg-surface-alt scroll-mt-24">
+    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-gutter py-20 md:px-12 md:py-24 lg:grid-cols-12 lg:gap-16">
+      <div data-reveal class="text-center lg:col-span-5 lg:text-left">
+        <p class="text-caption text-ink">How to apply</p>
+        <h2 class="text-h2 text-ink mt-4">Apply online</h2>
+        <p class="text-body-sm text-ink mx-auto mt-5 max-w-md lg:mx-0">
+          Apply online using the form. Once we receive your application, a member of our team will contact you by
+          email to request your documents.
+        </p>
 
-          <h3 class="text-body-lg text-ink mt-8 font-semibold">What we'll ask for later</h3>
-          <ul class="divide-hairline border-hairline mt-4 max-w-md divide-y border-t">
-            {DOCUMENTS.map((item) => <li class="text-body text-ink py-4">{item}</li>)}
-          </ul>
-        </div>
+        <h3 class="text-h4 text-ink mt-10">What we'll ask for later</h3>
+        <ul class="divide-ink/15 border-ink/15 mx-auto mt-4 max-w-md divide-y border-y lg:mx-0">
+          {DOCUMENTS.map((item) => <li class="text-body-sm text-ink py-3">{item}</li>)}
+        </ul>
+      </div>
 
-        <div data-reveal class="lg:col-span-7">
-          <div id="apply" class="bg-paper p-6 shadow-2xl sm:p-8 lg:p-9">
-            <SectionHeading level="h3">Your application</SectionHeading>
-            <p class="text-caption text-stone mt-2">
-              All fields are required unless marked optional.
-            </p>
-            <ApplicationForm client:visible />
-          </div>
+      <div data-reveal class="lg:col-span-7">
+        <div class="bg-paper border border-hairline p-6 sm:p-8 lg:p-10">
+          <h2 class="text-h3 text-ink">Your application</h2>
+          <p class="text-caption text-stone mt-2">All fields are required unless marked optional.</p>
+          <ApplicationForm client:visible />
         </div>
       </div>
     </div>

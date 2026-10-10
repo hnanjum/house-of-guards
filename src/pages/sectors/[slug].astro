@@ -1,7 +1,9 @@
 ---
 import { Image } from "astro:assets";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import ClosingCta from "../../components/home/ClosingCta.astro";
+import Button from "../../components/ui/Button.astro";
+import PageHero from "../../components/page/PageHero.astro";
+import QuoteBand from "../../components/page/QuoteBand.astro";
 import Chevron from "../../icons/Chevron.astro";
 import { SECTORS, type Sector } from "../../data/sectors";
 
@@ -120,12 +122,11 @@ const WHY_INTRO = `Every officer we deploy to a ${sector.name.toLowerCase()} sit
 // "plain" (Corporate/Education, no `sector.fill`) reuses Amber as a bare,
 // non-fill mark — the same accepted use as the header-nav/MissionBand
 // underline, not a new exception.
-const ACCENT_TRIGGER_CLASS: Record<"electric-blue" | "magenta" | "plain", string> = {
-  "electric-blue": "group-has-[[aria-expanded='true']]:border-electric-blue",
-  magenta: "group-has-[[aria-expanded='true']]:border-magenta",
-  plain: "group-has-[[aria-expanded='true']]:border-amber",
-};
-const accentTriggerClass = ACCENT_TRIGGER_CLASS[sector.fill ?? "plain"];
+// Open FAQ row accent: Amber on every sector now (owner moved the public
+// site to black/white/grey; the old per-sector Electric Blue / Magenta
+// mark is retired). Amber as a bare 2px mark on Paper (~2.15:1) is the
+// already-accepted decorative-mark tradeoff (PR #17/#18).
+const accentTriggerClass = "group-has-[[aria-expanded='true']]:border-amber";
 
 const hasRisks = Boolean(sector.risks?.length);
 const hasFaqs = Boolean(sector.faqs?.length);
@@ -208,78 +209,85 @@ const faqSchema = hasFaqs
   <script type="application/ld+json" is:inline set:html={JSON.stringify(serviceSchema)} />
   {faqSchema && <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />}
 
-  <section class="bg-paper">
-    <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-28">
-      <h1 class="text-h1 sm:text-display text-ink max-w-3xl">{sector.name} Security</h1>
-      <p class="text-body-lg text-ink mt-4 max-w-2xl">{sector.headline}</p>
-
-      <div class="mt-12 grid grid-cols-1 items-start gap-12 md:grid-cols-2 md:gap-16 lg:gap-20">
-        <div class="text-left">
-          <p class="text-body text-ink max-w-md">{sector.blurb}</p>
-          {
-            sector.expandedDescription && (
-              <p class="text-body text-ink mt-5 max-w-md">{sector.expandedDescription}</p>
-            )
-          }
-          <p class="text-caption text-stone mt-6 max-w-md">
-            Harley Garrison is based in Bradford, covering {sector.name.toLowerCase()} sites across West
-            Yorkshire — alongside <a href={`/sectors/${relatedSectors[0].slug}`} class="text-ink underline decoration-hairline underline-offset-2 hover:decoration-ink">{relatedSectors[0].name.toLowerCase()}</a> and{" "}
-            <a href={`/sectors/${relatedSectors[1].slug}`} class="text-ink underline decoration-hairline underline-offset-2 hover:decoration-ink">{relatedSectors[1].name.toLowerCase()}</a> security.
-          </p>
-        </div>
-
-        <div class="aspect-[3/2] overflow-hidden md:justify-self-end">
-          <Image
-            src={sector.photo}
-            alt={sector.alt}
-            widths={[400, 600, 768, 1024]}
-            sizes="(min-width: 768px) 50vw, 100vw"
-            class="h-full w-full object-cover"
-            format="webp"
-            quality={82}
-            loading="eager"
-          />
-        </div>
-      </div>
-    </div>
-  </section>
+  <PageHero
+    eyebrow={`Sectors · ${sector.name}`}
+    title={`${sector.name} Security`}
+    lead={sector.headline}
+    image={sector.photo}
+    imageAlt={sector.alt}
+  >
+    <Button href="/contact/">Get a Quote</Button>
+  </PageHero>
 
   <section class="bg-paper" data-reveal>
-    <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-24">
-      {
-        hasRisks && (
-          <div>
-            <h2 class="text-h3 text-ink">Risks & challenges in {sector.name.toLowerCase()} security</h2>
-            <ul class="mt-6 grid grid-cols-1 gap-x-12 gap-y-4 md:grid-cols-2">
-              {sector.risks!.map((risk) => (
-                <li class="text-body text-ink border-t border-hairline pt-4">{risk}</li>
-              ))}
-            </ul>
-            {sector.approach && <p class="text-body text-ink mt-8 max-w-2xl">{sector.approach}</p>}
-          </div>
-        )
-      }
-
-      <div class:list={[hasRisks && "mt-16"]}>
-        <h2 class="text-h3 text-ink">Why Harley Garrison</h2>
-        <p class="text-body text-ink mt-4 max-w-2xl">{WHY_INTRO}</p>
-
-        <ul class="mt-8 max-w-md divide-y divide-hairline border-t border-hairline">
-          <li class="py-4 text-body text-ink">SIA licensed and DBS checked officers</li>
-          <li class="py-4 text-body text-ink">First aid trained personnel</li>
-          <li class="py-4 text-body text-ink">Bespoke shift patterns, arranged around you</li>
-        </ul>
+    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-gutter pb-20 md:px-12 md:pb-28 lg:grid-cols-12 lg:gap-16">
+      <div class="text-center lg:col-span-7 lg:text-left">
+        <p class="text-caption text-stone">Overview</p>
+        <h2 class="text-h2 text-ink mt-4">How we protect {sector.name.toLowerCase()} sites</h2>
+        <p class="text-body-sm text-ink mx-auto mt-6 max-w-xl lg:mx-0">{sector.blurb}</p>
+        {
+          sector.expandedDescription && (
+            <p class="text-body-sm text-stone mx-auto mt-5 max-w-xl lg:mx-0">{sector.expandedDescription}</p>
+          )
+        }
+        <p class="text-caption text-stone mx-auto mt-8 max-w-xl lg:mx-0">
+          Based in Bradford, covering {sector.name.toLowerCase()} sites across West Yorkshire — alongside{" "}
+          <a href={`/sectors/${relatedSectors[0].slug}/`} class="text-ink underline decoration-hairline underline-offset-2 hover:decoration-ink">{relatedSectors[0].name.toLowerCase()}</a> and{" "}
+          <a href={`/sectors/${relatedSectors[1].slug}/`} class="text-ink underline decoration-hairline underline-offset-2 hover:decoration-ink">{relatedSectors[1].name.toLowerCase()}</a> security.
+        </p>
       </div>
+
+      <aside class="bg-surface-alt p-8 text-center sm:p-10 lg:col-span-5 lg:text-left">
+        <h2 class="text-h3 text-ink">Why Harley Garrison</h2>
+        <p class="text-body-sm text-ink mx-auto mt-3 max-w-sm lg:mx-0">{WHY_INTRO}</p>
+        <ul class="mt-6 divide-y divide-ink/15 border-y border-ink/15">
+          <li class="text-body-sm text-ink py-3.5">SIA licensed and DBS checked officers</li>
+          <li class="text-body-sm text-ink py-3.5">First aid trained personnel</li>
+          <li class="text-body-sm text-ink py-3.5">Bespoke shift patterns, arranged around you</li>
+        </ul>
+      </aside>
     </div>
   </section>
 
   {
+    hasRisks && (
+      <section class="bg-surface-alt">
+        <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-24">
+          <div data-reveal class="text-center lg:text-left">
+            <p class="text-caption text-ink">The challenge</p>
+            <h2 class="text-h2 text-ink mx-auto mt-4 max-w-2xl lg:mx-0">
+              Risks in {sector.name.toLowerCase()} security
+            </h2>
+          </div>
+          <ul data-reveal class="bg-hairline mt-12 grid grid-cols-1 gap-px md:grid-cols-2">
+            {sector.risks!.map((risk) => (
+              <li class="bg-paper px-8 py-7 text-center md:text-left">
+                <span aria-hidden="true" class="bg-amber mx-auto mb-4 block h-0.5 w-6 md:mx-0" />
+                <p class="text-body-sm text-ink">{risk}</p>
+              </li>
+            ))}
+          </ul>
+          {sector.approach && (
+            <div data-reveal class="mt-12 text-center lg:grid lg:grid-cols-12 lg:gap-16 lg:text-left">
+              <h3 class="text-h3 text-ink lg:col-span-4">Our approach</h3>
+              <p class="text-body-sm text-ink mx-auto mt-4 max-w-2xl lg:col-span-8 lg:mx-0 lg:mt-0">{sector.approach}</p>
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  {
     hasFaqs && (
       <section class="bg-paper">
-        <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-24">
-          <h2 class="text-h2 text-ink">Frequently asked questions</h2>
+        <div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-gutter py-20 md:px-12 md:py-24 lg:grid-cols-12 lg:gap-16">
+          <div class="text-center lg:col-span-4 lg:text-left">
+            <p class="text-caption text-stone">Questions</p>
+            <h2 class="text-h2 text-ink mt-4">Frequently asked questions</h2>
+          </div>
 
-          <div class="mt-10 max-w-3xl divide-y divide-hairline border-t border-hairline">
+          <div class="divide-y divide-hairline border-y border-hairline lg:col-span-8">
             {sector.faqs!.map((faq, i) => (
               <div data-faq-item class="group">
                 <button
@@ -293,7 +301,7 @@ const faqSchema = hasFaqs
                     accentTriggerClass,
                   ]}
                 >
-                  <span class="text-body-lg font-semibold text-ink">{faq.question}</span>
+                  <span class="text-h4 text-ink">{faq.question}</span>
                   <Chevron class="size-4 shrink-0 text-ink transition-transform duration-200 ease-out group-has-[[aria-expanded='true']]:rotate-90" />
                 </button>
                 <div
@@ -303,7 +311,7 @@ const faqSchema = hasFaqs
                   data-faq-panel
                   class="pl-4"
                 >
-                  <p class="text-body text-ink max-w-2xl pb-6">{faq.answer}</p>
+                  <p class="text-body-sm text-stone max-w-2xl pb-6">{faq.answer}</p>
                 </div>
               </div>
             ))}
@@ -313,7 +321,39 @@ const faqSchema = hasFaqs
     )
   }
 
-  <ClosingCta />
+  <section class="bg-paper">
+    <div class="mx-auto max-w-7xl px-gutter pb-4 md:px-12">
+      <div class="border-t border-hairline pt-16 text-center lg:text-left">
+        <p class="text-caption text-stone">Other sectors</p>
+        <h2 class="text-h2 text-ink mt-4">Who else we protect</h2>
+      </div>
+      <div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
+        {
+          relatedSectors.map((related) => (
+            <a href={`/sectors/${related.slug}/`} class="group block">
+              <div class="aspect-[16/9] overflow-hidden">
+                <Image
+                  src={related.photo}
+                  alt=""
+                  widths={[480, 768, 1024]}
+                  sizes="(min-width: 640px) 45vw, 100vw"
+                  class="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.04]"
+                  format="webp"
+                  quality={78}
+                />
+              </div>
+              <div class="mt-5 text-center sm:text-left">
+                <h3 class="text-h3 text-ink">{related.name} Security</h3>
+                <span aria-hidden="true" class="bg-amber mx-auto mt-3 block h-0.5 w-8 transition-[width] duration-500 ease-out group-hover:w-14 sm:mx-0" />
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <QuoteBand heading={`Security for your ${sector.name.toLowerCase()} site`} />
 
   <script>
     import { initScrollReveal } from "../../lib/scrollReveal";

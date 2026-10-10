@@ -80,6 +80,13 @@ Every change was a direct owner instruction.
   hairline-ruled credentials band, mission/vision as two Paper panels on
   Surface Alt, then the homepage ServicesGrid and ClosingCta unmodified.
   Running copy uses a new 15px text-body-sm step. No blue/magenta left.
+- **Interior pages** (2026-10-10): Services, the six sector pages, Careers
+  and the new Get a Quote page (/contact/) share src/components/page/
+  PageHero.astro (Paper, caption + serif h1 + Amber rule + lead, optional
+  photo with offset Surface Alt block) and QuoteBand.astro (Surface Alt
+  closing CTA to /contact/). Owner: NO black section fills on these pages.
+  Services = alternating photo/text rows; sector FAQ accent is Amber for all.
+  Policies and Gallery removed from header, mobile menu and footer.
 - **MOBILE CENTRING RULE (owner, standing)**: text/content sections
   centre-align on mobile and return to left-aligned once the layout goes
   multi-column (text-center lg:text-left, auto margins on max-width blocks
@@ -87,8 +94,7 @@ Every change was a direct owner instruction.
 - **SEO**: site is set in astro.config.mjs, BaseLayout emits a canonical
   link, src/pages/sitemap.xml.ts lists public pages (add new ones to
   PAGES), public/robots.txt blocks the portal paths.
-- **Still blue/magenta, not yet asked about**: sector
-  detail pages' FAQ accent line, the portals.
+- **Still blue/magenta, not yet asked about**: the portals only.
 - **Open items**: real phone number (01274 000 000 is a placeholder);
   info bar still says "Bradford, West Yorkshire"; registered office
   address not on the site yet (legally required); MissionBand team photo
