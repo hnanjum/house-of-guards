@@ -107,7 +107,7 @@ function crossfadePanel(outgoing: HTMLElement, incoming: HTMLElement) {
   });
 }
 
-function activateSector(root: ParentNode, slug: string) {
+function activateSector(root: ParentNode, slug: string, auto = false) {
   const tablist = root.querySelector<HTMLElement>(TABLIST_SELECTOR);
   const tabs = root.querySelectorAll<HTMLElement>(TAB_SELECTOR);
   const panels = root.querySelectorAll<HTMLElement>(PANEL_SELECTOR);
@@ -117,7 +117,21 @@ function activateSector(root: ParentNode, slug: string) {
   if (!nextTab || !nextPanel) return;
 
   tabs.forEach((tab) => setTabState(tab, tab === nextTab));
-  ensureTabVisible(nextTab, tablist);
+  if (auto) {
+    // Auto-rotation must never move the PAGE (scrollIntoView can nudge
+    // the window vertically) — only slide the tab row sideways.
+    if (tablist && tablist.scrollWidth > tablist.clientWidth) {
+      tablist.scrollTo({
+        left:
+          tablist.scrollLeft +
+          (nextTab.getBoundingClientRect().left - tablist.getBoundingClientRect().left) -
+          (tablist.clientWidth - nextTab.offsetWidth) / 2,
+        behavior: "smooth",
+      });
+    }
+  } else {
+    ensureTabVisible(nextTab, tablist);
+  }
 
   if (!nextPanel.hidden) return; // already the active panel
 
@@ -162,4 +176,63 @@ export function initSectorsGridTabs(root: ParentNode = document) {
     activateSector(root, slug);
     nextTab.focus();
   });
+
+  initAutoRotate(root, tablist, Array.from(tabs));
+}
+
+/**
+ * AUTO-ROTATE — on direct instruction from the owner, the tabs advance
+ * on their own (Retail → Distribution → … → Education → Retail) every
+ * few seconds while the section is on screen, using the same crossfade
+ * a click does. The moment a visitor takes over — clicks or taps
+ * anywhere in the section, presses a key in the tab row, or tabs focus
+ * into it — rotation stops for good on that page view, leaving them in
+ * full control. Mouse hover only pauses it (someone reading the panel),
+ * and it carries on when the pointer leaves. Never runs under
+ * prefers-reduced-motion, off screen, or in a background browser tab
+ * (WCAG 2.2.2: auto-updating content must be stoppable).
+ */
+const ROTATE_EVERY_MS = 6000;
+const ROTATE_TICK_MS = 250;
+
+function initAutoRotate(root: ParentNode, tablist: HTMLElement, tabs: HTMLElement[]) {
+  if (prefersReducedMotion() || tabs.length < 2) return;
+  const section = tablist.closest("section") ?? tablist.parentElement;
+  if (!section) return;
+
+  let stopped = false;
+  let hovered = false;
+  let onScreen = false;
+  let elapsed = 0;
+
+  const stop = () => {
+    stopped = true;
+  };
+  section.addEventListener("pointerdown", stop);
+  section.addEventListener("focusin", stop);
+  tablist.addEventListener("keydown", stop);
+  section.addEventListener("pointerenter", (e) => {
+    if (e.pointerType === "mouse") hovered = true;
+  });
+  section.addEventListener("pointerleave", () => {
+    hovered = false;
+  });
+
+  new IntersectionObserver(([entry]) => (onScreen = entry.isIntersecting), { threshold: 0.4 }).observe(section);
+
+  const timer = window.setInterval(() => {
+    if (stopped || !section.isConnected) {
+      window.clearInterval(timer);
+      return;
+    }
+    if (hovered || !onScreen || document.visibilityState !== "visible") return;
+
+    elapsed += ROTATE_TICK_MS;
+    if (elapsed < ROTATE_EVERY_MS) return;
+    elapsed = 0;
+
+    const current = tabs.findIndex((tab) => tab.getAttribute("aria-selected") === "true");
+    const slug = tabs[(current + 1) % tabs.length].dataset.slug;
+    if (slug) activateSector(root, slug, true);
+  }, ROTATE_TICK_MS);
 }
