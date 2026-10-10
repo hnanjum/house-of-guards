@@ -33,6 +33,39 @@ export async function loadAssignments(officerId: string): Promise<Assignment[]> 
   return (data ?? []).map(toAssignment).sort((a, b) => a.shift.starts_at.localeCompare(b.shift.starts_at));
 }
 
+/** Accepted shifts that started in [from, to) — the officer's history. */
+export async function loadWorked(officerId: string, from: Date, to: Date): Promise<Assignment[]> {
+  const { data, error } = await supabase
+    .from("shift_assignments")
+    .select(SHIFT_FIELDS)
+    .eq("guard_id", officerId)
+    .eq("status", "accepted")
+    .gte("shifts.starts_at", from.toISOString())
+    .lt("shifts.starts_at", to.toISOString())
+    .limit(500);
+  if (error) throw error;
+  return (data ?? []).map(toAssignment).sort((x, y) => y.shift.starts_at.localeCompare(x.shift.starts_at));
+}
+
+/** Clocked hours for one assignment: first clock-in to last clock-out. */
+export function hoursFor(events: ClockEvent[] | undefined): number | null {
+  const ins = events?.filter((e) => e.type === "in") ?? [];
+  const outs = events?.filter((e) => e.type === "out") ?? [];
+  if (!ins.length || !outs.length) return null;
+  return Math.max(0, (Date.parse(outs.at(-1)!.server_time) - Date.parse(ins[0].server_time)) / 3_600_000);
+}
+
+export async function updateMyPhone(officerId: string, phone: string | null) {
+  const { data, error } = await supabase.from("profiles").update({ phone }).eq("id", officerId).select("id");
+  if (error) throw error;
+  if (!data?.length) throw new Error("Not saved");
+}
+
+export async function loadMyEmail(): Promise<string | null> {
+  const { data } = await supabase.auth.getUser();
+  return data.user?.email ?? null;
+}
+
 export async function loadAssignment(id: string): Promise<Assignment | null> {
   const { data, error } = await supabase.from("shift_assignments").select(SHIFT_FIELDS).eq("id", id).maybeSingle();
   if (error) throw error;

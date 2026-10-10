@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Assignment, ClockEvent, SiteInstruction } from "../../../lib/portalSupabase";
 import { fmtDay, fmtTime, Loading, mapsUrl, Notice, PortalButton } from "../ui";
+import { Page, PageHeader, Panel } from "../admin/kit";
 import { CLOCK_IN_OPENS_MIN, clock, dutyState, loadAssignment, loadClockEvents, loadInstructions, readPosition, respond, type Position } from "./data";
 
 /**
@@ -43,85 +44,94 @@ export default function ShiftDetail({
     load();
   }, [load]);
 
-  if (!a) return error ? <Notice kind="error">{error}</Notice> : <Loading label="Loading shift" />;
+  if (!a) {
+    return (
+      <>
+        <PageHeader offset={false} title="Shift" />
+        <Page>{error ? <Notice kind="error">{error}</Notice> : <Loading label="Loading shift" />}</Page>
+      </>
+    );
+  }
 
   const { shift } = a;
   const state = a.status === "accepted" ? dutyState(a, events) : null;
 
+  const back = (
+    <a href="#/shifts" className="text-caption text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink">
+      My shifts
+    </a>
+  );
+
   return (
-    <article>
-      <a href="#/" className="text-caption text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink">
-        All shifts
-      </a>
+    <>
+      <PageHeader
+        offset={false}
+        title={`${fmtTime(shift.starts_at)} – ${fmtTime(shift.ends_at)}`}
+        subtitle={fmtDay(shift.starts_at)}
+        actions={back}
+      />
+      <Page>
+        {error && <Notice kind="error">{error}</Notice>}
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <div className="space-y-8">
+            <section className="on-dark bg-electric-blue text-paper px-6 py-6 sm:px-8" aria-label="Site">
+              <p className="text-caption text-paper/85">Site</p>
+              <p className="text-h3 mt-2">{shift.site.name}</p>
+              {shift.site.address && <p className="text-caption text-paper/85 mt-1">{shift.site.address}</p>}
+              <a
+                href={mapsUrl(shift.site)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-caption border-paper/40 text-paper mt-5 inline-flex min-h-11 items-center border px-5 hover:border-paper"
+              >
+                Get directions
+              </a>
+            </section>
 
-      <p className="text-caption text-stone mt-10">{fmtDay(shift.starts_at)}</p>
-      <h1 className="text-h2 sm:text-h1 text-ink mt-3 tabular-nums leading-none">
-        {fmtTime(shift.starts_at)}
-        <span className="text-stone"> – </span>
-        {fmtTime(shift.ends_at)}
-      </h1>
-      <p className="text-h3 text-ink mt-6">{shift.site.name}</p>
-      {shift.site.address && <p className="text-body text-stone mt-1">{shift.site.address}</p>}
-      <a
-        href={mapsUrl(shift.site)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-caption text-ink mt-4 inline-block underline decoration-hairline underline-offset-4 hover:decoration-ink"
-      >
-        Get directions
-      </a>
+            <Panel title={a.status === "offered" ? "Shift offer" : "Attendance"}>
+              {a.status === "offered" ? (
+                <OfferControls assignmentId={a.id} onDone={async () => { await load(); await onChanged(); }} />
+              ) : (
+                <ClockPanel
+                  state={state!}
+                  events={events}
+                  opensAt={new Date(Date.parse(shift.starts_at) - CLOCK_IN_OPENS_MIN * 60_000).toISOString()}
+                  onClock={async (type, position) => {
+                    const ev = await clock(a.id, officerId, type, position);
+                    setEvents((prev) => [...prev, ev]);
+                    await onChanged();
+                    return ev;
+                  }}
+                />
+              )}
+            </Panel>
 
-      {error && (
-        <div className="mt-8">
-          <Notice kind="error">{error}</Notice>
+            {shift.notes && (
+              <Panel title="Notes for this shift">
+                <p className="text-caption text-ink whitespace-pre-line">{shift.notes}</p>
+              </Panel>
+            )}
+          </div>
+
+          <Panel title="Site instructions" flush>
+            {instructions === null ? (
+              <Loading />
+            ) : instructions.length === 0 ? (
+              <p className="text-caption text-stone px-6 py-8">No instructions have been added for this site yet.</p>
+            ) : (
+              <ol className="divide-hairline divide-y">
+                {instructions.map((i) => (
+                  <li key={i.id} className="px-6 py-5">
+                    <h3 className="text-h4 text-ink">{i.title}</h3>
+                    {i.body && <p className="text-caption text-ink/80 mt-1.5 whitespace-pre-line">{i.body}</p>}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Panel>
         </div>
-      )}
-
-      {a.status === "offered" ? (
-        <OfferControls assignmentId={a.id} onDone={async () => { await load(); await onChanged(); }} />
-      ) : (
-        <ClockPanel
-          state={state!}
-          events={events}
-          opensAt={new Date(Date.parse(shift.starts_at) - CLOCK_IN_OPENS_MIN * 60_000).toISOString()}
-          onClock={async (type, position) => {
-            const ev = await clock(a.id, officerId, type, position);
-            setEvents((prev) => [...prev, ev]);
-            await onChanged();
-            return ev;
-          }}
-        />
-      )}
-
-      {shift.notes && (
-        <section className="mt-16" aria-labelledby="notes">
-          <h2 id="notes" className="text-h3 text-ink">
-            Notes for this shift
-          </h2>
-          <p className="text-body text-ink mt-4 whitespace-pre-line">{shift.notes}</p>
-        </section>
-      )}
-
-      <section className="mt-16" aria-labelledby="instructions">
-        <h2 id="instructions" className="text-h3 text-ink">
-          Site instructions
-        </h2>
-        {instructions === null ? (
-          <p className="text-caption text-stone mt-4">Loading…</p>
-        ) : instructions.length === 0 ? (
-          <p className="text-body text-stone mt-4">No instructions have been added for this site yet.</p>
-        ) : (
-          <ol className="divide-hairline border-hairline mt-6 divide-y border-y">
-            {instructions.map((i) => (
-              <li key={i.id} className="py-6">
-                <h3 className="text-h4 text-ink">{i.title}</h3>
-                {i.body && <p className="text-body text-ink/80 mt-2 whitespace-pre-line">{i.body}</p>}
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
-    </article>
+      </Page>
+    </>
   );
 }
 
@@ -140,8 +150,8 @@ function OfferControls({ assignmentId, onDone }: { assignmentId: string; onDone:
     setBusy(false);
   };
   return (
-    <section className="border-hairline mt-12 border-t pt-8">
-      <p className="text-body text-ink">The office has offered you this shift.</p>
+    <div>
+      <p className="text-caption text-ink">The office has offered you this shift.</p>
       <div className="mt-6 flex flex-wrap gap-3">
         <PortalButton disabled={busy} onClick={() => answer("accepted")}>
           Accept shift
@@ -155,7 +165,7 @@ function OfferControls({ assignmentId, onDone }: { assignmentId: string; onDone:
           <Notice kind="error">{error}</Notice>
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
@@ -211,12 +221,8 @@ function ClockPanel({
   const lastOut = [...events].reverse().find((e) => e.type === "out");
 
   return (
-    <section className="border-hairline mt-12 border-t pt-8" aria-labelledby="attendance">
-      <h2 id="attendance" className="text-h3 text-ink">
-        Attendance
-      </h2>
-
-      <dl className="mt-6 grid grid-cols-2 gap-6">
+    <div>
+      <dl className="grid grid-cols-2 gap-6">
         <div>
           <dt className="text-caption text-stone">Clocked in</dt>
           <dd className="text-h3 text-ink mt-1 tabular-nums">{firstIn ? fmtTime(firstIn.server_time) : "—"}</dd>
@@ -229,10 +235,10 @@ function ClockPanel({
 
       <div className="mt-8 space-y-6" aria-live="polite">
         {state === "not-yet" && (
-          <p className="text-body text-stone">Clocking in opens at {fmtTime(opensAt)} on {fmtDay(opensAt)}.</p>
+          <p className="text-caption text-stone">Clocking in opens at {fmtTime(opensAt)} on {fmtDay(opensAt)}.</p>
         )}
-        {state === "missed" && <p className="text-body text-stone">This shift has ended without a clock-in. Contact the office.</p>}
-        {state === "done" && <p className="text-body text-ink">Shift complete. Thank you.</p>}
+        {state === "missed" && <p className="text-caption text-stone">This shift has ended without a clock-in. Contact the office.</p>}
+        {state === "done" && <p className="text-caption text-ink">Shift complete. Thank you.</p>}
 
         {(state === "can-clock-in" || state === "on-duty") && !noLocation && (
           <PortalButton className="w-full sm:w-auto sm:min-w-64" disabled={busy} onClick={start}>
@@ -243,7 +249,7 @@ function ClockPanel({
         {noLocation && (
           <div className="space-y-5">
             <Notice kind="error">{noLocation.reason}</Notice>
-            <p className="text-body text-ink">
+            <p className="text-caption text-ink">
               You can turn location on and try again, or {noLocation.type === "in" ? "clock in" : "clock out"} without it.
               The office will see that no location was recorded.
             </p>
@@ -260,6 +266,6 @@ function ClockPanel({
 
         {message && <Notice kind={message.kind}>{message.text}</Notice>}
       </div>
-    </section>
+    </div>
   );
 }
