@@ -65,6 +65,13 @@ export const IconBuilding = (p: P) => (
   </svg>
 );
 
+export const IconUser = (p: P) => (
+  <svg {...base} {...p}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 21c1-4.2 4.1-6.5 8-6.5s7 2.3 8 6.5" />
+  </svg>
+);
+
 export const IconSearch = (p: P) => (
   <svg {...base} {...p}>
     <circle cx="11" cy="11" r="7" />
