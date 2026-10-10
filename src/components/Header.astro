@@ -133,8 +133,14 @@ import NavDrawer from "./NavDrawer.tsx";
  */
 ---
 
-<header>
-  <div class="on-dark bg-ink">
+<!-- Owner: whole header is black, white logo, and the nav bar stays
+     stuck to the top while scrolling. The info bar sits OUTSIDE the
+     sticky <header> on purpose: position:sticky only sticks within its
+     own parent, and the old sticky nav was inside <header>, which is only
+     as tall as itself, so it never actually stuck. Now the header's
+     parent is <body>, so it sticks for the whole page; the info bar
+     scrolls away. -->
+<div class="on-dark bg-ink">
     <div
       class="mx-auto flex flex-nowrap items-center justify-center gap-3 px-gutter py-2 sm:justify-start sm:gap-8 sm:py-2.5 md:px-12"
     >
@@ -150,22 +156,23 @@ import NavDrawer from "./NavDrawer.tsx";
         <span class="truncate">Bradford, West Yorkshire</span>
       </p>
     </div>
-  </div>
+</div>
 
-  <div class="border-hairline sticky top-0 z-30 border-b bg-paper">
+<header class="sticky top-0 z-30 border-b border-paper/10 bg-ink">
+  <div>
     <div class="mx-auto flex max-w-7xl items-center justify-between px-gutter py-2.5 md:px-12">
-      <a href="/" class="shrink-0" aria-label="Harley Garrison, home">
-        <img src="/logo/logo-horizontal.svg" alt="Harley Garrison" width="177" height="40" class="h-8 w-auto sm:h-10" />
+      <a href="/" class="on-dark shrink-0" aria-label="Harley Garrison, home">
+        <img src="/logo/logo-white.svg" alt="Harley Garrison" width="148" height="40" class="h-8 w-auto sm:h-10" />
       </a>
 
-      <div class="hidden items-center gap-6 lg:flex">
+      <div class="on-dark hidden items-center gap-6 lg:flex">
         <nav class="flex items-center gap-6" aria-label="Primary">
-          <NavLink href="/">Home</NavLink>
-          <NavLink href="/about">About Us</NavLink>
-          <NavLink href="/services">Services</NavLink>
-          <NavLink href="/careers">Careers</NavLink>
-          <NavLink href="/policies">Our Policies</NavLink>
-          <NavLink href="/gallery">Gallery</NavLink>
+          <NavLink href="/" tone="paper">Home</NavLink>
+          <NavLink href="/about" tone="paper">About Us</NavLink>
+          <NavLink href="/services" tone="paper">Services</NavLink>
+          <NavLink href="/careers" tone="paper">Careers</NavLink>
+          <NavLink href="/policies" tone="paper">Our Policies</NavLink>
+          <NavLink href="/gallery" tone="paper">Gallery</NavLink>
         </nav>
 
         <Button href="/contact">Get a Quote</Button>
