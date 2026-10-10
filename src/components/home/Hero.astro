@@ -205,11 +205,20 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
     fetchpriority="high"
   />
 
-  <div aria-hidden="true" class="bg-ink/28 pointer-events-none absolute inset-0"></div>
+  <!-- Black overlay only, no blue (owner's instruction): a flat Ink wash
+       over the whole photo plus an Ink fade behind the copy (from the
+       bottom on phones, from the right where the copy sits on desktop).
+       Weakest point under the text still composites a pure-white photo
+       pixel to about rgb(86,86,86), white text ~7:1 or better. -->
+  <div aria-hidden="true" class="bg-ink/30 pointer-events-none absolute inset-0"></div>
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-0 bg-linear-to-t from-ink/90 from-0% via-ink/60 via-40% to-ink/0 to-75% lg:bg-linear-to-l lg:from-ink/85 lg:via-ink/55 lg:via-45% lg:to-ink/0 lg:to-80%"
+  ></div>
 
   <div class="relative z-10 flex h-full flex-col justify-end lg:mx-auto lg:max-w-7xl lg:flex-row lg:items-center lg:justify-end lg:px-12">
     <div
-      class="on-dark bg-electric-blue/85 w-full px-6 py-8 sm:px-10 sm:py-10 lg:w-auto lg:max-w-lg lg:px-10 lg:py-12"
+      class="on-dark w-full px-6 py-10 sm:px-10 sm:py-12 lg:w-auto lg:max-w-lg lg:px-0 lg:py-12"
     >
       <h1 data-hero-reveal class="text-h3 text-paper sm:text-h2">
         Security You Can Rely On, Every Hour of the Week

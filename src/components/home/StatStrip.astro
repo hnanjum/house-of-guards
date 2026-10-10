@@ -166,7 +166,10 @@ const FACTS = [
 ];
 ---
 
-<section class="on-dark bg-electric-blue">
+<!-- Owner: strip is now Ink (black), no blue. Dividers drop to the
+     quieter tone="paper" (Paper 35% on Ink, ~3.2:1, still past 3:1);
+     the paper-strong history above described the Electric Blue era. -->
+<section class="on-dark bg-ink">
   <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12">
     <div class="flex flex-col gap-0 sm:flex-row sm:items-stretch sm:gap-0">
       {
@@ -175,10 +178,10 @@ const FACTS = [
             {i > 0 && (
               <>
                 <div class="sm:hidden">
-                  <Divider orientation="horizontal" tone="paper-strong" class="my-8" />
+                  <Divider orientation="horizontal" tone="paper" class="my-8" />
                 </div>
                 <div class="hidden shrink-0 sm:flex">
-                  <Divider orientation="vertical" tone="paper-strong" class="mx-8" />
+                  <Divider orientation="vertical" tone="paper" class="mx-8" />
                 </div>
               </>
             )}
