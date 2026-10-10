@@ -10,7 +10,7 @@ import { Field, Loading, Notice, PortalButton } from "./ui";
  * away rather than shown an empty screen). The database enforces the
  * same rules independently through RLS; this only shapes the UI.
  *
- * Sign-in screen: Electric Blue identity panel (white logo, Fraunces
+ * Sign-in screen: Electric Blue identity panel (white logo, Lora
  * portal name; white on Electric Blue ~5.17:1) beside a plain Paper
  * form. On phones the panel becomes a band above the form.
  */
@@ -31,11 +31,29 @@ interface Props {
 // Invite and password-reset links arrive with the token in the URL hash.
 // Read it before supabase-js consumes and clears it.
 const arrivedToSetPassword =
-  typeof window !== "undefined" && /type=(invite|recovery)/.test(window.location.hash);
+  typeof window !== "undefined" && /type=(invite|recovery)/.test(window.location.hash) && !window.location.hash.startsWith("#/activate");
+
+// Invite links made by the admin dashboard (supabase/functions/invite-user)
+// look like `#/activate?token_hash=…&type=invite`. The token is only
+// redeemed when the person presses the button, so link previews in
+// WhatsApp/SMS (which fetch the URL but never run it) can't use it up.
+type Activation = { token_hash: string; type: "invite" | "recovery" };
+function parseActivation(hash: string): Activation | null {
+  const m = hash.match(/^#\/activate\?(.*)$/);
+  if (!m) return null;
+  const p = new URLSearchParams(m[1]);
+  const token_hash = p.get("token_hash");
+  const type = p.get("type");
+  if (!token_hash || (type !== "invite" && type !== "recovery")) return null;
+  return { token_hash, type };
+}
 
 export default function PortalShell({ portalName, tagline, role, children }: Props) {
   const [state, setState] = useState<State>({ kind: "loading" });
   const [needsPassword, setNeedsPassword] = useState(arrivedToSetPassword);
+  const [activation, setActivation] = useState<Activation | null>(() =>
+    typeof window === "undefined" ? null : parseActivation(window.location.hash),
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -78,6 +96,21 @@ export default function PortalShell({ portalName, tagline, role, children }: Pro
     setState({ kind: "signed-out" });
   };
 
+  if (activation) {
+    return (
+      <AuthFrame portalName={portalName} tagline={tagline}>
+        <Activate
+          activation={activation}
+          onDone={() => {
+            history.replaceState(null, "", window.location.pathname);
+            setNeedsPassword(true);
+            setActivation(null);
+          }}
+        />
+      </AuthFrame>
+    );
+  }
+
   if (state.kind === "loading") return <Loading />;
 
   if (state.kind === "ready" && needsPassword) {
@@ -114,7 +147,7 @@ function AuthFrame({ portalName, tagline, children }: { portalName: string; tagl
           <img src="/logo/logo-white.svg" alt="Harley Garrison" width="148" height="40" className="h-9 w-auto" />
         </a>
         <div className="mt-14 lg:mt-0">
-          <p className="text-h1 sm:text-display">{portalName}</p>
+          <p className="text-h2 sm:text-h1">{portalName}</p>
           <p className="text-body text-paper/85 mt-4 max-w-sm">{tagline}</p>
         </div>
         <p className="text-micro text-paper/70 mt-14 hidden lg:block">Authorised personnel only. Activity is recorded.</p>
@@ -178,6 +211,35 @@ function SignIn() {
         </button>
       </div>
     </form>
+  );
+}
+
+function Activate({ activation, onDone }: { activation: Activation; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function go() {
+    setBusy(true);
+    setError(null);
+    const { error } = await supabase.auth.verifyOtp({ token_hash: activation.token_hash, type: activation.type });
+    setBusy(false);
+    if (error) return setError("This link has expired or has already been used. Ask the office to send you a new one.");
+    onDone();
+  }
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-h2 text-ink">{activation.type === "invite" ? "Welcome to Harley Garrison" : "Reset your password"}</h1>
+      <p className="text-body text-stone">
+        {activation.type === "invite"
+          ? "Activate your account, then choose the password you'll sign in with."
+          : "Continue to choose a new password."}
+      </p>
+      {error && <Notice kind="error">{error}</Notice>}
+      <PortalButton onClick={go} disabled={busy}>
+        {busy ? "Please wait" : activation.type === "invite" ? "Activate my account" : "Continue"}
+      </PortalButton>
+    </div>
   );
 }
 

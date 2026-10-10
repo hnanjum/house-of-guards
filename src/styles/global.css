@@ -18,8 +18,8 @@
 
 /* Self-hosted variable fonts — see src/styles/global.css §2 in README for
    why these specific packages/axis files were chosen. */
-@import "@fontsource-variable/fraunces/full.css"; /* wght + opsz + SOFT + WONK axes */
-@import "@fontsource-variable/montserrat"; /* wght axis only — nothing on the body font ever goes italic (the one italic use, MissionBand's pull-quote, is Fraunces/display, not body/sans) */
+@import "@fontsource-variable/lora"; /* wght axis, upright only — the display serif (replaced Fraunces 2026-10-11 on direct instruction) */
+@import "@fontsource-variable/montserrat"; /* wght axis only — nothing on the body font ever goes italic (no italic is used anywhere on the site) */
 
 /*
  * ---------------------------------------------------------------------
@@ -328,7 +328,7 @@
   /* Font families. Referenced directly by the composed type-scale
      utilities below, and also usable standalone (e.g. `font-display`
      on the header wordmark). */
-  --font-display: "Fraunces Variable", ui-serif, Georgia, serif;
+  --font-display: "Lora Variable", ui-serif, Georgia, serif;
   --font-sans: "Montserrat Variable", ui-sans-serif, system-ui, sans-serif;
 
   /* Semantic spacing tokens for section-level rhythm, layered on top of
@@ -352,45 +352,53 @@
  * the project — nowhere else should a font-size or font-weight be
  * written as a literal number.
  *
- * Fraunces is dialled to low WONK / standard optical size throughout —
- * quiet and weighted, not the font's own default "wonky" personality.
+ * Headings are Lora (replaced Fraunces on direct instruction): one calm
+ * serif, weights 500/600 only, on a deliberately restrained scale.
  * ---------------------------------------------------------------------
  */
 @utility text-display {
   font-family: var(--font-display);
-  font-size: 5.5rem; /* 88px — hero statement only */
-  line-height: 0.98;
-  font-weight: 350;
-  font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 0;
+  font-size: 4rem; /* 64px — hero statement only */
+  line-height: 1.05;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 @utility text-h1 {
   font-family: var(--font-display);
-  font-size: 3.5rem; /* 56px — page titles */
-  line-height: 1.05;
-  font-weight: 450;
-  font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 0;
+  font-size: 2.75rem; /* 44px — page titles */
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 @utility text-h2 {
   font-family: var(--font-display);
-  font-size: 2.5rem; /* 40px — section heads */
-  line-height: 1.1;
+  font-size: 2rem; /* 32px — section heads */
+  line-height: 1.2;
   font-weight: 500;
-  font-variation-settings: "opsz" 72, "SOFT" 0, "WONK" 0;
 }
 
 @utility text-h3 {
   font-family: var(--font-display);
-  font-size: 1.75rem; /* 28px — sub-heads, service names */
-  line-height: 1.2;
-  font-weight: 500;
-  font-variation-settings: "opsz" 40, "SOFT" 0, "WONK" 0;
+  font-size: 1.375rem; /* 22px — sub-heads, service names */
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+/* 20px display step, added for the portals' panel titles (dashboard
+   cards and tables), where text-h3 is too large for a compact panel
+   header and a sans step would drop the serif voice. */
+@utility text-h4 {
+  font-family: var(--font-display);
+  font-size: 1.125rem; /* 18px — panel titles */
+  line-height: 1.35;
+  font-weight: 600;
 }
 
 @utility text-body-lg {
   font-family: var(--font-sans);
-  font-size: 1.25rem; /* 20px — intro paragraphs, pull-quotes */
+  font-size: 1.125rem; /* 18px — intro paragraphs, pull-quotes */
   line-height: 1.5;
   font-weight: 400;
 }
@@ -472,9 +480,8 @@
   font-family: var(--font-display);
   font-size: 1.125rem; /* 18px */
   line-height: 1;
-  font-weight: 550;
+  font-weight: 600;
   letter-spacing: 0.04em;
-  font-variation-settings: "opsz" 18, "SOFT" 0, "WONK" 0;
 }
 
 /*

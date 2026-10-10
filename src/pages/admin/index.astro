@@ -1,0 +1,10 @@
+---
+import PortalLayout from "../../layouts/PortalLayout.astro";
+import AdminApp from "../../components/portal/admin/AdminApp.tsx";
+
+// Served at admin.harleygarrison.co.uk (see worker/index.ts). Client-only.
+---
+
+<PortalLayout title="Admin">
+  <AdminApp client:only="react" />
+</PortalLayout>

@@ -1,4 +1,10 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from "react";
+import type {
+  ButtonHTMLAttributes,
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+} from "react";
 
 /**
  * Shared portal primitives, built only from the site's own tokens.
@@ -47,13 +53,49 @@ export function Field({
         id={id}
         {...rest}
         aria-describedby={hint ? `${id}-hint` : undefined}
-        className="text-body border-ink/50 text-ink mt-2 block min-h-12 w-full rounded-none border bg-paper px-4 transition-colors focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20"
+        className={CONTROL}
       />
       {hint && (
         <p id={`${id}-hint`} className="text-micro text-stone mt-2">
           {hint}
         </p>
       )}
+    </div>
+  );
+}
+
+const CONTROL =
+  "text-body border-ink/50 text-ink mt-2 block min-h-12 w-full rounded-none border bg-paper px-4 transition-colors focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20";
+
+export function SelectField({
+  label,
+  id,
+  children,
+  ...rest
+}: SelectHTMLAttributes<HTMLSelectElement> & { label: string; id: string }) {
+  return (
+    <div>
+      <label htmlFor={id} className="text-caption text-ink block">
+        {label}
+      </label>
+      <select id={id} {...rest} className={CONTROL}>
+        {children}
+      </select>
+    </div>
+  );
+}
+
+export function TextArea({
+  label,
+  id,
+  ...rest
+}: TextareaHTMLAttributes<HTMLTextAreaElement> & { label: string; id: string }) {
+  return (
+    <div>
+      <label htmlFor={id} className="text-caption text-ink block">
+        {label}
+      </label>
+      <textarea id={id} rows={4} {...rest} className={`${CONTROL} py-3`} />
     </div>
   );
 }
