@@ -152,4 +152,109 @@ export function initStandardsCarousel(root: ParentNode = document) {
   // of truth rather than the initial markup guessing at it separately.
   updateActiveCard(track, cards);
   updateArrowState(track, prevButtons, nextButtons);
+
+  initAutoDrift(track, prevButtons, nextButtons);
+}
+
+/**
+ * AUTO-DRIFT — on direct instruction from the owner, the row now scrolls
+ * itself slowly and continuously, ticker-style, rather than only moving
+ * when a visitor uses the arrows/swipe. Mechanism: while drifting, CSS
+ * scroll-snap is switched off on the track (a mandatory snap would keep
+ * pulling a sub-card scroll position back to the nearest card) and a
+ * float accumulator advances `scrollLeft` a little every frame. At the
+ * end of the row it holds briefly, glides back to the start, and carries
+ * on. The existing scroll listener keeps the amber active-card highlight
+ * following along for free.
+ *
+ * It stops whenever a visitor is reading or steering: pointer hovering
+ * the track, keyboard focus inside the section, or any real interaction
+ * (touch, wheel, arrow click, arrow key) — the last of these also
+ * restores scroll-snap so manual scrolling behaves exactly as before.
+ * It resumes after a few idle seconds. It only runs while the section
+ * is on screen and the tab is visible, and never at all under
+ * prefers-reduced-motion (WCAG 2.2.2: auto-moving content must be
+ * pausable — hover/focus/touch all pause it).
+ */
+const DRIFT_PX_PER_SECOND = 28;
+const END_HOLD_MS = 1800;
+const RESUME_AFTER_MS = 4000;
+
+function initAutoDrift(
+  track: HTMLElement,
+  prevButtons: HTMLButtonElement[],
+  nextButtons: HTMLButtonElement[],
+) {
+  if (prefersReducedMotion()) return;
+
+  const section = track.closest("section") ?? track.parentElement ?? track;
+  let onScreen = false;
+  let hovered = false;
+  let focused = false;
+  let pausedUntil = 0; // after a real interaction
+  let holdUntil = 0; // at the end of the row / while gliding back
+  let pos = track.scrollLeft;
+  let last = 0;
+  let drifting = false;
+
+  const setSnap = (on: boolean) => {
+    track.style.scrollSnapType = on ? "" : "none";
+  };
+
+  const interact = () => {
+    pausedUntil = performance.now() + RESUME_AFTER_MS;
+    drifting = false;
+    setSnap(true);
+  };
+
+  const frame = (now: number) => {
+    if (!track.isConnected) return;
+    const dt = last ? Math.min(now - last, 100) : 0;
+    last = now;
+
+    const canDrift =
+      onScreen && !hovered && !focused && document.visibilityState === "visible" && now >= pausedUntil && now >= holdUntil;
+
+    if (canDrift) {
+      if (!drifting) {
+        drifting = true;
+        pos = track.scrollLeft;
+        setSnap(false);
+      }
+      const maxScroll = track.scrollWidth - track.clientWidth;
+      pos += (DRIFT_PX_PER_SECOND * dt) / 1000;
+      if (pos >= maxScroll) {
+        pos = 0;
+        track.scrollLeft = maxScroll;
+        // Pause at the last card, then glide back to the first.
+        holdUntil = now + END_HOLD_MS + 1400;
+        setTimeout(() => {
+          if (track.isConnected) track.scrollTo({ left: 0, behavior: "smooth" });
+        }, END_HOLD_MS);
+        drifting = false;
+      } else {
+        track.scrollLeft = pos;
+      }
+    }
+    requestAnimationFrame(frame);
+  };
+
+  new IntersectionObserver(([entry]) => (onScreen = entry.isIntersecting), { threshold: 0.25 }).observe(section);
+
+  track.addEventListener("pointerenter", (e) => {
+    if (e.pointerType === "mouse") hovered = true;
+  });
+  track.addEventListener("pointerleave", () => (hovered = false));
+  section.addEventListener("focusin", () => (focused = true));
+  section.addEventListener("focusout", (e) => {
+    if (!section.contains(e.relatedTarget as Node | null)) focused = false;
+  });
+
+  track.addEventListener("touchstart", interact, { passive: true });
+  track.addEventListener("wheel", interact, { passive: true });
+  track.addEventListener("keydown", interact);
+  // Capture phase so snap is restored BEFORE the arrow's own scrollBy runs.
+  [...prevButtons, ...nextButtons].forEach((btn) => btn.addEventListener("click", interact, { capture: true }));
+
+  requestAnimationFrame(frame);
 }
