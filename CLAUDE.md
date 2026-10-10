@@ -74,7 +74,12 @@ Every change was a direct owner instruction.
   England and Wales · Company number 17508784" (SIA line removed).
   Menus: "Quick links" + "Sectors" (built from `src/data/sectors.ts`),
   left-aligned columns on desktop; on phones centred open/close
-  accordions (CSS grid-rows transition).
+  accordions (CSS grid-rows transition). 2026-10-10 (PR #85): EVERYTHING
+  in the footer centres on phones (logo, blurb, toggles, links, contact,
+  bottom bar); text reduced — blurb/phone/email/toggles text-caption
+  (14px), menu links 12px via NavLink size="sm", icons 16px.
+- **Header Get a Quote button**: compact, via Button size="sm"
+  (px-3.5 py-1.5, ~33px tall), links /contact/ (PR #84).
 - **About page** (2026-10-10, redesigned twice that day): Ink masthead
   continuing the Ink header (photo framed right), "Who we are" with a
   hairline-ruled credentials band, mission/vision as two Paper panels on
@@ -88,6 +93,8 @@ Every change was a direct owner instruction.
   closing CTA to /contact/). Owner WANTS black (Ink) bands further down pages: Services
   standards band, sector risks band, Careers roles band.
   Services = alternating photo/text rows; sector FAQ accent is Amber for all.
+  Sector risks grid: with an odd number of risks (all six have five) the
+  empty last cell is a "Facing any of these on your site?" CTA cell.
   Policies and Gallery removed from header, mobile menu and footer.
 - **Forms -> email** (2026-10-10): ContactForm (quote) and ApplicationForm
   (careers) POST to /api/enquiry and /api/application, handled by
@@ -99,6 +106,16 @@ Every change was a direct owner instruction.
   choice): Cloudflare Email Routing forwards info@ and operations@ to the
   owner's Gmail; Gmail "Send mail as" replies through Resend SMTP
   (smtp.resend.com:587, user "resend", password = a Resend API key).
+  CONFIRMED WORKING end to end 2026-10-10: receiving, Gmail send-as for
+  both addresses, and both forms (test enquiry + application delivered).
+  Resend free tier = 100 sends/day shared by forms and Gmail replies.
+  DNS (do not touch): 3 Cloudflare MX (route1-3.mx.cloudflare.net), SPF
+  include:_spf.mx.cloudflare.net, cf2024-1._domainkey, resend._domainkey,
+  send + rsend CNAMEs (Resend; region looks like ap-northeast-1, harmless),
+  _dmarc "v=DMARC1; p=none;", google-site-verification, 5 Worker routes.
+  Logo/blue-tick in inboxes (BIMI) discussed and DEFERRED by owner: needs
+  DMARC enforcement + a VMC (registered trademark, ~$1k+/yr) for the tick;
+  free alternative = Google account profile photo for info@/operations@.
 - **MOBILE CENTRING RULE (owner, standing)**: text/content sections
   centre-align on mobile and return to left-aligned once the layout goes
   multi-column (text-center lg:text-left, auto margins on max-width blocks
@@ -106,11 +123,46 @@ Every change was a direct owner instruction.
 - **SEO**: site is set in astro.config.mjs, BaseLayout emits a canonical
   link, src/pages/sitemap.xml.ts lists public pages (add new ones to
   PAGES), public/robots.txt blocks the portal paths.
+- **Marketing assets (not part of the website)**:
+  - `marketing/outreach-email.html` — branded cold-outreach email
+    (table layout, inline styles; Ink header with white logo, Amber
+    italic tagline, serif headline, services list, Ink credentials strip,
+    Amber "Request a quote" button to /contact/, Ink footer). NO photo —
+    owner rejected an added photo banner. Georgia/Arial stand in for
+    Lora/Montserrat. Owner pasted it into Gmail and saved it as a Gmail
+    template (Settings > Advanced > Templates). Footer carries the office
+    address. Placeholders left: phone, name/title, per-company lines.
+  - `public/logo/email-logo-white.png` / `email-logo-black.png`
+    (440px PNGs; Gmail can't show SVG). Hosted on the live site because
+    the email loads them from harleygarrison.co.uk — DO NOT delete.
+  - `public/logo/logo-black.svg` — Ink recolour of logo-white.svg, for
+    white backgrounds (business cards). Owner: never use the coloured
+    logo-horizontal.svg on print/marketing.
+  - Business card: a prompt was written for the owner to use in Claude
+    Design (company card, no personal name; black/white/amber; monochrome
+    logos only; 85x55mm + 3mm bleed). A `business-card/` folder appeared
+    in the repo afterwards — owner's, not created by Claude; untouched.
+  - Plain-text outreach sequence (first email + 2 follow-ups + sector
+    lines) was given in chat; PECR note: cold email to limited companies
+    OK with identification + opt-out, not to sole traders/partnerships.
+- **OWNER WORKING RULES (2026-10-10)**: (1) ask before publishing or
+  deploying anything that is NOT a website change (emails, cards,
+  documents, hosted assets for them); (2) never add elements the owner
+  didn't ask for (e.g. photos) — suggest instead.
+- **Office address** (owner, 2026-10-10): 742 Great Horton Road,
+  Bradford, BD7 4EE. Used in the outreach email footer as the registered
+  office — owner has NOT yet confirmed it is the Companies House
+  registered office. Not on the website yet.
 - **Still blue/magenta, not yet asked about**: the portals only.
-- **Open items**: real phone number (01274 000 000 is a placeholder);
-  info bar still says "Bradford, West Yorkshire"; registered office
-  address not on the site yet (legally required); MissionBand team photo
-  and About photo still show "HOUSE OF GUARDS".
+- **Open items**: real phone number (01274 000 000 is a placeholder,
+  sitewide and in the email/card); confirm registered office and add it
+  to the site footer (legally required) and info bar; MissionBand team
+  photo and About photo still show "HOUSE OF GUARDS"; privacy policy page
+  (forms collect personal data) + check ICO fee; Get a Quote page hero is
+  still the Ink masthead (owner not asked); offered but not started —
+  Gmail signature, readable form-email subjects, Turnstile, auto-reply to
+  enquirers, Supabase invite emails via Resend SMTP, Google Business
+  Profile, OG/LocalBusiness tags, Cloudflare Web Analytics.
 - **Testing note**: the Browser pane is usually hidden, so rAF,
   IntersectionObserver, scrolling and repaints are frozen there. For
   motion checks, serve `dist/` with a scratch server that injects a shim
