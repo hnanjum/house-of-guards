@@ -46,11 +46,11 @@ const MENUS: { id: string; title: string; links: [string, string][] }[] = [
 <footer class="on-dark bg-ink">
   <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12">
     <div class="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1.3fr] md:gap-10">
-      <div>
-        <a href="/" aria-label="Harley Garrison, home">
+      <div class="text-center md:text-left">
+        <a href="/" aria-label="Harley Garrison, home" class="inline-block">
           <img src="/logo/logo-white.svg" alt="Harley Garrison" width="148" height="40" class="h-10 w-auto" />
         </a>
-        <p class="text-body text-paper/70 mt-4 max-w-xs">
+        <p class="text-caption text-paper/70 mx-auto mt-4 max-w-xs md:mx-0">
           SIA-licensed manned guarding, close protection, CCTV monitoring, and
           mobile patrols for corporate and high-net-worth clients across
           Yorkshire and the North West.
@@ -71,10 +71,10 @@ const MENUS: { id: string; title: string; links: [string, string][] }[] = [
               data-footer-menu-toggle
               aria-expanded="true"
               aria-controls={`footer-menu-${menu.id}`}
-              class="flex w-full items-center justify-center gap-2 py-4 text-body text-paper md:hidden"
+              class="flex w-full items-center justify-center gap-2 py-4 text-caption text-paper md:hidden"
             >
               {menu.title}
-              <Chevron class="size-5 shrink-0 rotate-90 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[open=true]/menu:-rotate-90" />
+              <Chevron class="size-4 shrink-0 rotate-90 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[open=true]/menu:-rotate-90" />
             </button>
             <div
               id={`footer-menu-${menu.id}`}
@@ -86,7 +86,7 @@ const MENUS: { id: string; title: string; links: [string, string][] }[] = [
                     class="translate-y-2 opacity-0 transition-[opacity,translate] duration-500 ease-out group-data-[open=true]/menu:translate-y-0 group-data-[open=true]/menu:opacity-100 md:translate-y-0 md:opacity-100"
                     style={`transition-delay: ${60 + i * 45}ms`}
                   >
-                    <NavLink href={href} tone="paper">{label}</NavLink>
+                    <NavLink href={href} tone="paper" size="sm">{label}</NavLink>
                   </li>
                 ))}
               </ul>
@@ -95,20 +95,20 @@ const MENUS: { id: string; title: string; links: [string, string][] }[] = [
         ))}
       </div>
 
-      <div>
-        <p class="text-caption text-paper/70">Bradford, West Yorkshire</p>
+      <div class="text-center md:text-left">
+        <p class="text-micro text-paper/70">Bradford, West Yorkshire</p>
         <a
           href="tel:+441274000000"
-          class="mt-4 flex items-center gap-2 text-body text-paper transition-colors duration-200 ease-out hover:text-paper/70"
+          class="mt-4 flex items-center justify-center gap-2 text-caption text-paper transition-colors md:justify-start duration-200 ease-out hover:text-paper/70"
         >
-          <Phone class="size-5 shrink-0" />
+          <Phone class="size-4 shrink-0" />
           01274 000 000
         </a>
         <a
           href="mailto:info@harleygarrison.co.uk"
-          class="mt-3 flex items-center gap-2 text-body text-paper transition-colors duration-200 ease-out hover:text-paper/70"
+          class="mt-3 flex items-center justify-center gap-2 text-caption text-paper transition-colors md:justify-start duration-200 ease-out hover:text-paper/70"
         >
-          <Email class="size-5 shrink-0" />
+          <Email class="size-4 shrink-0" />
           info@harleygarrison.co.uk
         </a>
       </div>
@@ -116,7 +116,7 @@ const MENUS: { id: string; title: string; links: [string, string][] }[] = [
 
     <Divider tone="paper" class="mt-16" />
 
-    <div class="flex flex-col gap-2 pt-8 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col items-center gap-2 pt-8 text-center sm:flex-row sm:justify-between sm:text-left">
       <p class="text-micro text-paper/70">&copy; {year} Harley Garrison. All rights reserved.</p>
       <p class="text-micro text-paper/70">
         Harley Garrison Ltd · Registered in England and Wales · Company number 17508784
