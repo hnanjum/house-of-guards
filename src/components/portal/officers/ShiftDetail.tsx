@@ -55,7 +55,7 @@ export default function ShiftDetail({
       </a>
 
       <p className="text-caption text-stone mt-10">{fmtDay(shift.starts_at)}</p>
-      <h1 className="text-h1 sm:text-display text-ink mt-3 tabular-nums leading-none">
+      <h1 className="text-h2 sm:text-h1 text-ink mt-3 tabular-nums leading-none">
         {fmtTime(shift.starts_at)}
         <span className="text-stone"> – </span>
         {fmtTime(shift.ends_at)}
@@ -114,7 +114,7 @@ export default function ShiftDetail({
           <ol className="divide-hairline border-hairline mt-6 divide-y border-y">
             {instructions.map((i) => (
               <li key={i.id} className="py-6">
-                <h3 className="text-body-lg text-ink">{i.title}</h3>
+                <h3 className="text-h4 text-ink">{i.title}</h3>
                 {i.body && <p className="text-body text-ink/80 mt-2 whitespace-pre-line">{i.body}</p>}
               </li>
             ))}

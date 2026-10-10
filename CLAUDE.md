@@ -183,6 +183,13 @@ to one dark enough to require it (Electric Blue, Magenta) in the SAME
 rebrand, which is exactly why this needs re-checking per colour rather
 than assumed from whatever the previous accent needed.
 
+> **CURRENT (2026-10-11): the display serif is now Lora**
+> (`@fontsource-variable/lora`, upright weights 500/600), replacing Fraunces
+> sitewide on direct instruction. The heading scale was also made smaller
+> and calmer: display 64px, h1 44px, h2 32px, h3 22px, new h4 18px (panel
+> titles), body-lg 18px. Anything below that still says "Fraunces" is
+> history, not the current font.
+
 **Type** — two typefaces, both self-hosted via `@fontsource`/
 `@fontsource-variable`, **never** the Google Fonts CDN:
 - **Fraunces** (`@fontsource-variable/fraunces/full.css`, full axis range
@@ -3386,3 +3393,12 @@ the database role is still named `guard` internally.
   everything else Paper/Ink on hairlines. Input borders use Ink at 50%
   (~3.6:1) because the hairline token is too faint for a form field.
   No Framer Motion here (the three-island rule stands).
+- **Admin dashboard** (`admin.` → `/admin`, `src/components/portal/admin/`):
+  Ink sidebar + sticky page header, content on Surface Alt with white
+  hairline panels. Overview / Shifts / Attendance / Officers / Sites /
+  Clients. Officers are invited through the `invite-user` Edge Function
+  (`supabase/functions/`), which returns a one-time link to send by
+  WhatsApp; the portal redeems it only on a button press
+  (`#/activate?token_hash=…`), so link previews can't burn it. All
+  calendar maths uses UK time (`ukToInstant` etc. in `adminData.ts`),
+  never the admin's own computer time zone.

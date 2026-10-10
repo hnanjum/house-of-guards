@@ -6,7 +6,7 @@ import { dutyState, respond } from "./data";
 /**
  * Officer home. One bold moment only: the "duty panel" — the shift the
  * officer is on now, or their next accepted one — as an Electric Blue
- * block with the hours set large in Fraunces (white on Electric Blue
+ * block with the hours set large in Lora (white on Electric Blue
  * ~5.17:1; `on-dark` for its focusable links). Everything else is quiet
  * Paper rows on hairlines: shifts awaiting a reply, then the rest.
  */
@@ -113,7 +113,7 @@ function DutyPanel({ a, state, events }: { a: Assignment; state: string; events?
       <p className="text-caption text-paper/85">
         {STATE_LINE[state] ?? "Next shift"} · {fmtDay(a.shift.starts_at)}
       </p>
-      <p className="text-h1 sm:text-display mt-4 tabular-nums leading-none">
+      <p className="text-h2 sm:text-h1 mt-4 tabular-nums leading-none">
         {fmtTime(a.shift.starts_at)}
         <span className="text-paper/60"> – </span>
         {fmtTime(a.shift.ends_at)}
