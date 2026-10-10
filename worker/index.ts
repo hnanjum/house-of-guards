@@ -1,3 +1,4 @@
+import { handleForm, isFormPath, type FormEnv } from "./forms";
 /**
  * Cloudflare Worker in front of the static site. It only decides WHICH
  * static files a hostname may see; every response still comes from the
@@ -19,7 +20,7 @@
  * no indexing, and no caching of HTML (pages show personal data).
  */
 
-interface Env {
+interface Env extends FormEnv {
   ASSETS: { fetch(request: Request): Promise<Response> };
 }
 
@@ -98,6 +99,9 @@ export default {
       const page = await env.ASSETS.fetch(new Request(new URL("/404.html", request.url), request));
       return new Response(page.body, { status: 404, headers: page.headers });
     }
+
+    // Website form endpoints (marketing hosts only).
+    if (!decision.portal && isFormPath(decision.pathname)) return handleForm(request, env, decision.pathname);
 
     const target = new URL(request.url);
     target.pathname = decision.pathname;

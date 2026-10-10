@@ -210,9 +210,14 @@ export default function ContactForm() {
     const data = new FormData(form);
 
     try {
-      // TODO: point this at the real enquiry endpoint (e.g. a Cloudflare
-      // Worker/Pages Function, Formspree, or similar) once decided.
-      console.log("Contact form submission", Object.fromEntries(data));
+      // worker/forms.ts emails the enquiry to operations@. Success only on a
+      // real 2xx; anything else (incl. 503 = sending not switched on) is an error.
+      const response = await fetch("/api/enquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(Object.fromEntries(data)),
+      });
+      if (!response.ok) throw new Error(`Enquiry endpoint responded ${response.status}`);
       setStatus("success");
       form.reset();
     } catch {
@@ -226,7 +231,9 @@ export default function ContactForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-5">
+    <form onSubmit={handleSubmit} className="relative mt-5">
+      {/* Honeypot for bots: hidden from people and assistive tech. */}
+      <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-px w-px opacity-0" />
       <motion.div
         className="grid grid-cols-1 gap-4 sm:grid-cols-2"
         initial="hidden"
@@ -318,8 +325,7 @@ export default function ContactForm() {
             transition={{ duration: 0.2 }}
             className="text-caption text-ink border-ink mt-5 border-l-2 pl-4"
           >
-            Something went wrong sending your enquiry. Please try again or
-            call us directly.
+            Your enquiry could not be sent and has not been received. Please try again, or email info@harleygarrison.co.uk.
           </motion.p>
         )}
       </AnimatePresence>
