@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { CONTACT_EMAIL } from "../data/contact";
 
 const LINKS = [
   { href: "/", label: "Home" },
@@ -11,176 +12,189 @@ const LINKS = [
 ];
 
 /**
- * Isolated interactive island: mobile nav drawer. Mirrors the desktop
- * nav exactly (same six links + the Get a Quote CTA).
+ * Mobile/tablet menu (below lg). Rebuilt on the owner's direct
+ * instruction for a cleaner, more premium feel to match the black header:
  *
- * The trigger is a genuine hamburger icon now (three bars that morph
- * into an X on open), not plain text — the header used to be Guard
- * Green, where a bordered white-text button read fine; on the new
- * white header, an icon reads cleaner and is what the brief asks for.
- * Built from three `<motion.span>` bars rather than a static SVG
- * because the morph itself needs Framer Motion state, which an Astro
- * icon component can't drive from inside a React island.
+ * - Trigger: two white lines of unequal length (the shorter one widens
+ *   on hover), not a generic three-bar icon.
+ * - Opens as a full-screen Ink "curtain" that drops from the top
+ *   (clip-path inset), rather than a white side drawer. It covers the
+ *   info bar and header, so it carries its own logo + close row.
+ * - Links are set large in the display serif, each rising out of its
+ *   own mask on a short stagger; the current page carries an Amber dash
+ *   (bare mark on Ink, ~9:1). Get a Quote (Amber fill, Ink text ~9.05:1)
+ *   and the contact line fade in last.
+ * - Escape closes; focus moves to the close button on open and back to
+ *   the trigger on close; page scroll (including Lenis, via the
+ *   "hg:scroll-lock" event in smoothScroll.ts) is locked while open.
+ * - Reduced motion: every transition is instant, nothing slides.
  *
- * Full-height panel slide-in, a staggered fade/slide reveal on the
- * link list once the panel arrives, and an expo-style ease-out on the
- * panel itself (steeper deceleration than a generic material curve) —
- * closer to what higher-end sites use for a full-height sidebar than
- * an instant/linear slide. Every animated value has a reduced-motion
- * fallback (duration 0, no stagger, no offset).
+ * Text on Ink: white ~19.4:1, white at 70% ~9.6:1. Focus rings inside
+ * the overlay are Paper (on-dark), since an Ink ring on Ink is invisible.
  */
 export default function NavDrawer() {
   const [open, setOpen] = useState(false);
-  const shouldReduceMotion = useReducedMotion();
+  const [path, setPath] = useState("/");
+  const reduce = useReducedMotion();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
 
-  const premiumEase = [0.16, 1, 0.3, 1] as const;
+  const ease = [0.76, 0, 0.24, 1] as const; // in-out for the curtain
+  const easeOut = [0.16, 1, 0.3, 1] as const; // expo-out for the links
 
-  const slideTransition = shouldReduceMotion
-    ? { duration: 0 }
-    : { type: "tween" as const, duration: 0.45, ease: premiumEase };
+  useEffect(() => {
+    if (open) {
+      setPath(window.location.pathname.replace(/\/$/, "") || "/");
+      document.documentElement.style.overflow = "hidden";
+      window.dispatchEvent(new CustomEvent("hg:scroll-lock", { detail: true }));
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setOpen(false);
+      };
+      window.addEventListener("keydown", onKey);
+      const t = window.setTimeout(() => closeRef.current?.focus(), reduce ? 0 : 350);
+      wasOpen.current = true;
+      return () => {
+        window.removeEventListener("keydown", onKey);
+        window.clearTimeout(t);
+      };
+    }
+    if (wasOpen.current) {
+      document.documentElement.style.overflow = "";
+      window.dispatchEvent(new CustomEvent("hg:scroll-lock", { detail: false }));
+      triggerRef.current?.focus();
+    }
+  }, [open, reduce]);
 
-  const fadeTransition = shouldReduceMotion ? { duration: 0 } : { duration: 0.3 };
+  const curtain = {
+    hidden: { clipPath: "inset(0% 0% 100% 0%)" },
+    visible: { clipPath: "inset(0% 0% 0% 0%)", transition: reduce ? { duration: 0 } : { duration: 0.7, ease } },
+    exit: {
+      clipPath: "inset(0% 0% 100% 0%)",
+      transition: reduce ? { duration: 0 } : { duration: 0.55, ease, delay: 0.1 },
+    },
+  };
 
-  const barTransition = shouldReduceMotion ? { duration: 0 } : { duration: 0.3, ease: premiumEase };
-
-  const listVariants = {
+  const list = {
     hidden: {},
-    visible: {
-      transition: shouldReduceMotion ? {} : { staggerChildren: 0.06, delayChildren: 0.25 },
-    },
+    visible: { transition: reduce ? {} : { staggerChildren: 0.06, delayChildren: 0.35 } },
+    exit: { transition: reduce ? {} : { staggerChildren: 0.03, staggerDirection: -1 } },
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, x: shouldReduceMotion ? 0 : 20 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: shouldReduceMotion ? { duration: 0 } : { duration: 0.5, ease: premiumEase },
-    },
+  const rise = {
+    hidden: { y: reduce ? "0%" : "110%" },
+    visible: { y: "0%", transition: reduce ? { duration: 0 } : { duration: 0.8, ease: easeOut } },
+    exit: { y: reduce ? "0%" : "-110%", transition: reduce ? { duration: 0 } : { duration: 0.35, ease } },
   };
 
-  const barClass = "bg-ink absolute left-0 h-[1.5px] w-6 transition-colors duration-200 ease-out";
+  const fade = (delay: number) => ({
+    hidden: { opacity: 0, y: reduce ? 0 : 12 },
+    visible: { opacity: 1, y: 0, transition: reduce ? { duration: 0 } : { duration: 0.6, ease: easeOut, delay } },
+    exit: { opacity: 0, transition: reduce ? { duration: 0 } : { duration: 0.2 } },
+  });
+
+  const close = () => setOpen(false);
 
   return (
     <div>
       <button
+        ref={triggerRef}
         type="button"
         aria-expanded={open}
         aria-controls="nav-drawer-panel"
-        aria-label={open ? "Close menu" : "Open menu"}
-        onClick={() => setOpen((v) => !v)}
-        className="group flex h-11 w-11 items-center justify-center"
+        aria-label="Open menu"
+        onClick={() => setOpen(true)}
+        className="group flex h-11 w-11 items-center justify-end focus-visible:outline-paper"
       >
-        <span className="relative block h-6 w-6 group-hover:opacity-70">
-          <motion.span
-            className={barClass}
-            style={{ top: "25%" }}
-            animate={open ? { y: 6, rotate: 45 } : { y: 0, rotate: 0 }}
-            transition={barTransition}
-          />
-          <motion.span
-            className={barClass}
-            style={{ top: "50%", marginTop: "-0.75px" }}
-            animate={open ? { opacity: 0, x: 8 } : { opacity: 1, x: 0 }}
-            transition={barTransition}
-          />
-          <motion.span
-            className={barClass}
-            style={{ bottom: "25%" }}
-            animate={open ? { y: -6, rotate: -45 } : { y: 0, rotate: 0 }}
-            transition={barTransition}
-          />
+        <span className="flex w-7 flex-col items-end gap-[7px]">
+          <span className="bg-paper block h-[1.5px] w-7" />
+          <span className="bg-paper block h-[1.5px] w-4 transition-[width] duration-300 ease-out group-hover:w-7" />
         </span>
       </button>
 
       <AnimatePresence>
         {open && (
-          <>
+          <motion.div
+            id="nav-drawer-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Main menu"
+            className="on-dark bg-ink text-paper fixed inset-0 z-50 flex flex-col overflow-y-auto"
+            variants={curtain}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            data-lenis-prevent
+          >
             <motion.div
-              className="bg-ink/40 fixed inset-0 z-40 backdrop-blur-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={fadeTransition}
-              onClick={() => setOpen(false)}
-              aria-hidden="true"
-            />
-            <motion.nav
-              id="nav-drawer-panel"
-              className="border-hairline bg-paper fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col border-l"
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={slideTransition}
-              aria-label="Main navigation"
+              className="border-paper/10 flex items-center justify-between border-b px-gutter py-4 md:px-12"
+              variants={fade(0.25)}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
             >
-              <div className="border-hairline flex items-center justify-between border-b px-6 py-5">
-                <img src="/logo/logo-horizontal.svg" alt="Harley Garrison" width="177" height="40" className="h-8 w-auto" />
-                <button
-                  type="button"
-                  aria-label="Close menu"
-                  onClick={() => setOpen(false)}
-                  className="group relative flex h-11 w-11 items-center justify-center"
-                >
-                  <span className="relative block h-4 w-4 group-hover:opacity-70">
-                    <span className="bg-ink absolute top-1/2 left-1/2 h-[1.5px] w-5 -translate-x-1/2 -translate-y-1/2 rotate-45" />
-                    <span className="bg-ink absolute top-1/2 left-1/2 h-[1.5px] w-5 -translate-x-1/2 -translate-y-1/2 -rotate-45" />
-                  </span>
-                </button>
-              </div>
-
-              {/* hover:border-amber — mirrors the desktop NavLink's own
-                  active/hover underline exactly, kept in sync per the
-                  standing "hand-matched copies drift apart" note. This
-                  bare mark on Paper measures ~2.15:1, which FAILS the
-                  3:1 WCAG 1.4.11 non-text floor — see global.css's
-                  Amber token comment and NavLink.astro's own comment
-                  for the full derivation. Shipped per the explicit
-                  "Amber everywhere for consistency" instruction, then
-                  reviewed by the user against this exact number and
-                  explicitly kept as-is — a settled, accepted tradeoff,
-                  not an open item. */}
-              <motion.ul
-                className="divide-hairline flex-1 divide-y overflow-y-auto"
-                variants={listVariants}
-                initial="hidden"
-                animate="visible"
+              <a href="/" onClick={close} aria-label="Harley Garrison, home">
+                <img src="/logo/logo-white.svg" alt="Harley Garrison" width="148" height="40" className="h-8 w-auto" />
+              </a>
+              <button
+                ref={closeRef}
+                type="button"
+                aria-label="Close menu"
+                onClick={close}
+                className="group relative flex h-11 w-11 items-center justify-center"
               >
-                {LINKS.map((link) => (
-                  <motion.li key={link.href} variants={itemVariants}>
-                    <a
-                      href={link.href}
-                      onClick={() => setOpen(false)}
-                      className="text-ink text-body block border-l-2 border-transparent px-6 py-4 transition-colors duration-200 ease-out hover:border-amber"
-                    >
-                      {link.label}
-                    </a>
-                  </motion.li>
-                ))}
+                <span className="relative block h-5 w-5 transition-transform duration-500 ease-out group-hover:rotate-90">
+                  <span className="bg-paper absolute top-1/2 left-1/2 h-[1.5px] w-6 -translate-x-1/2 -translate-y-1/2 rotate-45" />
+                  <span className="bg-paper absolute top-1/2 left-1/2 h-[1.5px] w-6 -translate-x-1/2 -translate-y-1/2 -rotate-45" />
+                </span>
+              </button>
+            </motion.div>
+
+            <nav aria-label="Main navigation" className="flex flex-1 flex-col px-gutter pt-8 pb-6 md:px-12">
+              <motion.ul className="flex flex-col" variants={list} initial="hidden" animate="visible" exit="exit">
+                {LINKS.map((link) => {
+                  const current = path === link.href;
+                  return (
+                    <li key={link.href} className="border-paper/10 border-b">
+                      <span className="block overflow-hidden">
+                        <motion.a
+                          href={link.href}
+                          onClick={close}
+                          aria-current={current ? "page" : undefined}
+                          variants={rise}
+                          className="text-h2 group flex items-center py-3 transition-colors duration-300 hover:text-paper/70"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={`bg-amber block h-0.5 transition-[width,margin] duration-500 ease-out ${current ? "mr-4 w-6" : "mr-0 w-0 group-hover:mr-4 group-hover:w-6"}`}
+                          />
+                          {link.label}
+                        </motion.a>
+                      </span>
+                    </li>
+                  );
+                })}
               </motion.ul>
 
-              {/* Hand-matched copy of Button.astro's own `primary`
-                  variant — this is a React island, so it can't literally
-                  import the Astro component. Rebranded off Guard Green
-                  Secondary/white text to Amber/Ink, same fill+text pair
-                  Button.astro now uses (Ink on Amber ~9.05:1, AAA — see
-                  global.css's Amber token comment). Hover is a plain
-                  `brightness-90` darken rather than Button.astro's own
-                  diagonal shine-sweep — this was already a simplified
-                  hand-match before the rebrand (a colour-change hover,
-                  not the sweep), so it stays simplified now; porting
-                  the sweep itself wasn't part of this pass. */}
-              <div className="px-6 py-6">
+              <motion.div className="mt-auto pt-10" variants={fade(0.75)} initial="hidden" animate="visible" exit="exit">
                 <a
                   href="/contact"
-                  onClick={() => setOpen(false)}
-                  className="bg-amber text-ink hover:brightness-90 inline-flex w-full items-center justify-center rounded-none px-6 py-3 text-caption transition-[filter] duration-200 ease-out"
+                  onClick={close}
+                  className="bg-amber text-ink hover:brightness-90 text-caption inline-flex w-full items-center justify-center rounded-none px-6 py-4 transition-[filter] duration-200 ease-out"
                 >
                   Get a Quote
                 </a>
-              </div>
-            </motion.nav>
-          </>
+                <div className="text-caption text-paper/70 mt-6 flex flex-col gap-2 sm:flex-row sm:gap-8">
+                  <a href="tel:+441274000000" className="hover:text-paper transition-colors duration-200">
+                    01274 000 000
+                  </a>
+                  <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-paper transition-colors duration-200">
+                    {CONTACT_EMAIL}
+                  </a>
+                </div>
+              </motion.div>
+            </nav>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

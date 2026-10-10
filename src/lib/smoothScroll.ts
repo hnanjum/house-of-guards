@@ -56,4 +56,16 @@ export function destroySmoothScroll() {
   lenis = null;
 }
 
+// The mobile menu (NavDrawer.tsx, a React island) locks page scroll
+// while it's open by dispatching this event, rather than importing this
+// module and pulling GSAP into its own bundle. Lenis drives scrolling
+// itself, so overflow:hidden alone wouldn't stop a wheel/trackpad.
+if (typeof window !== "undefined") {
+  window.addEventListener("hg:scroll-lock", (event) => {
+    const locked = (event as CustomEvent<boolean>).detail;
+    if (locked) lenis?.stop();
+    else lenis?.start();
+  });
+}
+
 export { gsap, ScrollTrigger };
