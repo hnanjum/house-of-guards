@@ -4,6 +4,7 @@ import Divider from "./ui/Divider.astro";
 import Phone from "../icons/Phone.astro";
 import Email from "../icons/Email.astro";
 import Chevron from "../icons/Chevron.astro";
+import { SECTORS } from "../data/sectors";
 
 /**
  * Site footer. Solid dark neutral grey (--color-footer-grey), not
@@ -19,24 +20,34 @@ import Chevron from "../icons/Chevron.astro";
  */
 const year = new Date().getFullYear();
 
-// The menu column is centred at every width and, at phone width, becomes an open/close
-// "Quick links" accordion at phone width — both on direct instruction
-// from the owner (centring is a named exception to the left-aligned
-// default). Company name/number in the bottom bar are the real
-// Companies House details.
-const FOOTER_LINKS: [string, string][] = [
-  ["/about", "About Us"],
-  ["/services", "Services"],
-  ["/careers", "Careers"],
-  ["/policies", "Our Policies"],
-  ["/gallery", "Gallery"],
-  ["/contact", "Get a Quote"],
-];
----
+// Two link menus — Quick links and Sectors (each sector's own detail
+// page). On direct instruction from the owner: left-aligned columns on
+// desktop as before, but centred and collapsed into open/close
+// accordions at phone width. Company name/number in the bottom bar are
+// the real Companies House details.
+const MENUS: { id: string; title: string; links: [string, string][] }[] = [
+  {
+    id: "links",
+    title: "Quick links",
+    links: [
+      ["/about", "About Us"],
+      ["/services", "Services"],
+      ["/careers", "Careers"],
+      ["/policies", "Our Policies"],
+      ["/gallery", "Gallery"],
+      ["/contact", "Get a Quote"],
+    ],
+  },
+  {
+    id: "sectors",
+    title: "Sectors",
+    links: SECTORS.map((sector) => [`/sectors/${sector.slug}`, sector.name] as [string, string]),
+  },
+];---
 
 <footer class="on-dark bg-footer-grey">
   <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12">
-    <div class="grid gap-12 md:grid-cols-3">
+    <div class="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1.3fr] md:gap-10">
       <div>
         <a href="/" aria-label="Harley Garrison, home">
           <img src="/logo/logo-white.svg" alt="Harley Garrison" width="148" height="40" class="h-10 w-auto" />
@@ -48,33 +59,43 @@ const FOOTER_LINKS: [string, string][] = [
         </p>
       </div>
 
-      <nav aria-label="Footer" data-footer-menu data-open="true" class="group/menu border-y border-paper/15 text-center md:border-0">
-        <button
-          type="button"
-          data-footer-menu-toggle
-          aria-expanded="true"
-          aria-controls="footer-menu-panel"
-          class="flex w-full items-center justify-center gap-2 py-4 text-body text-paper md:hidden"
-        >
-          Quick links
-          <Chevron class="size-5 shrink-0 rotate-90 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[open=true]/menu:-rotate-90" />
-        </button>
-        <div
-          id="footer-menu-panel"
-          class="grid grid-rows-[0fr] invisible transition-[grid-template-rows,visibility] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[open=true]/menu:grid-rows-[1fr] group-data-[open=true]/menu:visible md:visible md:grid-rows-[1fr]"
-        >
-          <ul class="min-h-0 space-y-3 overflow-hidden transition-[padding] duration-500 max-md:group-data-[open=true]/menu:pb-5 md:overflow-visible">
-            {FOOTER_LINKS.map(([href, label], i) => (
-              <li
-                class="translate-y-2 opacity-0 transition-[opacity,translate] duration-500 ease-out group-data-[open=true]/menu:translate-y-0 group-data-[open=true]/menu:opacity-100 md:translate-y-0 md:opacity-100"
-                style={`transition-delay: ${60 + i * 45}ms`}
-              >
-                <NavLink href={href} tone="paper">{label}</NavLink>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </nav>
+      <div class="md:contents">
+        {MENUS.map((menu, m) => (
+          <nav
+            aria-label={menu.title}
+            data-footer-menu
+            data-open="true"
+            class:list={["group/menu border-b border-paper/15 text-center md:border-0 md:text-left", m === 0 && "border-t"]}
+          >
+            <p class="text-caption text-paper/70 mb-4 hidden md:block">{menu.title}</p>
+            <button
+              type="button"
+              data-footer-menu-toggle
+              aria-expanded="true"
+              aria-controls={`footer-menu-${menu.id}`}
+              class="flex w-full items-center justify-center gap-2 py-4 text-body text-paper md:hidden"
+            >
+              {menu.title}
+              <Chevron class="size-5 shrink-0 rotate-90 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[open=true]/menu:-rotate-90" />
+            </button>
+            <div
+              id={`footer-menu-${menu.id}`}
+              class="grid grid-rows-[0fr] invisible transition-[grid-template-rows,visibility] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[open=true]/menu:grid-rows-[1fr] group-data-[open=true]/menu:visible md:visible md:grid-rows-[1fr]"
+            >
+              <ul class="min-h-0 space-y-3 overflow-hidden transition-[padding] duration-500 max-md:group-data-[open=true]/menu:pb-5 md:overflow-visible">
+                {menu.links.map(([href, label], i) => (
+                  <li
+                    class="translate-y-2 opacity-0 transition-[opacity,translate] duration-500 ease-out group-data-[open=true]/menu:translate-y-0 group-data-[open=true]/menu:opacity-100 md:translate-y-0 md:opacity-100"
+                    style={`transition-delay: ${60 + i * 45}ms`}
+                  >
+                    <NavLink href={href} tone="paper">{label}</NavLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </nav>
+        ))}
+      </div>
 
       <div>
         <p class="text-caption text-paper/70">Bradford, West Yorkshire</p>
@@ -107,7 +128,7 @@ const FOOTER_LINKS: [string, string][] = [
 </footer>
 
 <script>
-  // Phone-width accordion for the footer menu. The markup ships OPEN so
+  // Phone-width accordions for the footer menus. The markup ships OPEN so
   // the links are reachable without JavaScript; this closes it on phones
   // once the script runs (the footer is off-screen at load, so nothing
   // visibly snaps). At md+ the panel is always shown by CSS and the
@@ -115,17 +136,19 @@ const FOOTER_LINKS: [string, string][] = [
   // The motion is plain CSS transitions, covered by global.css's
   // prefers-reduced-motion reset.
   function initFooterMenu() {
-    const menu = document.querySelector<HTMLElement>("[data-footer-menu]");
-    const toggle = menu?.querySelector<HTMLButtonElement>("[data-footer-menu-toggle]");
-    if (!menu || !toggle || menu.dataset.ready) return;
-    menu.dataset.ready = "true";
+    const phone = !window.matchMedia("(min-width: 48rem)").matches;
+    document.querySelectorAll<HTMLElement>("[data-footer-menu]").forEach((menu) => {
+      const toggle = menu.querySelector<HTMLButtonElement>("[data-footer-menu-toggle]");
+      if (!toggle || menu.dataset.ready) return;
+      menu.dataset.ready = "true";
 
-    const set = (open: boolean) => {
-      menu.dataset.open = String(open);
-      toggle.setAttribute("aria-expanded", String(open));
-    };
-    if (!window.matchMedia("(min-width: 48rem)").matches) set(false);
-    toggle.addEventListener("click", () => set(menu.dataset.open !== "true"));
+      const set = (open: boolean) => {
+        menu.dataset.open = String(open);
+        toggle.setAttribute("aria-expanded", String(open));
+      };
+      if (phone) set(false);
+      toggle.addEventListener("click", () => set(menu.dataset.open !== "true"));
+    });
   }
   document.addEventListener("astro:page-load", initFooterMenu);
 </script>
