@@ -92,11 +92,11 @@ const DOT: Record<string, string> = {
   idle: "bg-hairline",
 };
 
-export function Status({ tone, children }: { tone: keyof typeof DOT; children: ReactNode }) {
+export function Status({ tone, children, wrap = false }: { tone: keyof typeof DOT; children: ReactNode; wrap?: boolean }) {
   return (
-    <span className="text-caption text-ink inline-flex items-center gap-2 whitespace-nowrap">
+    <span className={`text-caption text-ink inline-flex gap-2 ${wrap ? "min-w-0 items-baseline break-words" : "items-center whitespace-nowrap"}`}>
       <span className={`size-2 shrink-0 ${DOT[tone]}`} aria-hidden="true" />
-      {children}
+      {wrap ? <span className="min-w-0 break-words">{children}</span> : children}
     </span>
   );
 }

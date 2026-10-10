@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { fmtShortDay, fmtTime, Loading, Notice } from "../ui";
+import { fmtDistance, fmtShortDay, fmtTime, Loading, Notice } from "../ui";
 import { addDays, listClockEvents, startOfToday, type ClockRow } from "./adminData";
 import { Empty, Page, PageHeader, Panel, Status, Table, td } from "./kit";
 
@@ -87,7 +87,7 @@ export default function Attendance() {
                     {r.within_geofence === true ? (
                       <Status tone="good">On site</Status>
                     ) : r.within_geofence === false ? (
-                      <Status tone="bad">{r.distance_to_site_m != null ? `${Math.round(r.distance_to_site_m)} m away` : "Away"}</Status>
+                      <Status tone="bad">{r.distance_to_site_m != null ? `${fmtDistance(r.distance_to_site_m)} away` : "Away"}</Status>
                     ) : (
                       <Status tone="warn">No location</Status>
                     )}

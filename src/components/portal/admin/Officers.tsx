@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Loading, Notice, PortalButton } from "../ui";
+import { Field, Loading, Notice, PortalButton } from "../ui";
 import { IconPlus, IconSearch } from "./icons";
-import { listOfficers, setOfficerActive, type Officer } from "./adminData";
+import { listOfficers, setOfficerActive, updateOfficer, type Officer } from "./adminData";
 import InviteForm from "./InviteForm";
 import { Empty, Page, PageHeader, Panel, Status, Table, td } from "./kit";
 
@@ -88,15 +88,69 @@ export default function Officers() {
 
 function OfficerRow({ officer, onChanged }: { officer: Officer; onChanged: () => Promise<void> }) {
   const [busy, setBusy] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const link = "text-caption text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink disabled:opacity-50";
+
+  if (editing) {
+    return (
+      <tr>
+        <td className={td} colSpan={5}>
+          <form
+            className="flex flex-wrap items-end gap-3"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const f = new FormData(e.currentTarget);
+              const full_name = String(f.get("name") ?? "").trim();
+              if (!full_name) return setError("Enter a name.");
+              setBusy(true);
+              setError(null);
+              try {
+                await updateOfficer(officer.id, { full_name, phone: String(f.get("phone") ?? "").trim() || null });
+                await onChanged();
+                setEditing(false);
+              } catch {
+                setError("Couldn't save.");
+              }
+              setBusy(false);
+            }}
+          >
+            <div className="min-w-56 flex-1">
+              <Field label="Full name" id={`n-${officer.id}`} name="name" defaultValue={officer.full_name} required />
+            </div>
+            <div className="min-w-48">
+              <Field label="Mobile" id={`p-${officer.id}`} name="phone" type="tel" defaultValue={officer.phone ?? ""} />
+            </div>
+            <PortalButton type="submit" disabled={busy}>
+              {busy ? "Saving" : "Save"}
+            </PortalButton>
+            <PortalButton tone="quiet" onClick={() => setEditing(false)}>
+              Cancel
+            </PortalButton>
+            {error && (
+              <div className="w-full">
+                <Notice kind="error">{error}</Notice>
+              </div>
+            )}
+          </form>
+          <p className="text-micro text-stone mt-3">{officer.email} · email can't be changed here.</p>
+        </td>
+      </tr>
+    );
+  }
+
   return (
     <tr>
-      <td className={td}>{officer.full_name || "—"}</td>
+      <td className={td}>{officer.full_name || <span className="text-stone">No name set</span>}</td>
       <td className={td}>{officer.email ?? "—"}</td>
       <td className={`${td} tabular-nums`}>{officer.phone ?? "—"}</td>
       <td className={td}>
         <Status tone={officer.active ? "good" : "idle"}>{officer.active ? "Active" : "Deactivated"}</Status>
       </td>
-      <td className={`${td} text-right`}>
+      <td className={`${td} text-right whitespace-nowrap`}>
+        <button type="button" onClick={() => setEditing(true)} className={`${link} mr-5`}>
+          Edit
+        </button>
         <button
           type="button"
           disabled={busy}
@@ -111,7 +165,7 @@ function OfficerRow({ officer, onChanged }: { officer: Officer; onChanged: () =>
               setBusy(false);
             }
           }}
-          className="text-caption text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink disabled:opacity-50"
+          className={link}
         >
           {officer.active ? "Deactivate" : "Reactivate"}
         </button>

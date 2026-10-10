@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { fmtDay, fmtTime, Loading, Notice } from "../ui";
+import { fmtDay, fmtDistance, fmtTime, Loading, Notice } from "../ui";
 import { IconPlus } from "./icons";
 import { addDays, attendance, listClockEvents, listShifts, startOfToday, type ClockRow, type ShiftRow } from "./adminData";
 import { Empty, LinkButton, Page, PageHeader, Panel, Stat, Status, Table, td } from "./kit";
@@ -103,7 +103,7 @@ export default function Overview() {
       title: `${e.officer_name} clocked ${e.type} ${e.within_geofence === false ? "away from site" : "without a location"}`,
       detail:
         e.within_geofence === false && e.distance_to_site_m != null
-          ? `${Math.round(e.distance_to_site_m)} m from ${e.site_name}, ${fmtTime(e.server_time)}`
+          ? `${fmtDistance(e.distance_to_site_m)} from ${e.site_name}, ${fmtTime(e.server_time)}`
           : `${e.site_name}, ${fmtTime(e.server_time)}`,
     })),
   ];
@@ -170,7 +170,9 @@ export default function Overview() {
                 <ul className="divide-hairline divide-y">
                   {attention.map((i) => (
                     <li key={i.key} className="px-6 py-4">
-                      <Status tone={i.tone}>{i.title}</Status>
+                      <Status tone={i.tone} wrap>
+                        {i.title}
+                      </Status>
                       <p className="text-micro text-stone mt-1 pl-4">{i.detail}</p>
                     </li>
                   ))}
