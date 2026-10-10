@@ -30,6 +30,10 @@ export function GeofenceMap({ site }: { site: SiteRow }) {
       map = L.map(el.current, { scrollWheelZoom: false }).setView(centre, 16);
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
+        // The portal hosts send Referrer-Policy: no-referrer (worker/index.ts),
+        // and OpenStreetMap's tile policy blocks requests with no Referer
+        // ("Access blocked" 403 tiles). Send just our origin for tiles only.
+        referrerPolicy: "strict-origin",
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
       const circle = L.circle(centre, { radius: site.geofence_radius_m, color: token("--color-electric-blue"), weight: 2, fillOpacity: 0.12 }).addTo(map);
