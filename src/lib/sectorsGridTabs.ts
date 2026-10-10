@@ -187,8 +187,8 @@ export function initSectorsGridTabs(root: ParentNode = document) {
  * a click does. The moment a visitor takes over — clicks or taps
  * anywhere in the section, presses a key in the tab row, or tabs focus
  * into it — rotation stops for good on that page view, leaving them in
- * full control. Mouse hover only pauses it (someone reading the panel),
- * and it carries on when the pointer leaves. Never runs under
+ * full control. Hovering does NOT pause it (the owner found a resting mouse
+ * made it look broken); only a real click/tap/key/focus stops it. Never runs under
  * prefers-reduced-motion, off screen, or in a background browser tab
  * (WCAG 2.2.2: auto-updating content must be stoppable).
  */
@@ -201,7 +201,6 @@ function initAutoRotate(root: ParentNode, tablist: HTMLElement, tabs: HTMLElemen
   if (!section) return;
 
   let stopped = false;
-  let hovered = false;
   let onScreen = false;
   let elapsed = 0;
 
@@ -211,12 +210,6 @@ function initAutoRotate(root: ParentNode, tablist: HTMLElement, tabs: HTMLElemen
   section.addEventListener("pointerdown", stop);
   section.addEventListener("focusin", stop);
   tablist.addEventListener("keydown", stop);
-  section.addEventListener("pointerenter", (e) => {
-    if (e.pointerType === "mouse") hovered = true;
-  });
-  section.addEventListener("pointerleave", () => {
-    hovered = false;
-  });
 
   new IntersectionObserver(([entry]) => (onScreen = entry.isIntersecting), { threshold: 0.4 }).observe(section);
 
@@ -225,7 +218,7 @@ function initAutoRotate(root: ParentNode, tablist: HTMLElement, tabs: HTMLElemen
       window.clearInterval(timer);
       return;
     }
-    if (hovered || !onScreen || document.visibilityState !== "visible") return;
+    if (!onScreen || document.visibilityState !== "visible") return;
 
     elapsed += ROTATE_TICK_MS;
     if (elapsed < ROTATE_EVERY_MS) return;
