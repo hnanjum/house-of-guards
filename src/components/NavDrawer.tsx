@@ -20,7 +20,8 @@ const LINKS = [
  * - Opens as a full-screen Ink "curtain" that drops from the top
  *   (clip-path inset), rather than a white side drawer. It covers the
  *   info bar and header, so it carries its own logo + close row.
- * - Links are set large in the display serif, each rising out of its
+ * - Links are set in the display serif at the h3 step (32px read too
+ *   large on phones, per the owner), each rising out of its
  *   own mask on a short stagger; the current page carries an Amber dash
  *   (bare mark on Ink, ~9:1). Get a Quote (Amber fill, Ink text ~9.05:1)
  *   and the contact line fade in last.
@@ -162,7 +163,7 @@ export default function NavDrawer() {
                           onClick={close}
                           aria-current={current ? "page" : undefined}
                           variants={rise}
-                          className="text-h2 group flex items-center py-3 transition-colors duration-300 hover:text-paper/70"
+                          className="text-h3 group flex items-center py-4 transition-colors duration-300 hover:text-paper/70"
                         >
                           <span
                             aria-hidden="true"
