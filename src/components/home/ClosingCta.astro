@@ -224,15 +224,19 @@ import Location from "../../icons/Location.astro";
  */
 ---
 
+<!-- Owner: the contact panel is now the same light grey as the sector
+     panels (Surface Alt), no Electric Blue. Ink text ~17.8:1, Ink at 80%
+     ~10:1, hover Ink at 70% ~7:1; icon badges flip to Ink circles with
+     white icons. No .on-dark: the default Ink focus ring suits the grey. -->
 <section class="bg-paper">
   <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12 md:py-20">
     <div class="grid grid-cols-1 lg:grid-cols-12 lg:items-stretch">
       <div
         data-reveal
-        class="on-dark bg-electric-blue flex flex-col justify-center p-8 sm:p-10 lg:col-start-1 lg:col-span-7 lg:row-start-1 lg:p-12 lg:pr-16"
+        class="bg-surface-alt flex flex-col justify-center p-8 sm:p-10 lg:col-start-1 lg:col-span-7 lg:row-start-1 lg:p-12 lg:pr-16"
       >
-        <h2 class="text-h2 text-paper">Contact Now</h2>
-        <p class="text-caption text-paper/85 mt-3 max-w-md">
+        <h2 class="text-h2 text-ink">Contact Now</h2>
+        <p class="text-caption text-ink/80 mt-3 max-w-md">
           Speak to our team today for a no-obligation consultation on your security requirement — we respond
           promptly to every enquiry.
         </p>
@@ -240,29 +244,29 @@ import Location from "../../icons/Location.astro";
         <ul class="mt-8 space-y-5">
           <li>
             <a href="tel:+441274000000" class="group flex items-center gap-4">
-              <span class="grid size-12 shrink-0 place-items-center rounded-full bg-paper">
-                <Phone class="text-electric-blue size-5" />
+              <span class="grid size-12 shrink-0 place-items-center rounded-full bg-ink">
+                <Phone class="text-paper size-5" />
               </span>
-              <span class="text-caption text-paper group-hover:text-paper/70 transition-colors duration-200 ease-out">
+              <span class="text-caption text-ink group-hover:text-ink/70 transition-colors duration-200 ease-out">
                 01274 000 000
               </span>
             </a>
           </li>
           <li>
             <a href="mailto:info@harleygarrison.co.uk" class="group flex items-center gap-4">
-              <span class="grid size-12 shrink-0 place-items-center rounded-full bg-paper">
-                <Email class="text-electric-blue size-5" />
+              <span class="grid size-12 shrink-0 place-items-center rounded-full bg-ink">
+                <Email class="text-paper size-5" />
               </span>
-              <span class="text-caption text-paper group-hover:text-paper/70 transition-colors duration-200 ease-out">
+              <span class="text-caption text-ink group-hover:text-ink/70 transition-colors duration-200 ease-out">
                 info@harleygarrison.co.uk
               </span>
             </a>
           </li>
           <li class="flex items-center gap-4">
-            <span class="grid size-12 shrink-0 place-items-center rounded-full bg-paper">
-              <Location class="text-electric-blue size-5" />
+            <span class="grid size-12 shrink-0 place-items-center rounded-full bg-ink">
+              <Location class="text-paper size-5" />
             </span>
-            <span class="text-caption text-paper">Bradford, West Yorkshire</span>
+            <span class="text-caption text-ink">Bradford, West Yorkshire</span>
           </li>
         </ul>
       </div>
