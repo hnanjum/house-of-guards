@@ -28,7 +28,14 @@ export interface SiteRow {
   geofence_radius_m: number;
   active: boolean;
   client_id: string | null;
+  contact_name: string | null;
+  contact_phone: string | null;
+  patrol_interval_min: number | null;
+  welfare_interval_min: number | null;
+  selfie_required: boolean;
 }
+
+export type InstructionCategory = "post_orders" | "emergency" | "fire" | "access" | "general";
 
 export interface Instruction {
   id: string;
@@ -36,6 +43,9 @@ export interface Instruction {
   title: string;
   body: string;
   sort_order: number;
+  category: InstructionCategory;
+  file_path: string | null;
+  file_name: string | null;
 }
 
 export interface AssignmentRow {
@@ -53,6 +63,8 @@ export interface ShiftRow {
   ends_at: string;
   guards_required: number;
   notes: string | null;
+  open_for_requests: boolean;
+  published: boolean;
   assignments: AssignmentRow[];
 }
 
@@ -66,6 +78,9 @@ export interface ClockRow {
   distance_to_site_m: number | null;
   officer_name: string;
   site_name: string;
+  selfie_path: string | null;
+  schedule_offset_min: number | null;
+  offline: boolean;
 }
 
 function check<T>(res: { data: T | null; error: { message: string } | null }): T {
@@ -95,7 +110,7 @@ export async function updateOfficer(id: string, fields: { full_name: string; pho
 }
 
 /** Creates the account via the `invite-user` Edge Function and returns a one-time link. */
-export async function inviteUser(input: { email: string; full_name: string; role: "guard" | "client"; client_id?: string | null }) {
+export async function inviteUser(input: { email: string; full_name: string; role: "guard" | "client" | "admin"; client_id?: string | null }) {
   const { data, error } = await supabase.functions.invoke("invite-user", { body: input });
   if (error) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -148,7 +163,7 @@ export async function listSites(): Promise<SiteRow[]> {
   return check(
     await supabase
       .from("sites")
-      .select("id, name, address, latitude, longitude, geofence_radius_m, active, client_id")
+      .select("id, name, address, latitude, longitude, geofence_radius_m, active, client_id, contact_name, contact_phone, patrol_interval_min, welfare_interval_min, selfie_required")
       .order("name"),
   );
 }
@@ -163,13 +178,22 @@ export async function listInstructions(siteId: string): Promise<Instruction[]> {
   return check(
     await supabase
       .from("site_instructions")
-      .select("id, site_id, title, body, sort_order")
+      .select("id, site_id, title, body, sort_order, category, file_path, file_name")
       .eq("site_id", siteId)
       .order("sort_order"),
   );
 }
 
-export async function saveInstruction(i: { id?: string; site_id: string; title: string; body: string; sort_order: number }) {
+export async function saveInstruction(i: {
+  id?: string;
+  site_id: string;
+  title: string;
+  body: string;
+  sort_order: number;
+  category?: InstructionCategory;
+  file_path?: string | null;
+  file_name?: string | null;
+}) {
   const { id, ...fields } = i;
   if (id) check(await supabase.from("site_instructions").update(fields).eq("id", id).select("id"));
   else check(await supabase.from("site_instructions").insert(fields).select("id"));
@@ -191,6 +215,8 @@ function toShift(r: any): ShiftRow {
     ends_at: r.ends_at,
     guards_required: r.guards_required,
     notes: r.notes,
+    open_for_requests: r.open_for_requests ?? false,
+    published: r.published ?? true,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     assignments: (r.shift_assignments ?? []).map((a: any) => ({
       id: a.id,
@@ -207,7 +233,7 @@ export async function listShifts(fromIso: string, toIso: string): Promise<ShiftR
     await supabase
       .from("shifts")
       .select(
-        "id, site_id, starts_at, ends_at, guards_required, notes, sites(name), shift_assignments(id, status, guard_id, profiles(full_name, email))",
+        "id, site_id, starts_at, ends_at, guards_required, notes, open_for_requests, published, sites(name), shift_assignments(id, status, guard_id, profiles!shift_assignments_guard_id_fkey(full_name, email))",
       )
       .lt("starts_at", toIso)
       .gt("ends_at", fromIso)
@@ -217,7 +243,7 @@ export async function listShifts(fromIso: string, toIso: string): Promise<ShiftR
   return (rows ?? []).map(toShift);
 }
 
-export async function createShift(s: { site_id: string; starts_at: string; ends_at: string; guards_required: number; notes: string | null }) {
+export async function createShift(s: { site_id: string; starts_at: string; ends_at: string; guards_required: number; notes: string | null; open_for_requests?: boolean; published?: boolean }) {
   check(await supabase.from("shifts").insert(s).select("id"));
 }
 
@@ -246,7 +272,7 @@ export async function listClockEvents(sinceIso: string, assignmentIds?: string[]
   let q = supabase
     .from("clock_events")
     .select(
-      "id, assignment_id, type, server_time, device_time, within_geofence, distance_to_site_m, profiles(full_name, email), shift_assignments(shifts(sites(name)))",
+      "id, assignment_id, type, server_time, device_time, within_geofence, distance_to_site_m, selfie_path, schedule_offset_min, offline, profiles(full_name, email), shift_assignments(shifts(sites(name)))",
     )
     .gte("server_time", sinceIso)
     .order("server_time", { ascending: false })
@@ -265,6 +291,9 @@ export async function listClockEvents(sinceIso: string, assignmentIds?: string[]
     device_time: r.device_time,
     within_geofence: r.within_geofence,
     distance_to_site_m: r.distance_to_site_m,
+    selfie_path: r.selfie_path ?? null,
+    schedule_offset_min: r.schedule_offset_min ?? null,
+    offline: r.offline ?? false,
     officer_name: r.profiles?.full_name || r.profiles?.email || "Officer",
     site_name: r.shift_assignments?.shifts?.sites?.name ?? "—",
   }));

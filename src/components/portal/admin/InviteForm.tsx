@@ -16,7 +16,7 @@ export default function InviteForm({
   onClose,
   onDone,
 }: {
-  role: "guard" | "client";
+  role: "guard" | "client" | "admin";
   clientId?: string;
   clientName?: string;
   onClose: () => void;
@@ -27,8 +27,8 @@ export default function InviteForm({
   const [result, setResult] = useState<{ name: string; url: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const who = role === "guard" ? "officer" : "client user";
-  const portal = role === "guard" ? "officer" : "client portal";
+  const who = role === "guard" ? "officer" : role === "admin" ? "administrator" : "client user";
+  const portal = role === "guard" ? "officer" : role === "admin" ? "admin dashboard" : "client portal";
 
   async function submit(e: SyntheticEvent<HTMLFormElement, SubmitEvent>) {
     e.preventDefault();

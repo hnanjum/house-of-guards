@@ -4,11 +4,16 @@ import { IconPlus } from "./icons";
 import { createClient, listClientUsers, listClients, listSites, type Client, type ClientUser, type SiteRow } from "./adminData";
 import InviteForm from "./InviteForm";
 import { Empty, Page, PageHeader, Panel, Table, td } from "./kit";
+import { CLIENT_SECTIONS, loadClientSettings, saveClientSettings, type ClientSettings } from "./opsData";
 
 /**
  * Clients and the sites linked to them. A site is linked to a client from
  * the site's own form. "Invite user" gives someone at the client a login
  * to the client portal (portal.harleygarrison.co.uk) for their sites only.
+ * "Settings" chooses which portal sections the client sees, what may be
+ * shared (officer names as "Ahmed N.", GPS locations, attendance times),
+ * and the contact details shown to them. "Preview as client" opens their
+ * portal exactly as they see it.
  */
 export default function Clients() {
   const [clients, setClients] = useState<Client[] | null>(null);
@@ -17,6 +22,7 @@ export default function Clients() {
   const [adding, setAdding] = useState(false);
   const [users, setUsers] = useState<ClientUser[]>([]);
   const [inviteFor, setInviteFor] = useState<Client | null>(null);
+  const [settingsFor, setSettingsFor] = useState<Client | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -52,6 +58,7 @@ export default function Clients() {
         {inviteFor && (
           <InviteForm role="client" clientId={inviteFor.id} clientName={inviteFor.name} onClose={() => setInviteFor(null)} onDone={load} />
         )}
+        {settingsFor && <SettingsPanel client={settingsFor} onClose={() => setSettingsFor(null)} />}
         <Panel flush title="All clients">
           {!clients ? (
             <Loading />
@@ -94,11 +101,21 @@ export default function Clients() {
                         </ul>
                       )}
                     </td>
-                    <td className={`${td} text-right`}>
+                    <td className={`${td} text-right whitespace-nowrap`}>
+                      <button
+                        type="button"
+                        onClick={() => setSettingsFor(c)}
+                        className="text-caption text-ink mr-4 underline decoration-hairline underline-offset-4 hover:decoration-ink"
+                      >
+                        Settings
+                      </button>
+                      <a href={`#/preview/${c.id}`} className="text-caption text-ink mr-4 underline decoration-hairline underline-offset-4 hover:decoration-ink">
+                        Preview as client
+                      </a>
                       <button
                         type="button"
                         onClick={() => setInviteFor(c)}
-                        className="text-caption text-ink whitespace-nowrap underline decoration-hairline underline-offset-4 hover:decoration-ink"
+                        className="text-caption text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink"
                       >
                         Invite user
                       </button>
@@ -151,6 +168,97 @@ function AddClient({ onClose, onSaved }: { onClose: () => void; onSaved: () => P
             <Notice kind="error">{error}</Notice>
           </div>
         )}
+      </form>
+    </Panel>
+  );
+}
+
+function SettingsPanel({ client, onClose }: { client: Client; onClose: () => void }) {
+  const [s, setS] = useState<ClientSettings | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<{ kind: "info" | "error"; text: string } | null>(null);
+
+  useEffect(() => {
+    setS(null);
+    loadClientSettings(client.id)
+      .then(setS)
+      .catch((e) => setMsg({ kind: "error", text: e.message }));
+  }, [client.id]);
+
+  if (!s) return <Panel title={`Settings · ${client.name}`}>{msg ? <Notice kind="error">{msg.text}</Notice> : <Loading />}</Panel>;
+
+  async function submit(e: SyntheticEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const txt = (k: string) => String(f.get(k) ?? "").trim() || null;
+    setBusy(true);
+    setMsg(null);
+    try {
+      await saveClientSettings({
+        client_id: client.id,
+        sections: CLIENT_SECTIONS.map((x) => x.key).filter((k) => f.get(`sec-${k}`) === "on"),
+        control_room_phone: txt("crp"),
+        account_manager_name: txt("amn"),
+        account_manager_phone: txt("amp"),
+        account_manager_email: txt("ame"),
+        share_names: f.get("share_names") === "on",
+        share_locations: f.get("share_locations") === "on",
+        share_attendance: f.get("share_attendance") === "on",
+      });
+      setMsg({ kind: "info", text: "Saved. The client's portal follows these settings straight away." });
+    } catch (err) {
+      setMsg({ kind: "error", text: err instanceof Error ? err.message : "Couldn't save." });
+    }
+    setBusy(false);
+  }
+
+  const box = "accent-electric-blue size-5";
+  return (
+    <Panel title={`Settings · ${client.name}`} action={<button type="button" onClick={onClose} className="text-caption text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink">Close</button>}>
+      <form onSubmit={submit} className="grid gap-8 xl:grid-cols-3">
+        <fieldset className="space-y-2">
+          <legend className="text-h4 text-ink mb-2">Sections they see</legend>
+          {CLIENT_SECTIONS.map((x) => (
+            <label key={x.key} className="text-caption text-ink flex items-center gap-3">
+              <input type="checkbox" name={`sec-${x.key}`} defaultChecked={s.sections.includes(x.key)} className={box} />
+              {x.label}
+            </label>
+          ))}
+        </fieldset>
+        <fieldset className="space-y-3">
+          <legend className="text-h4 text-ink mb-2">What may be shared</legend>
+          <label className="text-caption text-ink flex items-start gap-3">
+            <input type="checkbox" name="share_names" defaultChecked={s.share_names} className={`${box} mt-0.5`} />
+            <span>Officer names, as first name and last initial (e.g. "Ahmed N.")</span>
+          </label>
+          <label className="text-caption text-ink flex items-start gap-3">
+            <input type="checkbox" name="share_locations" defaultChecked={s.share_locations} className={`${box} mt-0.5`} />
+            <span>GPS locations of patrol scans and incident reports (only if the client asks)</span>
+          </label>
+          <label className="text-caption text-ink flex items-start gap-3">
+            <input type="checkbox" name="share_attendance" defaultChecked={s.share_attendance} className={`${box} mt-0.5`} />
+            <span>Attendance: arrival and leaving times per shift (e.g. for proof of attendance)</span>
+          </label>
+          <p className="text-micro text-stone">Never shared: full names, photos of officers, SIA numbers, alerts, internal notes, pay, rota or compliance.</p>
+        </fieldset>
+        <fieldset className="space-y-3">
+          <legend className="text-h4 text-ink mb-2">Contact details shown</legend>
+          <Field label="Control room phone" id="crp" name="crp" type="tel" defaultValue={s.control_room_phone ?? ""} />
+          <Field label="Account manager" id="amn" name="amn" defaultValue={s.account_manager_name ?? ""} />
+          <Field label="Account manager phone" id="amp" name="amp" type="tel" defaultValue={s.account_manager_phone ?? ""} />
+          <Field label="Account manager email" id="ame" name="ame" type="email" defaultValue={s.account_manager_email ?? ""} />
+        </fieldset>
+        <div className="space-y-3 xl:col-span-3">
+          {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
+          <div className="flex flex-wrap gap-3">
+            <PortalButton type="submit" disabled={busy}>
+              Save settings
+            </PortalButton>
+            <a href={`#/preview/${client.id}`} className="text-caption border-ink/20 text-ink inline-flex min-h-12 items-center border px-6 hover:border-ink">
+              Preview as client
+            </a>
+          </div>
+        </div>
       </form>
     </Panel>
   );

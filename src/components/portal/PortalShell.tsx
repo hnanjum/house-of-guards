@@ -51,6 +51,9 @@ function parseActivation(hash: string): Activation | null {
 export default function PortalShell({ portalName, tagline, role, children }: Props) {
   const [state, setState] = useState<State>({ kind: "loading" });
   const [needsPassword, setNeedsPassword] = useState(arrivedToSetPassword);
+  // 2-step verification: someone with an authenticator app set up must
+  // enter a code after their password before the portal opens.
+  const [needsCode, setNeedsCode] = useState(false);
   const [activation, setActivation] = useState<Activation | null>(() =>
     typeof window === "undefined" ? null : parseActivation(window.location.hash),
   );
@@ -69,6 +72,25 @@ export default function PortalShell({ portalName, tagline, role, children }: Pro
         .eq("id", session.user.id)
         .maybeSingle();
       if (cancelled) return;
+      // Offline start (officers on a site with no signal): fall back to
+      // the profile saved on this device the last time it loaded. RLS
+      // still decides everything once the connection is back.
+      const cacheKey = `hg.profile.${session.user.id}`;
+      if (error && !navigator.onLine) {
+        try {
+          const saved = JSON.parse(localStorage.getItem(cacheKey) ?? "null") as Profile | null;
+          if (saved?.role === role && saved.active) return setState({ kind: "ready", session, profile: saved });
+        } catch {
+          /* fall through */
+        }
+      }
+      if (data) {
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(data));
+        } catch {
+          /* storage full or blocked */
+        }
+      }
       if (error || !data) {
         setState({ kind: "blocked", message: "Your account could not be loaded. Contact the office." });
       } else if (!data.active) {
@@ -76,6 +98,9 @@ export default function PortalShell({ portalName, tagline, role, children }: Pro
       } else if (data.role !== role) {
         setState({ kind: "blocked", message: `This account doesn't have access to the ${portalName.toLowerCase()} portal.` });
       } else {
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (cancelled) return;
+        setNeedsCode(aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2");
         setState({ kind: "ready", session, profile: data as Profile });
       }
     }
@@ -117,6 +142,14 @@ export default function PortalShell({ portalName, tagline, role, children }: Pro
     return (
       <AuthFrame portalName={portalName} tagline={tagline}>
         <SetPassword onDone={() => setNeedsPassword(false)} />
+      </AuthFrame>
+    );
+  }
+
+  if (state.kind === "ready" && needsCode) {
+    return (
+      <AuthFrame portalName={portalName} tagline={tagline}>
+        <CodeChallenge onDone={() => setNeedsCode(false)} onCancel={signOut} />
       </AuthFrame>
     );
   }
@@ -272,6 +305,50 @@ function SetPassword({ onDone }: { onDone: () => void }) {
       <PortalButton type="submit" disabled={busy}>
         {busy ? "Saving" : "Save password"}
       </PortalButton>
+    </form>
+  );
+}
+
+/** Second step of sign-in for accounts with an authenticator app. */
+function CodeChallenge({ onDone, onCancel }: { onDone: () => void; onCancel: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit(e: SyntheticEvent<HTMLFormElement, SubmitEvent>) {
+    e.preventDefault();
+    const code = String(new FormData(e.currentTarget).get("code") ?? "").replace(/\s+/g, "");
+    if (!/^\d{6}$/.test(code)) return setError("Enter the 6-digit code from your authenticator app.");
+    setBusy(true);
+    setError(null);
+    const { data: factors } = await supabase.auth.mfa.listFactors();
+    const factor = factors?.totp?.find((f) => f.status === "verified");
+    if (!factor) {
+      setBusy(false);
+      return setError("No authenticator is set up for this account. Contact an administrator.");
+    }
+    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
+    setBusy(false);
+    if (error) return setError("That code didn't work. Codes change every 30 seconds — try the current one.");
+    onDone();
+  }
+
+  return (
+    <form onSubmit={submit} className="space-y-6" noValidate>
+      <div>
+        <h1 className="text-h3 text-ink">2-step verification</h1>
+        <p className="text-caption text-stone mt-2">Enter the 6-digit code from your authenticator app.</p>
+      </div>
+      <Field label="Code" id="mfa-code" name="code" inputMode="numeric" autoComplete="one-time-code" maxLength={7} autoFocus />
+      {error && <Notice kind="error">{error}</Notice>}
+      <div className="flex flex-wrap gap-3">
+        <PortalButton type="submit" disabled={busy}>
+          {busy ? "Checking" : "Continue"}
+        </PortalButton>
+        <PortalButton tone="quiet" onClick={onCancel}>
+          Sign out
+        </PortalButton>
+      </div>
+      <p className="text-micro text-stone">Lost your phone? An administrator can reset 2-step verification for you.</p>
     </form>
   );
 }

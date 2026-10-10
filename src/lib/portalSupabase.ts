@@ -35,6 +35,11 @@ export interface Site {
   latitude: number | null;
   longitude: number | null;
   geofence_radius_m: number;
+  contact_name: string | null;
+  contact_phone: string | null;
+  patrol_interval_min: number | null;
+  welfare_interval_min: number | null;
+  selfie_required: boolean;
 }
 
 export interface Shift {
@@ -49,6 +54,8 @@ export interface Assignment {
   id: string;
   status: AssignmentStatus;
   shift: Shift;
+  approved_minutes: number | null;
+  approved_at: string | null;
 }
 
 export interface ClockEvent {
@@ -57,10 +64,19 @@ export interface ClockEvent {
   server_time: string;
   within_geofence: boolean | null;
   distance_to_site_m: number | null;
+  schedule_offset_min?: number | null;
+  selfie_path?: string | null;
+  /** Saved on the phone, not yet received by the server. */
+  pending?: boolean;
 }
+
+export type InstructionCategory = "post_orders" | "emergency" | "fire" | "access" | "general";
 
 export interface SiteInstruction {
   id: string;
   title: string;
   body: string;
+  category: InstructionCategory;
+  file_path: string | null;
+  file_name: string | null;
 }

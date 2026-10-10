@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState, type SyntheticEvent } from "react";
 import { Field, Loading, mapsUrl, Notice, PortalButton, SelectField, TextArea } from "../ui";
 import { IconPlus } from "./icons";
 import {
+  addDays,
+  listShifts,
+  startOfToday,
   deleteInstruction,
   listClients,
   listInstructions,
@@ -11,27 +14,39 @@ import {
   saveSite,
   type Client,
   type Instruction,
+  type InstructionCategory,
   type SiteRow,
 } from "./adminData";
 import { Empty, Page, PageHeader, Panel, Status, Table, td } from "./kit";
+import { uploadSiteFile, signed } from "./opsData";
+import { Checkpoints, ChecklistsAdmin, Keys, QrSheet } from "./SiteSetup";
+import { GeofenceMap, SiteContacts, SiteRequirements } from "./SiteExtras";
+import { Tabs } from "../officers/widgets";
 
 /**
- * Sites: list, add/edit, and each site's instructions (what officers
- * read on their shift screen). Location is entered as one "lat, lng"
- * value pasted from Google Maps; the radius is how far from that point a
- * clock-in still counts as on site.
+ * Sites: list, add/edit, and each site's set-up — instructions officers
+ * read on shift (post orders, emergency contacts, fire procedures, with
+ * attachments such as floor plans), patrol checkpoints with printable
+ * QR stickers, the key register, and checklists. Location is entered as
+ * one "lat, lng" value pasted from Google Maps; the radius is how far
+ * from that point a clock-in still counts as on site.
  */
-export default function Sites({ selectedId }: { selectedId?: string }) {
+export default function Sites({ selectedId, sub }: { selectedId?: string; sub?: string }) {
   const [sites, setSites] = useState<SiteRow[] | null>(null);
   const [clients, setClients] = useState<Client[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [guardCount, setGuardCount] = useState<Record<string, number>>({});
 
   const load = useCallback(async () => {
     try {
-      const [s, c] = await Promise.all([listSites(), listClients()]);
+      const today = startOfToday();
+      const [s, c, sh] = await Promise.all([listSites(), listClients(), listShifts(addDays(today, -30).toISOString(), addDays(today, 30).toISOString())]);
       setSites(s);
       setClients(c);
+      const counts: Record<string, Set<string>> = {};
+      for (const x of sh) for (const a of x.assignments) if (a.status === "accepted") (counts[x.site_id] ??= new Set()).add(a.guard_id);
+      setGuardCount(Object.fromEntries(Object.entries(counts).map(([k, v]) => [k, v.size])));
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't load sites.");
@@ -57,7 +72,18 @@ export default function Sites({ selectedId }: { selectedId?: string }) {
         </>
       );
     }
-    return <SiteDetail site={selected} clients={clients} onSaved={load} />;
+    if (sub === "qr") {
+      return (
+        <>
+          <PageHeader title={`QR stickers · ${selected.name}`} />
+          <Page>
+            <QrSheet siteId={selected.id} siteName={selected.name} />
+          </Page>
+        </>
+      );
+    }
+    const tab = (["orders", "checkpoints", "contacts", "requirements"].includes(sub ?? "") ? sub : "details") as SiteTab;
+    return <SiteDetail site={selected} clients={clients} tab={tab} onSaved={load} />;
   }
 
   const clientName = (id: string | null) => clients.find((c) => c.id === id)?.name ?? "—";
@@ -94,7 +120,7 @@ export default function Sites({ selectedId }: { selectedId?: string }) {
           ) : sites.length === 0 ? (
             <Empty>No sites yet. Add the first site you'll be covering.</Empty>
           ) : (
-            <Table head={["Site", "Address", "Client", "Location", "Status"]}>
+            <Table head={["Site", "Client", "Address", "Officers", "Status"]}>
               {sites.map((s) => (
                 <tr key={s.id} className="hover:bg-surface-alt">
                   <td className={td}>
@@ -102,27 +128,35 @@ export default function Sites({ selectedId }: { selectedId?: string }) {
                       {s.name}
                     </a>
                   </td>
-                  <td className={td}>{s.address || "—"}</td>
                   <td className={td}>{clientName(s.client_id)}</td>
-                  <td className={td}>
-                    {s.latitude != null ? (
-                      <Status tone="good">Set · {s.geofence_radius_m} m</Status>
-                    ) : (
-                      <Status tone="warn">Missing</Status>
-                    )}
+                  <td className={td}>{s.address || "—"}</td>
+                  <td className={`${td} tabular-nums`} title="Officers with a confirmed shift here in the last or next 30 days">
+                    {guardCount[s.id] ?? 0}
                   </td>
                   <td className={td}>
-                    <Status tone={s.active ? "good" : "idle"}>{s.active ? "Active" : "Archived"}</Status>
+                    {!s.active ? (
+                      <Status tone="idle">Archived</Status>
+                    ) : s.latitude == null ? (
+                      <Status tone="warn">Active · no location</Status>
+                    ) : (
+                      <Status tone="good">Active</Status>
+                    )}
                   </td>
                 </tr>
               ))}
             </Table>
           )}
         </Panel>
+        <ChecklistsAdmin siteId={null} />
       </Page>
     </>
   );
 }
+
+const numOrNull = (v: FormDataEntryValue | null) => {
+  const n = Number(v);
+  return v && Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+};
 
 function SiteForm({
   site,
@@ -158,6 +192,11 @@ function SiteForm({
         geofence_radius_m: Math.max(25, Number(f.get("radius")) || 150),
         client_id: String(f.get("client") ?? "") || null,
         active: site ? f.get("active") === "on" : true,
+        contact_name: String(f.get("contact_name") ?? "").trim() || null,
+        contact_phone: String(f.get("contact_phone") ?? "").trim() || null,
+        patrol_interval_min: numOrNull(f.get("patrol")),
+        welfare_interval_min: numOrNull(f.get("welfare")),
+        selfie_required: f.get("selfie") === "on",
       });
       setSaved(true);
       await onSaved();
@@ -199,6 +238,32 @@ function SiteForm({
         defaultValue={site?.geofence_radius_m ?? 150}
         hint="Clock-ins further away than this are flagged."
       />
+      <Field label="Site contact (optional)" id="contact_name" name="contact_name" defaultValue={site?.contact_name ?? ""} placeholder="e.g. Duty manager" />
+      <Field label="Site contact phone (optional)" id="contact_phone" name="contact_phone" type="tel" defaultValue={site?.contact_phone ?? ""} />
+      <Field
+        label="Patrol every (minutes, optional)"
+        id="patrol"
+        name="patrol"
+        type="number"
+        min={15}
+        max={1440}
+        defaultValue={site?.patrol_interval_min ?? ""}
+        hint="Control is alerted if no patrol starts in time."
+      />
+      <Field
+        label="Welfare check-in every (minutes, optional)"
+        id="welfare"
+        name="welfare"
+        type="number"
+        min={15}
+        max={480}
+        defaultValue={site?.welfare_interval_min ?? ""}
+        hint="For lone workers. Control is alerted if one is missed."
+      />
+      <label className="text-caption text-ink flex items-center gap-3 md:col-span-2">
+        <input type="checkbox" name="selfie" defaultChecked={site?.selfie_required ?? true} className="size-5 accent-electric-blue" />
+        Selfie required at clock in and out
+      </label>
       {site && (
         <label className="text-caption text-ink flex items-center gap-3 md:col-span-2">
           <input type="checkbox" name="active" defaultChecked={site.active} className="size-5 accent-electric-blue" />
@@ -229,7 +294,67 @@ function SiteForm({
   );
 }
 
-function SiteDetail({ site, clients, onSaved }: { site: SiteRow; clients: Client[]; onSaved: () => Promise<void> }) {
+type SiteTab = "details" | "orders" | "checkpoints" | "contacts" | "requirements";
+
+function SiteDetail({ site, clients, tab, onSaved }: { site: SiteRow; clients: Client[]; tab: SiteTab; onSaved: () => Promise<void> }) {
+  const base = `#/sites/${site.id}`;
+  return (
+    <>
+      <PageHeader
+        title={site.name}
+        subtitle={site.address || undefined}
+        actions={
+          <a href="#/sites" className="text-caption text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink">
+            All sites
+          </a>
+        }
+      />
+      <Page>
+        <Tabs
+          active={tab}
+          items={[
+            { key: "details", href: base, label: "Details and geofence" },
+            { key: "orders", href: `${base}/orders`, label: "Post orders" },
+            { key: "checkpoints", href: `${base}/checkpoints`, label: "Checkpoints" },
+            { key: "contacts", href: `${base}/contacts`, label: "Contacts" },
+            { key: "requirements", href: `${base}/requirements`, label: "Shift requirements" },
+          ]}
+        />
+        {tab === "orders" ? (
+          <PostOrders site={site} />
+        ) : tab === "checkpoints" ? (
+          <div className="space-y-8">
+            <div className="grid gap-8 xl:grid-cols-2">
+              <Checkpoints siteId={site.id} />
+              <Keys siteId={site.id} />
+            </div>
+            <ChecklistsAdmin siteId={site.id} />
+          </div>
+        ) : tab === "contacts" ? (
+          <SiteContacts siteId={site.id} />
+        ) : tab === "requirements" ? (
+          <SiteRequirements siteId={site.id} />
+        ) : (
+          <div className="grid gap-8 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+            <Panel title="Site details">
+              <SiteForm site={site} clients={clients} onSaved={onSaved} />
+            </Panel>
+            <div className="space-y-4">
+              <GeofenceMap site={site} />
+              {site.latitude != null && (
+                <a href={mapsUrl(site)} target="_blank" rel="noopener noreferrer" className="text-caption text-ink inline-block underline decoration-hairline underline-offset-4 hover:decoration-ink">
+                  Open in Google Maps
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+      </Page>
+    </>
+  );
+}
+
+function PostOrders({ site }: { site: SiteRow }) {
   const [items, setItems] = useState<Instruction[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | "new" | null>(null);
@@ -257,105 +382,100 @@ function SiteDetail({ site, clients, onSaved }: { site: SiteRow; clients: Client
   }
 
   return (
-    <>
-      <PageHeader
-        title={site.name}
-        subtitle={site.address || undefined}
-        actions={
-          <a href="#/sites" className="text-caption text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink">
-            All sites
-          </a>
-        }
-      />
-      <Page>
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-          <Panel
-            title="Site instructions"
-            flush
-            action={
-              <PortalButton onClick={() => setEditing("new")} className="min-h-10 gap-2 px-4">
-                <IconPlus width={16} height={16} />
-                Add
-              </PortalButton>
-            }
-          >
-            {error && (
-              <div className="p-6">
-                <Notice kind="error">{error}</Notice>
-              </div>
-            )}
-            {editing === "new" && (
-              <div className="border-hairline border-b p-6">
+    <Panel
+      title="Post orders and site instructions"
+      flush
+      action={
+        <PortalButton onClick={() => setEditing("new")} className="min-h-10 gap-2 px-4">
+          <IconPlus width={16} height={16} />
+          Add
+        </PortalButton>
+      }
+    >
+      {error && (
+        <div className="p-6">
+          <Notice kind="error">{error}</Notice>
+        </div>
+      )}
+      {editing === "new" && (
+        <div className="border-hairline border-b p-6">
+          <InstructionForm
+            siteId={site.id}
+            nextOrder={(items?.at(-1)?.sort_order ?? 0) + 1}
+            onDone={async () => {
+              setEditing(null);
+              await load();
+            }}
+          />
+        </div>
+      )}
+      {!items ? (
+        <Loading />
+      ) : items.length === 0 && editing !== "new" ? (
+        <Empty>No instructions yet. Add post orders, emergency contacts, fire procedures and floor plans.</Empty>
+      ) : (
+        <ol className="divide-hairline divide-y">
+          {items.map((i, idx) => (
+            <li key={i.id} className="px-6 py-5">
+              {editing === i.id ? (
                 <InstructionForm
                   siteId={site.id}
-                  nextOrder={(items?.at(-1)?.sort_order ?? 0) + 1}
+                  instruction={i}
+                  nextOrder={i.sort_order}
                   onDone={async () => {
                     setEditing(null);
                     await load();
                   }}
                 />
-              </div>
-            )}
-            {!items ? (
-              <Loading />
-            ) : items.length === 0 && editing !== "new" ? (
-              <Empty>No instructions yet. Add what officers need to know: access, patrol routes, contacts, alarm codes procedure.</Empty>
-            ) : (
-              <ol className="divide-hairline divide-y">
-                {items.map((i, idx) => (
-                  <li key={i.id} className="px-6 py-5">
-                    {editing === i.id ? (
-                      <InstructionForm
-                        siteId={site.id}
-                        instruction={i}
-                        nextOrder={i.sort_order}
-                        onDone={async () => {
-                          setEditing(null);
-                          await load();
+              ) : (
+                <div className="flex gap-6">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-micro text-stone">{CATEGORY_LABEL[i.category ?? "general"]}</p>
+                    <h3 className="text-h4 text-ink">{i.title}</h3>
+                    {i.body && <p className="text-caption text-ink/80 mt-1 whitespace-pre-line">{i.body}</p>}
+                    {i.file_path && (
+                      <button
+                        type="button"
+                        className="text-caption text-ink mt-2 underline decoration-hairline underline-offset-4 hover:decoration-ink"
+                        onClick={async () => {
+                          const url = await signed("site-files", i.file_path!, 300);
+                          if (url) window.open(url, "_blank", "noopener");
                         }}
-                      />
-                    ) : (
-                      <div className="flex gap-6">
-                        <div className="min-w-0 flex-1">
-                          <h3 className="text-h4 text-ink">{i.title}</h3>
-                          {i.body && <p className="text-caption text-ink/80 mt-1 whitespace-pre-line">{i.body}</p>}
-                        </div>
-                        <div className="text-caption flex shrink-0 flex-col items-end gap-1">
-                          <button type="button" onClick={() => setEditing(i.id)} className="text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink">
-                            Edit
-                          </button>
-                          <span className="flex gap-3">
-                            <button type="button" disabled={idx === 0} onClick={() => move(idx, -1)} className="text-stone hover:text-ink disabled:opacity-30">
-                              Up
-                            </button>
-                            <button type="button" disabled={idx === items.length - 1} onClick={() => move(idx, 1)} className="text-stone hover:text-ink disabled:opacity-30">
-                              Down
-                            </button>
-                          </span>
-                        </div>
-                      </div>
+                      >
+                        {i.file_name ?? "Attachment"}
+                      </button>
                     )}
-                  </li>
-                ))}
-              </ol>
-            )}
-          </Panel>
-
-          <div className="space-y-8">
-            <Panel title="Site details">
-              <SiteForm site={site} clients={clients} onSaved={onSaved} />
-            </Panel>
-            {site.latitude != null && (
-              <a href={mapsUrl(site)} target="_blank" rel="noopener noreferrer" className="text-caption text-ink inline-block underline decoration-hairline underline-offset-4 hover:decoration-ink">
-                Check the location on Google Maps
-              </a>
-            )}
-          </div>
-        </div>
-      </Page>
-    </>
+                  </div>
+                  <div className="text-caption flex shrink-0 flex-col items-end gap-1">
+                    <button type="button" onClick={() => setEditing(i.id)} className="text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink">
+                      Edit
+                    </button>
+                    <span className="flex gap-3">
+                      <button type="button" disabled={idx === 0} onClick={() => move(idx, -1)} className="text-stone hover:text-ink disabled:opacity-30">
+                        Up
+                      </button>
+                      <button type="button" disabled={idx === items.length - 1} onClick={() => move(idx, 1)} className="text-stone hover:text-ink disabled:opacity-30">
+                        Down
+                      </button>
+                    </span>
+                  </div>
+                </div>
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
+    </Panel>
   );
 }
+
+const CATEGORY_LABEL: Record<InstructionCategory, string> = {
+  post_orders: "Post orders",
+  emergency: "Emergency contacts",
+  fire: "Fire procedures",
+  access: "Access and keys",
+  general: "General",
+};
 
 function InstructionForm({
   siteId,
@@ -374,15 +494,21 @@ function InstructionForm({
   async function submit(e: SyntheticEvent<HTMLFormElement, SubmitEvent>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
+    const file = f.get("file") as File | null;
+    if (file && file.size > 10 * 1024 * 1024) return setError("Attachments must be under 10 MB.");
     setBusy(true);
     setError(null);
     try {
+      const uploaded = file && file.size > 0 ? await uploadSiteFile(siteId, file) : null;
+      const removeFile = f.get("remove_file") === "on";
       await saveInstruction({
         id: instruction?.id,
         site_id: siteId,
         title: String(f.get("title")).trim(),
         body: String(f.get("body") ?? "").trim(),
         sort_order: instruction?.sort_order ?? nextOrder,
+        category: f.get("category") as InstructionCategory,
+        ...(uploaded ? { file_path: uploaded.path, file_name: uploaded.name } : removeFile ? { file_path: null, file_name: null } : {}),
       });
       await onDone();
     } catch (err) {
@@ -393,8 +519,27 @@ function InstructionForm({
 
   return (
     <form onSubmit={submit} className="space-y-4">
+      <SelectField label="Section" id={`c-${instruction?.id ?? "new"}`} name="category" defaultValue={instruction?.category ?? "post_orders"}>
+        {Object.entries(CATEGORY_LABEL).map(([k, v]) => (
+          <option key={k} value={k}>
+            {v}
+          </option>
+        ))}
+      </SelectField>
       <Field label="Title" id={`t-${instruction?.id ?? "new"}`} name="title" required defaultValue={instruction?.title} placeholder="e.g. Main gate" />
       <TextArea label="Details" id={`b-${instruction?.id ?? "new"}`} name="body" rows={3} defaultValue={instruction?.body} />
+      <div>
+        <label htmlFor={`f-${instruction?.id ?? "new"}`} className="text-caption text-ink block">
+          Attachment, e.g. floor plan (PDF or image, optional)
+        </label>
+        <input id={`f-${instruction?.id ?? "new"}`} name="file" type="file" accept="image/*,application/pdf" className="text-caption text-ink mt-2 block" />
+        {instruction?.file_path && (
+          <label className="text-caption text-ink mt-2 flex items-center gap-3">
+            <input type="checkbox" name="remove_file" className="size-5 accent-electric-blue" />
+            Remove the current attachment ({instruction.file_name})
+          </label>
+        )}
+      </div>
       {error && <Notice kind="error">{error}</Notice>}
       <div className="flex flex-wrap gap-3">
         <PortalButton type="submit" disabled={busy}>

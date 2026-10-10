@@ -83,7 +83,8 @@ const PORTAL_HEADERS: Record<string, string> = {
   "Content-Security-Policy": "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'",
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "no-referrer",
-  "Permissions-Policy": "geolocation=(self), camera=(self), microphone=()",
+  // microphone: voice dictation in reports (officers app only uses it on request)
+  "Permissions-Policy": "geolocation=(self), camera=(self), microphone=(self)",
   "X-Robots-Tag": "noindex, nofollow",
 };
 
