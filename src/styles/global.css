@@ -410,6 +410,14 @@
   font-weight: 400;
 }
 
+/* 15px running copy with extra leading — for calm, editorial text blocks
+   (About page) where 17px read heavy. Regular weight, unlike caption. */
+@utility text-body-sm {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.75;
+  font-weight: 400;
+}
 @utility text-caption {
   font-family: var(--font-sans);
   font-size: 0.875rem; /* 14px — nav links, meta lines, marginal facts */

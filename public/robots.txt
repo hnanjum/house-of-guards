@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /officers/
+Disallow: /admin/
+Disallow: /client/
+
+Sitemap: https://harleygarrison.co.uk/sitemap.xml

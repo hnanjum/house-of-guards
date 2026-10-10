@@ -6,24 +6,29 @@ import ClosingCta from "../components/home/ClosingCta.astro";
 import officerPhoto from "../assets/about/officer-sia-badge.png";
 
 /**
- * About page — THIRD redesign (2026-10-10, direct owner instruction: "replace
- * the tiles with the homepage ones" and "a more premium layout"). The earlier
- * passes (PR #38–#40) are in CLAUDE.md's history.
+ * About page — FOURTH redesign (2026-10-10, owner: "redesign the whole about
+ * page", "more premium", "decrease the text size a bit for a clean look",
+ * and "centre aligned on mobile — keep this as a rule"). Earlier passes are
+ * in CLAUDE.md's history.
  *
- * Now black / white / grey like the rest of the public site, Amber only as a
- * bare rule mark and on buttons. Structure:
- *   1. Editorial intro — caption, serif headline, lead, Amber rule, tall
- *      cropped photo with an offset Surface Alt block behind it for depth.
- *   2. Who we are — Surface Alt band: heading left, copy right, then the three
- *      credentials as hairline-topped columns (no icons, no numbering).
- *   3. Mission and vision — two serif statements, each under a short Amber rule.
- *   4. The homepage's own photo-card ServicesGrid, reused unmodified.
- *   5. The shared ClosingCta (contact + quote form), as on the sector pages;
- *      it replaces the old standalone "Get in touch" button.
+ * MOBILE CENTRING (standing owner rule): every text block centres below the
+ * breakpoint where its layout goes multi-column, and returns to left-aligned
+ * from there up. Short rules and max-width blocks get auto side margins on
+ * mobile so they centre with the text.
  *
- * Contrast: Ink on Paper ~19.4:1, Ink on Surface Alt ~17.8:1. Stone is used on
- * Paper only (~4.6:1); on Surface Alt every line stays Ink, since Stone there
- * drops to ~4.2:1. Amber is never used as text.
+ * Structure:
+ *   1. Ink masthead continuing the Ink header — caption, serif headline,
+ *      Amber rule, lead; the officer photo framed on the right.
+ *   2. Who we are — heading column + copy column, then the three credentials
+ *      as one hairline-ruled band (no icons, no numbering).
+ *   3. Mission and vision — two Paper panels on Surface Alt.
+ *   4. The homepage photo-card ServicesGrid, reused unmodified.
+ *   5. The shared ClosingCta (contact + quote form).
+ *
+ * Running copy uses the 15px body-sm step (added for this page) instead of
+ * 17px body. Contrast: Paper on Ink ~19.4:1; Paper at 70% on Ink ~9.6:1;
+ * Amber as a bare rule on Ink ~9:1; Ink on Paper ~19.4:1; Stone on Paper
+ * ~4.6:1 (Paper only); Ink on Surface Alt ~17.8:1. Amber is never text.
  */
 const CREDENTIALS = [
   {
@@ -39,71 +44,90 @@ const CREDENTIALS = [
     body: "Cover arranged around how your site actually runs, day or night.",
   },
 ];
+
+const PRINCIPLES = [
+  {
+    label: "Our mission",
+    statement:
+      "To meet our clients' needs to perfection, in a professional working environment.",
+    body: "We recruit staff who share those values, give full assurance in the safety our guards provide, and aim to become a leading supplier of reliable close protection officers in the North.",
+  },
+  {
+    label: "Our vision",
+    statement: "The best quality for the right price, delivered by people we invest in.",
+    body: "We commit to ongoing improvement in every area, and to building a team of experts who understand our core values and want to deliver on them.",
+  },
+];
 ---
 
 <BaseLayout
   title="About"
   description="Harley Garrison is a new, Bradford-based physical security company — SIA-licensed, DBS-checked officers delivering manned guarding, close protection, and CCTV monitoring across West Yorkshire."
 >
-  <section class="bg-paper">
-    <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-gutter py-20 md:px-12 md:py-28 lg:grid-cols-12 lg:gap-10">
-      <div class="lg:col-span-7 lg:pr-8">
-        <p class="text-caption text-stone">About Harley Garrison</p>
-        <h1 class="text-h1 sm:text-display text-ink mt-5 max-w-2xl">
+  <section class="on-dark bg-ink text-paper">
+    <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-gutter pt-16 pb-20 md:px-12 md:pt-20 md:pb-24 lg:grid-cols-12 lg:gap-12">
+      <div class="text-center lg:col-span-7 lg:text-left">
+        <p class="text-caption text-paper/70">About Harley Garrison</p>
+        <h1 class="text-h1 sm:text-display mx-auto mt-5 max-w-2xl lg:mx-0">
           A young company with experienced people
         </h1>
-        <span aria-hidden="true" class="mt-8 block h-0.5 w-12 bg-amber"></span>
-        <p class="text-body-lg text-ink mt-8 max-w-xl">
+        <span aria-hidden="true" class="mx-auto mt-8 block h-0.5 w-12 bg-amber lg:mx-0"></span>
+        <p class="text-body-sm text-paper/70 mx-auto mt-8 max-w-lg lg:mx-0">
           Harley Garrison is a new establishment, growing steadily in both staff and
           contracts. Professionalism is central to how we operate — and to what we
           expect from every member of the crew.
         </p>
       </div>
 
-      <div class="relative lg:col-span-5">
-        <div aria-hidden="true" class="absolute -right-4 -bottom-4 hidden h-full w-full bg-surface-alt sm:block md:-right-6 md:-bottom-6"></div>
-        <div class="relative aspect-[4/5] overflow-hidden bg-surface-alt">
-          <Image
-            src={officerPhoto}
-            alt="A Harley Garrison security officer in a branded jacket, wearing an SIA licence badge on a lanyard"
-            class="h-full w-full object-cover object-[center_18%]"
-            widths={[400, 640, 800, 1024]}
-            sizes="(min-width: 1024px) 34vw, 100vw"
-            format="webp"
-            quality={82}
-            loading="eager"
-          />
+      <div class="mx-auto w-full max-w-sm lg:col-span-5 lg:max-w-none">
+        <div class="border border-paper/15 p-3">
+          <div class="aspect-[4/5] overflow-hidden">
+            <Image
+              src={officerPhoto}
+              alt="A Harley Garrison security officer in a branded jacket, wearing an SIA licence badge on a lanyard"
+              class="h-full w-full object-cover object-[center_18%]"
+              widths={[400, 640, 800, 1024]}
+              sizes="(min-width: 1024px) 34vw, 24rem"
+              format="webp"
+              quality={82}
+              loading="eager"
+            />
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="bg-surface-alt" data-reveal>
-    <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-24">
-      <div class="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
-        <h2 class="text-h2 text-ink lg:col-span-5">Who we are</h2>
-        <div class="lg:col-span-7">
-          <p class="text-body text-ink max-w-2xl">
+  <section class="bg-paper" data-reveal>
+    <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-28">
+      <div class="grid grid-cols-1 gap-8 text-center lg:grid-cols-12 lg:gap-10 lg:text-left">
+        <div class="lg:col-span-4">
+          <p class="text-caption text-stone">Who we are</p>
+          <h2 class="text-h2 text-ink mt-4">Security built on trust</h2>
+          <span aria-hidden="true" class="mx-auto mt-6 block h-0.5 w-12 bg-amber lg:mx-0"></span>
+        </div>
+        <div class="lg:col-span-7 lg:col-start-6">
+          <p class="text-body-sm text-ink mx-auto max-w-xl lg:mx-0">
             We work across retail, distribution, corporate, events, healthcare and
             education, and we continue to recruit skilled SIA licensed officers, CCTV
             monitoring operators and stewards.
           </p>
-          <p class="text-body text-ink mt-5 max-w-2xl">
+          <p class="text-body-sm text-stone mx-auto mt-5 max-w-xl lg:mx-0">
             Most of our work takes place in West Yorkshire, though some shifts run
             further afield with transport provided. Our staff receive regular training
-            on how to sharpen their work. Alongside the services below we also provide
-            retail security, private property security and event stewarding, with
-            bespoke arrangements available and specialists operational 24 hours a day.
+            on how to sharpen their work. We also provide retail security, private
+            property security and event stewarding, with bespoke arrangements available
+            and specialists operational 24 hours a day.
           </p>
         </div>
       </div>
 
-      <ul class="mt-16 grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-8">
+      <ul class="mt-16 grid grid-cols-1 divide-y divide-hairline border-y border-hairline md:mt-20 md:grid-cols-3 md:divide-x md:divide-y-0">
         {
           CREDENTIALS.map(({ title, body }) => (
-            <li class="border-t border-ink/20 pt-6">
+            <li class="px-2 py-8 text-center md:px-8 md:py-10 md:text-left md:first:pl-0 md:last:pr-0">
               <h3 class="text-h4 text-ink">{title}</h3>
-              <p class="text-caption text-ink mt-3 max-w-xs">{body}</p>
+              <p class="text-body-sm text-stone mx-auto mt-3 max-w-xs md:mx-0">{body}</p>
             </li>
           ))
         }
@@ -111,32 +135,18 @@ const CREDENTIALS = [
     </div>
   </section>
 
-  <section class="bg-paper" data-reveal>
-    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-16 px-gutter py-20 md:px-12 md:py-28 lg:grid-cols-2 lg:gap-20">
-      <div>
-        <span aria-hidden="true" class="block h-0.5 w-12 bg-amber"></span>
-        <h2 class="text-caption text-stone mt-6">Our mission</h2>
-        <p class="text-h3 text-ink mt-4">
-          To meet our clients' needs to perfection in a professional working
-          environment, and to recruit staff who share those values.
-        </p>
-        <p class="text-body text-stone mt-6 max-w-lg">
-          We aim to give full assurance in the safety our guards provide, and to
-          become a leading supplier of reliable close protection officers in the North.
-        </p>
-      </div>
-      <div>
-        <span aria-hidden="true" class="block h-0.5 w-12 bg-amber"></span>
-        <h2 class="text-caption text-stone mt-6">Our vision</h2>
-        <p class="text-h3 text-ink mt-4">
-          To offer the best quality for the right price, delivered by people we
-          invest in.
-        </p>
-        <p class="text-body text-stone mt-6 max-w-lg">
-          We commit to ongoing improvement in every area, and to building a team of
-          experts who understand our core values and want to deliver on them.
-        </p>
-      </div>
+  <section class="bg-surface-alt" data-reveal>
+    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-gutter py-20 md:px-12 md:py-24 lg:grid-cols-2 lg:gap-8">
+      {
+        PRINCIPLES.map(({ label, statement, body }) => (
+          <div class="bg-paper p-8 text-center sm:p-10 lg:p-12 lg:text-left">
+            <h2 class="text-caption text-stone">{label}</h2>
+            <p class="text-h3 text-ink mx-auto mt-4 max-w-md lg:mx-0">{statement}</p>
+            <span aria-hidden="true" class="mx-auto mt-6 block h-0.5 w-10 bg-amber lg:mx-0" />
+            <p class="text-body-sm text-stone mx-auto mt-6 max-w-md lg:mx-0">{body}</p>
+          </div>
+        ))
+      }
     </div>
   </section>
 
