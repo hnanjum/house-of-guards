@@ -24,6 +24,69 @@ a generic template. Existing tagline: "Security Built on Trust."
 > addresses, setup, what's built, what's next — is in the "Portals"
 > section at the END of this file. Read that first for any portal work.
 
+## CURRENT LOOK (2026-10-10, PRs #63–#78) — read before any colour/layout work
+
+The owner moved the public site to **black, white and grey, with Amber
+for buttons only**. This SUPERSEDES the Electric Blue / Magenta account
+in "Design system" and "Recent history" below for the sections listed
+here (those sections are kept as history, not as the current state).
+Every change was a direct owner instruction.
+
+- **Header** (`Header.astro`): info bar AND nav bar are Ink, white logo
+  (`/logo/logo-white.svg`), a thin Paper/15 rule between them. The nav
+  `<header>` is now genuinely sticky: the info bar is a sibling before
+  it, so `<header>`'s parent is `<body>` (the old sticky div sat inside
+  `<header>` and never stuck). `.on-dark` is scoped to the logo link and
+  the desktop nav only, so it can't leak into the mobile menu.
+- **NavLink `tone="paper"`**: active and hover = Amber underline
+  (bare mark on Ink ~9:1). Used by the header and footer.
+- **Mobile menu** (`NavDrawer.tsx`): rebuilt. Two-line trigger,
+  full-screen Ink curtain (clip-path from the top), serif links at
+  `text-h3` (owner found h2 too big) rising out of masks, Amber dash on
+  current/hover, Get a Quote + contact fade in. Escape closes, focus
+  managed, scroll locked incl. Lenis via the `hg:scroll-lock` window
+  event handled in `smoothScroll.ts`.
+- **Hero**: no blue panel. Copy sits on the photo over an Ink wash
+  (30%) + Ink gradient (from bottom on phones, from right on desktop).
+  New hero photo (`hero-officer.png`, AI-generated, owner-supplied, no
+  lettering on the uniform).
+- **StatStrip**: Ink fill, `Divider tone="paper"`. Third stat is
+  "Yorkshire" ("Based in Yorkshire, providing professional security
+  cover across West Yorkshire and beyond.").
+- **Homepage order**: Hero → StatStrip → **SectorsGrid** (Who We Protect)
+  → MissionBand → **ServicesGrid** → StandardsCarousel → ClosingCta.
+- **SectorsGrid**: all six panels Surface Alt (fill map kept, both
+  entries grey). Tabs **auto-rotate every 3.5s** while on screen; any
+  click/tap/key/focus in the section stops it for good; hover does NOT
+  pause (owner thought it was broken). Off under reduced motion.
+  Auto-advance scrolls only the tab row (never `scrollIntoView`).
+  Sector photos are now free stock photos (`src/assets/sectors/*.jpg`),
+  not the AI "House of Guards" ones. Retail still has Polish signage /
+  a Carrefour logo — owner may replace.
+- **ServicesGrid**: photo cards (stock photos in
+  `src/assets/services/`), Ink scrim, icon + name + Amber rule + copy in
+  white, hover zoom. Close Protection's source is only 735px wide.
+- **StandardsCarousel**: slow continuous auto-drift (28px/s), pauses on
+  hover/focus, stops on touch/wheel/arrows and resumes after 4s.
+- **ClosingCta** "Contact Now" panel: Surface Alt, Ink text, Ink icon
+  circles with white icons. Homepage has zero Electric Blue now.
+- **Footer**: Ink. Bottom bar: "Harley Garrison Ltd · Registered in
+  England and Wales · Company number 17508784" (SIA line removed).
+  Menus: "Quick links" + "Sectors" (built from `src/data/sectors.ts`),
+  left-aligned columns on desktop; on phones centred open/close
+  accordions (CSS grid-rows transition).
+- **Still blue/magenta, not yet asked about**: About page tiles, sector
+  detail pages' FAQ accent line, the portals.
+- **Open items**: real phone number (01274 000 000 is a placeholder);
+  info bar still says "Bradford, West Yorkshire"; registered office
+  address not on the site yet (legally required); MissionBand team photo
+  and About photo still show "HOUSE OF GUARDS".
+- **Testing note**: the Browser pane is usually hidden, so rAF,
+  IntersectionObserver, scrolling and repaints are frozen there. For
+  motion checks, serve `dist/` with a scratch server that injects a shim
+  (fake `visibilityState`, rAF via setTimeout, always-intersecting
+  IntersectionObserver) — that is how the tab rotation was verified.
+
 ## Resolved incident (historical) — Cloudflare Workers Builds stall around PR #14
 
 Kept as a brief historical record, not a "check this first" item —
@@ -3421,6 +3484,10 @@ tested with 17 cases by importing it under Node.
   = `https://officers.harleygarrison.co.uk`; redirect URLs = the three
   portal subdomains with `/**`.
 - The owner's admin account exists and has `role = 'admin'`.
+  As of 2026-10-10 its sign-in email is onata.1230@gmail.com (changed
+  from hnanjum0@ via SQL on auth.users + auth.identities). The test
+  officer was moved to onata.1230+officer@gmail.com to free that email.
+  Passwords are never recorded here.
 - Applied migrations (all run by the user in the SQL Editor, in order):
   1. `20261010000000_stage1_foundation.sql` — profiles/roles (guard /
      admin / client), clients, client_users, sites (lat/lng + geofence
@@ -3576,6 +3643,11 @@ parts) must be applied before this code works — see supabase/README.md.
   switches: names as "Ahmed N." (on), GPS (off), attendance times (off).
 - **2-step verification**: PortalShell asks for a TOTP code when the
   account has one (any portal). Admins enrol in Users and roles.
+
+- Admin Sites map: OpenStreetMap tiles need a Referer, but portal
+  hosts send `Referrer-Policy: no-referrer`; the tile layer sets
+  `referrerPolicy: "strict-origin"` (PR #70). If tiles show "Access
+  blocked" again, switch tile provider.
 
 ### Still not built / honest limits
 
