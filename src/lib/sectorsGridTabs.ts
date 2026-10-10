@@ -192,7 +192,7 @@ export function initSectorsGridTabs(root: ParentNode = document) {
  * prefers-reduced-motion, off screen, or in a background browser tab
  * (WCAG 2.2.2: auto-updating content must be stoppable).
  */
-const ROTATE_EVERY_MS = 6000;
+const ROTATE_EVERY_MS = 3500;
 const ROTATE_TICK_MS = 250;
 
 function initAutoRotate(root: ParentNode, tablist: HTMLElement, tabs: HTMLElement[]) {
