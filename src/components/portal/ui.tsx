@@ -131,6 +131,13 @@ export const fmtShortDay = (iso: string) =>
 export const fmtTime = (iso: string) =>
   new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: TZ }).format(new Date(iso));
 
+/** "420 m" under a kilometre, otherwise "6,300 km" / "1.4 km". */
+export function fmtDistance(metres: number) {
+  if (metres < 1000) return `${Math.round(metres)} m`;
+  const km = metres / 1000;
+  return `${km < 10 ? km.toFixed(1) : Math.round(km).toLocaleString("en-GB")} km`;
+}
+
 export function mapsUrl(site: { latitude: number | null; longitude: number | null; address: string; name: string }) {
   const q = site.latitude != null && site.longitude != null ? `${site.latitude},${site.longitude}` : `${site.name} ${site.address}`;
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Assignment, ClockEvent, SiteInstruction } from "../../../lib/portalSupabase";
-import { fmtDay, fmtTime, Loading, mapsUrl, Notice, PortalButton } from "../ui";
+import { fmtDay, fmtDistance, fmtTime, Loading, mapsUrl, Notice, PortalButton } from "../ui";
 import { Page, PageHeader, Panel } from "../admin/kit";
 import { CLOCK_IN_OPENS_MIN, clock, dutyState, loadAssignment, loadClockEvents, loadInstructions, readPosition, respond, type Position } from "./data";
 
@@ -195,7 +195,7 @@ function ClockPanel({
       if (ev.within_geofence === false && ev.distance_to_site_m != null) {
         setMessage({
           kind: "info",
-          text: `${verb} at ${fmtTime(ev.server_time)}. You appear to be ${Math.round(ev.distance_to_site_m)} m from the site, so the office will see this flagged.`,
+          text: `${verb} at ${fmtTime(ev.server_time)}. You appear to be ${fmtDistance(ev.distance_to_site_m)} from the site, so the office will see this flagged.`,
         });
       } else if (ev.within_geofence === null) {
         setMessage({ kind: "info", text: `${verb} at ${fmtTime(ev.server_time)}, without a location.` });
