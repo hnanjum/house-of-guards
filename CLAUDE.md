@@ -95,9 +95,10 @@ Every change was a direct owner instruction.
   (Reply-To = visitor). Needs Worker secret RESEND_API_KEY and the domain
   verified in Resend; without the key the endpoint returns 503 and the
   forms say NOT sent. Honeypot field "website", same-origin check. Owner
-  chose: both forms -> operations@, email only (no DB copy). Mailboxes:
-  owner wants a free service (Zoho Mail Free planned), so Cloudflare Email
-  Routing (MX) is not used.
+  chose: both forms -> operations@, email only (no DB copy). Mailboxes (owner's
+  choice): Cloudflare Email Routing forwards info@ and operations@ to the
+  owner's Gmail; Gmail "Send mail as" replies through Resend SMTP
+  (smtp.resend.com:587, user "resend", password = a Resend API key).
 - **MOBILE CENTRING RULE (owner, standing)**: text/content sections
   centre-align on mobile and return to left-aligned once the layout goes
   multi-column (text-center lg:text-left, auto margins on max-width blocks
