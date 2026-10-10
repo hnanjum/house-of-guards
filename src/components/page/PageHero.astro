@@ -3,17 +3,18 @@ import { Image } from "astro:assets";
 
 /**
  * Shared opening section for interior pages (Services, sector pages,
- * Careers, Get a Quote). Paper background — the owner asked for no black
- * section fills on these pages. Caption, serif headline, short Amber rule,
- * lead line, an optional actions slot, and an optional photo framed on the
- * right with an offset Surface Alt block behind it.
+ * Careers, Get a Quote). Ink masthead continuing the Ink header, the same
+ * treatment as the About page (owner: "use black like that"). Caption, serif headline, short Amber rule,
+ * lead line, an optional actions slot, and an optional photo in a thin
+ * Paper/15 frame on the right.
  *
  * Mobile centring (standing owner rule): text centres until the layout
  * splits into two columns at lg, then left-aligns. Without a photo the text
  * block simply runs full width.
  *
- * Contrast: Ink on Paper ~19.4:1; Stone caption/lead on Paper ~4.6:1
- * (14px+ only); Amber is a bare decorative rule, never text.
+ * Contrast: Paper on Ink ~19.4:1; Paper/70 on Ink ~9.6:1; Amber rule on
+ * Ink ~9:1 (never text). .on-dark swaps the focus ring to Paper; the ring
+ * sits 2px outside the Amber button, i.e. on Ink, so ~19.4:1.
  */
 interface Props {
   eyebrow: string;
@@ -28,7 +29,7 @@ const { eyebrow, title, lead, image, imageAlt = "", imagePosition = "object-cent
 const hasActions = Astro.slots.has("default");
 ---
 
-<section class="bg-paper">
+<section class="on-dark bg-ink text-paper">
   <div
     class:list={[
       "mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-gutter pt-16 pb-20 md:px-12 md:pt-24 md:pb-28",
@@ -36,10 +37,10 @@ const hasActions = Astro.slots.has("default");
     ]}
   >
     <div class:list={["text-center lg:text-left", image && "lg:col-span-6"]}>
-      <p class="text-caption text-stone">{eyebrow}</p>
-      <h1 class="text-h1 sm:text-display text-ink mx-auto mt-5 max-w-2xl lg:mx-0">{title}</h1>
+      <p class="text-caption text-paper/70">{eyebrow}</p>
+      <h1 class="text-h1 sm:text-display mx-auto mt-5 max-w-2xl lg:mx-0">{title}</h1>
       <span aria-hidden="true" class="mx-auto mt-8 block h-0.5 w-12 bg-amber lg:mx-0"></span>
-      {lead && <p class="text-body-lg text-stone mx-auto mt-8 max-w-xl lg:mx-0">{lead}</p>}
+      {lead && <p class="text-body-lg text-paper/70 mx-auto mt-8 max-w-xl lg:mx-0">{lead}</p>}
       {
         hasActions && (
           <div class="mt-10 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
@@ -51,12 +52,9 @@ const hasActions = Astro.slots.has("default");
 
     {
       image && (
-        <div class="relative mx-auto w-full max-w-xl lg:col-span-6 lg:max-w-none">
-          <div
-            aria-hidden="true"
-            class="bg-surface-alt absolute -right-3 -bottom-3 hidden h-full w-full sm:block md:-right-5 md:-bottom-5"
-          />
-          <div class="relative aspect-[4/3] overflow-hidden">
+        <div class="mx-auto w-full max-w-xl lg:col-span-6 lg:max-w-none">
+          <div class="border border-paper/15 p-3">
+          <div class="aspect-[4/3] overflow-hidden">
             <Image
               src={image}
               alt={imageAlt}
@@ -67,6 +65,7 @@ const hasActions = Astro.slots.has("default");
               quality={82}
               loading="eager"
             />
+          </div>
           </div>
         </div>
       )

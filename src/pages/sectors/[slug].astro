@@ -220,7 +220,7 @@ const faqSchema = hasFaqs
   </PageHero>
 
   <section class="bg-paper" data-reveal>
-    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-gutter pb-20 md:px-12 md:pb-28 lg:grid-cols-12 lg:gap-16">
+    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-gutter py-20 md:px-12 md:py-28 lg:grid-cols-12 lg:gap-16">
       <div class="text-center lg:col-span-7 lg:text-left">
         <p class="text-caption text-stone">Overview</p>
         <h2 class="text-h2 text-ink mt-4">How we protect {sector.name.toLowerCase()} sites</h2>
@@ -251,26 +251,26 @@ const faqSchema = hasFaqs
 
   {
     hasRisks && (
-      <section class="bg-surface-alt">
+      <section class="on-dark bg-ink text-paper">
         <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-24">
           <div data-reveal class="text-center lg:text-left">
-            <p class="text-caption text-ink">The challenge</p>
-            <h2 class="text-h2 text-ink mx-auto mt-4 max-w-2xl lg:mx-0">
+            <p class="text-caption text-paper/70">The challenge</p>
+            <h2 class="text-h2 mx-auto mt-4 max-w-2xl lg:mx-0">
               Risks in {sector.name.toLowerCase()} security
             </h2>
           </div>
-          <ul data-reveal class="bg-hairline mt-12 grid grid-cols-1 gap-px md:grid-cols-2">
+          <ul data-reveal class="bg-paper/15 mt-12 grid grid-cols-1 gap-px md:grid-cols-2">
             {sector.risks!.map((risk) => (
-              <li class="bg-paper px-8 py-7 text-center md:text-left">
+              <li class="bg-ink px-8 py-7 text-center md:text-left">
                 <span aria-hidden="true" class="bg-amber mx-auto mb-4 block h-0.5 w-6 md:mx-0" />
-                <p class="text-body-sm text-ink">{risk}</p>
+                <p class="text-body-sm text-paper/80">{risk}</p>
               </li>
             ))}
           </ul>
           {sector.approach && (
             <div data-reveal class="mt-12 text-center lg:grid lg:grid-cols-12 lg:gap-16 lg:text-left">
-              <h3 class="text-h3 text-ink lg:col-span-4">Our approach</h3>
-              <p class="text-body-sm text-ink mx-auto mt-4 max-w-2xl lg:col-span-8 lg:mx-0 lg:mt-0">{sector.approach}</p>
+              <h3 class="text-h3 lg:col-span-4">Our approach</h3>
+              <p class="text-body-sm text-paper/80 mx-auto mt-4 max-w-2xl lg:col-span-8 lg:mx-0 lg:mt-0">{sector.approach}</p>
             </div>
           )}
         </div>

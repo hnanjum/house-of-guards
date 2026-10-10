@@ -82,9 +82,10 @@ Every change was a direct owner instruction.
   Running copy uses a new 15px text-body-sm step. No blue/magenta left.
 - **Interior pages** (2026-10-10): Services, the six sector pages, Careers
   and the new Get a Quote page (/contact/) share src/components/page/
-  PageHero.astro (Paper, caption + serif h1 + Amber rule + lead, optional
-  photo with offset Surface Alt block) and QuoteBand.astro (Surface Alt
-  closing CTA to /contact/). Owner: NO black section fills on these pages.
+  PageHero.astro (Ink masthead like About: caption + serif h1 + Amber rule
+  + lead, optional photo in a thin Paper/15 frame) and QuoteBand.astro (Surface Alt
+  closing CTA to /contact/). Owner WANTS black (Ink) sections where they look good: heroes, Services
+  standards band, sector risks band, Careers roles band.
   Services = alternating photo/text rows; sector FAQ accent is Amber for all.
   Policies and Gallery removed from header, mobile menu and footer.
 - **MOBILE CENTRING RULE (owner, standing)**: text/content sections
