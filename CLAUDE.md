@@ -19,6 +19,11 @@ Brand register: **discreet, disciplined, high-trust, understated
 authority** — a private security consultancy or a bespoke law firm, not
 a generic template. Existing tagline: "Security Built on Trust."
 
+> **Portals:** there are now three signed-in apps (officers / admin /
+> client) on subdomains, backed by Supabase. Everything about them —
+> addresses, setup, what's built, what's next — is in the "Portals"
+> section at the END of this file. Read that first for any portal work.
+
 ## Resolved incident (historical) — Cloudflare Workers Builds stall around PR #14
 
 Kept as a brief historical record, not a "check this first" item —
@@ -3367,38 +3372,199 @@ Full Astro documentation: https://docs.astro.build
 - [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
 - [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
 
-## Portals (officers / admin / client)
+## Portals (officers / admin / client) — CURRENT STATE, read this first
 
-Started 2026-10-10. Signed-in web apps on subdomains of the same site:
-`officers.harleygarrison.co.uk` (built first), `admin.` and `portal.`
-(clients) to follow. Staff are called **officers** everywhere in the UI;
-the database role is still named `guard` internally.
+Last updated 2026-10-10. Three signed-in web apps live on subdomains of
+the same site, alongside the public marketing site. All are LIVE and
+were tested end to end with real data (admin created a site and shift,
+an officer accepted and clocked in/out, the dashboard showed it).
 
-- **Routing**: `worker/index.ts` (wrangler `main`, `run_worker_first`)
-  maps each subdomain to its section of the static build (`/officers`,
-  `/admin`, `/client`), 404s portal paths on the marketing hosts, and
-  301s `*.harleygarrison.com` to `.co.uk`. Unknown hosts (workers.dev)
-  pass through so previews keep working. Custom domains are attached in
-  the Cloudflare dashboard, deliberately not in `wrangler.jsonc`.
-- **Backend**: Supabase (London). Schema + RLS in
-  `supabase/migrations/`, setup steps in `supabase/README.md`. The
-  publishable key and URL in `src/lib/portalSupabase.ts` are public by
-  design; the secret/service-role key must never enter this repo.
-- **Frontend**: `src/layouts/PortalLayout.astro` (no marketing chrome,
-  noindex) + `client:only` React apps under `src/components/portal/`.
-  `PortalShell.tsx` is the shared auth gate (sign-in, reset, invite
-  set-password, role check). Screens switch by URL hash.
-- **Design**: same tokens and type as the public site. One Electric Blue
-  "duty panel" per screen is the bold moment; Amber is buttons only;
-  everything else Paper/Ink on hairlines. Input borders use Ink at 50%
-  (~3.6:1) because the hairline token is too faint for a form field.
-  No Framer Motion here (the three-island rule stands).
-- **Admin dashboard** (`admin.` → `/admin`, `src/components/portal/admin/`):
-  Ink sidebar + sticky page header, content on Surface Alt with white
-  hairline panels. Overview / Shifts / Attendance / Officers / Sites /
-  Clients. Officers are invited through the `invite-user` Edge Function
-  (`supabase/functions/`), which returns a one-time link to send by
-  WhatsApp; the portal redeems it only on a button press
-  (`#/activate?token_hash=…`), so link previews can't burn it. All
-  calendar maths uses UK time (`ukToInstant` etc. in `adminData.ts`),
-  never the admin's own computer time zone.
+### Addresses (all connected in Cloudflare, all verified live)
+
+| Address | What | Built from |
+|---|---|---|
+| `harleygarrison.co.uk`, `www.` | Public marketing site | everything outside `/officers`, `/admin`, `/client` |
+| `officers.harleygarrison.co.uk` | Officer portal (staff) | `src/pages/officers/` |
+| `admin.harleygarrison.co.uk` | Admin dashboard (owner/managers) | `src/pages/admin/` |
+| `portal.harleygarrison.co.uk` | Client portal (customers) | `src/pages/client/` |
+
+`house-of-guards.onata-1230.workers.dev/<section>/` still serves every
+section directly (useful for previews). Staff are called **officers**
+everywhere in the UI; the database role is still named `guard`
+internally (renaming it was offered and not taken up — leave it unless
+asked).
+
+### Routing — `worker/index.ts`
+
+A small Worker (`wrangler.jsonc`: `main`, `assets.binding: ASSETS`,
+`run_worker_first: true`) in front of the static build. Maps each
+subdomain to its section (`officers` → `/officers`, `admin` → `/admin`,
+`portal` → `/client`), passes shared files that have an extension
+(`/_astro/*`, `/logo/*`) through unchanged, 404s portal paths on the
+marketing hosts and on each other's hosts, 404s unknown subdomains,
+301s `*.harleygarrison.com` → `.co.uk` (the .com isn't owned yet), and
+adds `X-Frame-Options: DENY`, no-referrer, noindex and
+`Cache-Control: no-store` (HTML) on portal hosts. Any other host
+(workers.dev) passes straight through. Custom domains are attached in
+the Cloudflare dashboard (Workers → house-of-guards → Settings →
+Domains & Routes → Custom domain), deliberately NOT in wrangler.jsonc so
+a deploy never fails on a domain. `route()` is a pure function; it was
+tested with 17 cases by importing it under Node.
+
+### Backend — Supabase (project `jhacbfhxgodqumgxfnvr`, London, Free plan)
+
+- URL + publishable key are in `src/lib/portalSupabase.ts` — public by
+  design. The secret/service-role key must NEVER enter this repo or the
+  site; it only exists inside Supabase (the Edge Function gets it as an
+  env var automatically).
+- Auth: email + password, **public sign-ups OFF**, invite-only. Site URL
+  = `https://officers.harleygarrison.co.uk`; redirect URLs = the three
+  portal subdomains with `/**`.
+- The owner's admin account exists and has `role = 'admin'`.
+- Applied migrations (all run by the user in the SQL Editor, in order):
+  1. `20261010000000_stage1_foundation.sql` — profiles/roles (guard /
+     admin / client), clients, client_users, sites (lat/lng + geofence
+     radius), site_instructions, shifts, shift_assignments (offered /
+     accepted / declined / cancelled), clock_events (append-only;
+     `server_time`, distance-to-site and `within_geofence` stamped by a
+     trigger, never trusted from the phone). RLS on everything; helper
+     functions in the unexposed `private` schema; a deactivated profile
+     loses all access.
+  2. `20261011000000_admin_email.sql` — read-only `profiles.email` kept
+     in sync with auth.users.
+  3. `20261012000000_client_roster.sql` — `client_roster(from, to)`,
+     the client portal's ONLY view of officers: own sites only, officer
+     shown as first name + last initial, first clock-in / last clock-out.
+  New migrations: add a new dated file, never edit an applied one, and
+  give the user the file to paste and run.
+- Edge Function `invite-user` (`supabase/functions/invite-user/`,
+  deployed by the user via the dashboard editor, Verify JWT on):
+  admin-only; creates an officer or client-user account with
+  `generateLink` and returns
+  `https://<portal>/#/activate?token_hash=…&type=invite`. NO email is
+  sent (Supabase's built-in SMTP only delivers to team members) — the
+  admin copies the link or uses "Send on WhatsApp". The portal redeems
+  the token only when the person presses "Activate my account", so
+  messaging-app link previews can't burn it.
+- Testing approach that worked: run all migrations in an in-memory
+  Postgres (`@electric-sql/pglite`, installed in the session scratchpad,
+  NOT the project) with stubbed `auth.users` / `auth.uid()` / roles,
+  then assert RLS as each role. 34 checks (stage 1) + 13 (client
+  roster) pass. Re-run this style of test for any new table or policy.
+- When the user pastes SQL, Supabase sometimes warns "creates a table
+  without RLS" for plain inserts — a false positive; tell them to pick
+  "Run and enable RLS". `.ts`/`.sql` files open wrongly on Windows; tell
+  them Open with → Notepad, or paste the content in chat.
+
+### Frontend — shared
+
+- `src/layouts/PortalLayout.astro`: no marketing header/footer, no
+  Lenis, no view transitions, noindex. Each portal page mounts one
+  `client:only="react"` app (nothing personal is ever in static HTML).
+- `src/components/portal/PortalShell.tsx`: shared auth gate — sign in,
+  forgot password, `#/activate` invite/recovery redemption, choose
+  password (min 12 chars), role + active check. Sign-in screen =
+  Electric Blue panel with white logo + Paper form.
+- `src/components/portal/ui.tsx`: PortalButton (Amber primary / quiet /
+  onDark), Field / SelectField / TextArea (inputs use `border-ink/50`,
+  ~3.6:1, because hairline is too faint for a field), Notice, Loading,
+  date formatters (always `Europe/London`), `fmtDistance` ("420 m",
+  "6.3 km", "6,300 km"), `mapsUrl`.
+- `src/components/portal/admin/kit.tsx` (used by all three portals):
+  PageHeader (sticky; `offset={false}` when there's no fixed mobile bar
+  above it), Page, Panel (white, hairline, optional title + action),
+  Stat (`feature` = the Electric Blue one), Status (small square mark +
+  word; pass `wrap` for sentence-length text — the default is nowrap,
+  and a long email once pushed text out of its box), Table, Empty.
+- `src/components/portal/admin/adminData.ts` also holds the UK-time
+  helpers used everywhere: `ukToInstant`, `isoDate`, `startOfToday`,
+  `addDays` (calendar days, DST-safe), `weekStart` (Monday),
+  `localToIso`. ALL calendar maths must use these — the owner is not in
+  the UK, and an earlier version created shifts in the browser's own
+  time zone (tested from Karachi / New York / London, 8 cases including
+  both clock changes).
+- Icons: `src/components/portal/admin/icons.tsx` (24px line pictograms,
+  round caps, 1.75 stroke; no shield/tick).
+- Screens switch by URL hash (`#/shifts`, `#/shift/<uuid>` …) so the
+  back button works and no server routing is needed.
+
+### Design (owner's direct feedback, applies to all portals)
+
+"Luxury, high-end, not generic AI slop", "use our colour system",
+"proper dashboard with sidebar", "nice clean typography, no big text,
+text must not come out of its box". Concretely:
+- Content sits on Surface Alt with white hairline panels; no shadows,
+  sharp corners. Lora for headings (smaller scale), Montserrat for
+  everything else, tabular figures for times.
+- ONE Electric Blue moment per screen (duty panel / live stat / site
+  panel); Amber only for primary actions and the active-nav mark;
+  Magenta only as a small "bad" status mark and destructive underline.
+- Admin + officers on desktop: Ink sidebar (white logo, icon + label,
+  Amber bar on the active item). Officers on phones: Ink top bar + fixed
+  bottom tab bar (Home / My shifts / Timesheet / Profile). Client
+  portal: white top bar with colour logo, company name and underline
+  tabs.
+- Always check new screens with a throwaway preview page that mounts
+  the app with fixture data by stubbing `window.fetch` for the Supabase
+  REST URLs (`/rest/v1/<table>`, `/rest/v1/rpc/<fn>`, `/auth/v1/user`),
+  served from a scratch Node static server on `dist/`; measure overflow
+  with getBoundingClientRect at 390 / 1024 / 1280 / 1440px; delete the
+  preview before committing. Fixture IDs must be UUIDs (routes check),
+  and a mock matching `id=eq.` also matches `guard_id=eq.`.
+
+### What each portal does today
+
+- **Admin** (`src/components/portal/admin/`): Overview (on duty now,
+  shifts today, unfilled, awaiting reply; today's shifts with
+  per-officer attendance; needs attention = late / no-show / unfilled /
+  off-site or no-location clock events; latest activity; refreshes each
+  minute). Shifts (Mon–Sun week, create incl. overnight, offer to an
+  officer, remove an officer, delete unless attendance exists).
+  Attendance (Today / 7 / 30 days; on site / distance / no location;
+  phone-clock drift over 5 min; flagged filter). Officers (search,
+  invite, edit name + mobile, deactivate/reactivate). Sites (add/edit,
+  "lat, lng" pasted from Google Maps, radius, archive; site instructions
+  add/edit/delete/reorder). Clients (add, linked sites, portal users,
+  Invite user).
+- **Officers** (`src/components/portal/officers/`): Home (greeting, duty
+  panel with Clock in/out + Directions, next 7 days / hours this month /
+  offers to answer, accept/decline offers, coming up). My shifts
+  (upcoming by day; past 30 days with hours). Shift page (site panel,
+  attendance with GPS clock in/out — falls back to "clock without
+  location", recorded as such; notes; site instructions). Clock-in
+  opens 60 min before start (`CLOCK_IN_OPENS_MIN` in data.ts — an
+  assumed rule the owner can change). Timesheet (this/last week,
+  this/last month). Profile (details, edit own mobile, change password,
+  sign out).
+- **Client** (`src/components/portal/client/`): Overview (on site now,
+  shifts today, cover, hours covered in 7 days; today at your sites;
+  coming up), Schedule (week), Attendance (7/30/90 days, booked vs
+  clocked, hours, "Verified" when on site), Sites. Read-only.
+
+### NOT built yet (the owner's original list — ask which is next)
+
+Incident reports (with photos — needs Supabase Storage + a private
+bucket), shift handover notes, visitor log, vehicle log, key register,
+documents & licences (SIA / DBS / first aid with expiry reminders;
+dates of birth belong here too), offline mode (PWA + IndexedDB outbox
+for clock events/logs, keeping server_time as the record). Also open:
+custom SMTP so Supabase can send email from harleygarrison.co.uk;
+moving Supabase to the paid plan (daily backups) before real officer
+data; a privacy notice (GPS, DOB and licences are personal data — GPS
+is taken only at clock in/out, never tracked); spam protection on the
+public forms.
+
+### Gotchas hit while building this
+
+- Working-tree files are often CRLF on this machine; scripted text
+  replacement must normalise `\r\n` first (or match loosely). If line
+  endings alone show as changes, `git diff --ignore-cr-at-eol` proves
+  it and `git checkout -- <file>` restores them.
+- Long multi-line heredocs in Git Bash sometimes fail with "unexpected
+  EOF"; write the script/content to a file with the Write tool instead.
+- The `Write` tool and Git Bash can see the scratchpad at different
+  Windows paths (app virtualisation); copy files across if a script
+  can't find what Write created.
+- `tsconfig.json` excludes `supabase/functions` (Deno code).
+- The Browser pane often can't screenshot while hidden; read values
+  with javascript / get_page_text instead.
