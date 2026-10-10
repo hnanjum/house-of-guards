@@ -1,4 +1,5 @@
 ---
+import { Image } from "astro:assets";
 import SectionHeading from "../ui/SectionHeading.astro";
 import CorporateSecurity from "../../icons/services/CorporateSecurity.astro";
 import CloseProtection from "../../icons/services/CloseProtection.astro";
@@ -6,6 +7,12 @@ import CctvMonitoring from "../../icons/services/CctvMonitoring.astro";
 import MannedGuarding from "../../icons/services/MannedGuarding.astro";
 import ConstructionSecurity from "../../icons/services/ConstructionSecurity.astro";
 import OvernightSecurity from "../../icons/services/OvernightSecurity.astro";
+import corporatePhoto from "../../assets/services/corporate-security.jpg";
+import closeProtectionPhoto from "../../assets/services/close-protection.jpg";
+import cctvPhoto from "../../assets/services/cctv.jpg";
+import mannedGuardingPhoto from "../../assets/services/manned-guarding.jpg";
+import constructionPhoto from "../../assets/services/construction.jpg";
+import overnightPhoto from "../../assets/services/overnight.jpg";
 
 /**
  * "Services We Offer" — replaces `ServicesIndex.astro`'s numbered
@@ -200,81 +207,117 @@ import OvernightSecurity from "../../icons/services/OvernightSecurity.astro";
  * fallback (a plain, instant full-opacity/flat/full-scale state, no
  * animation, matching every other entry point on this site).
  */
-type Fill = "electric-blue" | "magenta" | "light";
-type IconAccent = "electric-blue" | "magenta";
-
-const SERVICES: { name: string; body: string; Icon: typeof CorporateSecurity; fill: Fill; iconAccent?: IconAccent }[] =
-  [
-    {
-      name: "Corporate Security",
-      body: "Front-of-house officers, access control and CCTV oversight that reflect the standards of your organisation.",
-      Icon: CorporateSecurity,
-      fill: "light",
-      iconAccent: "electric-blue",
-    },
-    {
-      name: "Close Protection",
-      body: "Discreet personal protection for individuals, families and visiting guests, at home and in transit.",
-      Icon: CloseProtection,
-      fill: "magenta",
-    },
-    {
-      name: "CCTV Monitoring",
-      body: "Round-the-clock camera monitoring with rapid escalation the moment something looks wrong.",
-      Icon: CctvMonitoring,
-      fill: "light",
-      iconAccent: "magenta",
-    },
-    {
-      name: "Manned Guarding",
-      body: "Highly trained, SIA licensed guards providing a visible presence from crowd control to mobile patrol.",
-      Icon: MannedGuarding,
-      fill: "electric-blue",
-    },
-    {
-      name: "Construction Site Security",
-      body: "Protecting plant, materials and part-built structures on sites that are a magnet for thieves.",
-      Icon: ConstructionSecurity,
-      fill: "light",
-      iconAccent: "magenta",
-    },
-    {
-      name: "Overnight Security",
-      body: "Dedicated night cover for premises that are most vulnerable once the working day ends.",
-      Icon: OvernightSecurity,
-      fill: "electric-blue",
-    },
-  ];
-
-// Keyed off each SERVICES entry's own `fill`, never derived from index —
-// see this file's own FILL ASSIGNMENT comment above for why.
-const FILL_CLASS: Record<Fill, string> = {
-  "electric-blue": "on-dark bg-electric-blue text-paper",
-  magenta: "on-dark bg-magenta text-paper",
-  light: "bg-surface-alt text-ink",
-};
-
-// Only consulted for `fill: "light"` cards — a filled card's icon
-// inherits `text-paper` from the card wrapper above and needs no
-// override.
-const ICON_ACCENT_CLASS: Record<IconAccent, string> = {
-  "electric-blue": "text-electric-blue",
-  magenta: "text-magenta",
-};
+/*
+ * PHOTO-CARD REDESIGN (on direct instruction from the owner, replacing
+ * the solid Electric-Blue/Magenta/Surface-Alt tiles described above —
+ * that account is kept as history). Each service is now a free stock
+ * photograph with an Ink scrim, its icon, name and line of copy in
+ * white. The scrim is strongest where the text sits: Ink at 92% at the
+ * bottom edge, still 80% at 42% of the card's height, fading to clear
+ * by 78%. Worst case (a pure-white photo pixel under the 80% stop) the
+ * backdrop composites to about rgb(61,61,61), and white text on that is
+ * about 10.9:1 — comfortably past 4.5:1 for the caption-size body copy.
+ * The six icons stay on every card, always visible (hard rule).
+ * Hover: the photo eases to 106% over 0.9s and a thin Amber rule under
+ * the name widens (Amber as a bare mark on near-Ink, ~9:1). Both are
+ * plain CSS transitions, covered by the global reduced-motion reset.
+ * Photos with readable lettering are framed away from it via each
+ * card's own object-position (the night lobby's street-number sign).
+ */
+const SERVICES: {
+  name: string;
+  body: string;
+  Icon: typeof CorporateSecurity;
+  photo: ImageMetadata;
+  alt: string;
+  position: string;
+}[] = [
+  {
+    name: "Corporate Security",
+    body: "Front-of-house officers, access control and CCTV oversight that reflect the standards of your organisation.",
+    Icon: CorporateSecurity,
+    photo: corporatePhoto,
+    alt: "A visitor checking in with a receptionist at the front desk of a modern office.",
+    position: "object-[45%_50%]",
+  },
+  {
+    name: "Close Protection",
+    body: "Discreet personal protection for individuals, families and visiting guests, at home and in transit.",
+    Icon: CloseProtection,
+    photo: closeProtectionPhoto,
+    alt: "A man in a dark suit holding open the rear door of a black executive car for a passenger.",
+    position: "object-[60%_50%]",
+  },
+  {
+    name: "CCTV Monitoring",
+    body: "Round-the-clock camera monitoring with rapid escalation the moment something looks wrong.",
+    Icon: CctvMonitoring,
+    photo: cctvPhoto,
+    alt: "An operator seen from behind in a dark control room facing a wall of camera and monitoring screens.",
+    position: "object-center",
+  },
+  {
+    name: "Manned Guarding",
+    body: "Highly trained, SIA licensed guards providing a visible presence from crowd control to mobile patrol.",
+    Icon: MannedGuarding,
+    photo: mannedGuardingPhoto,
+    alt: "Two security officers in dark uniforms walking through a busy shopping centre concourse.",
+    position: "object-[50%_65%]",
+  },
+  {
+    name: "Construction Site Security",
+    body: "Protecting plant, materials and part-built structures on sites that are a magnet for thieves.",
+    Icon: ConstructionSecurity,
+    photo: constructionPhoto,
+    alt: "A row of workers in hard hats and hi-vis vests standing beside a large construction site's foundations.",
+    position: "object-center",
+  },
+  {
+    name: "Overnight Security",
+    body: "Dedicated night cover for premises that are most vulnerable once the working day ends.",
+    Icon: OvernightSecurity,
+    photo: overnightPhoto,
+    alt: "A security officer standing watch in a dimly lit office building lobby at night.",
+    position: "object-[12%_50%]",
+  },
+];
 ---
 
 <section class="bg-paper">
   <div class="mx-auto max-w-7xl px-gutter py-24 md:px-12">
     <SectionHeading level="h2">Services We Offer</SectionHeading>
 
-    <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
       {
-        SERVICES.map(({ name, body, Icon, fill, iconAccent }) => (
-          <div data-services-reveal class:list={["flex flex-col items-start p-8 text-left sm:p-10", FILL_CLASS[fill]]}>
-            <Icon class:list={["mb-6 size-12", fill === "light" && iconAccent && ICON_ACCENT_CLASS[iconAccent]]} />
-            <h3 class="text-h3 mb-3">{name}</h3>
-            <p class="text-fine">{body}</p>
-          </div>
+        SERVICES.map(({ name, body, Icon, photo, alt, position }) => (
+          <article
+            data-services-reveal
+            class="group on-dark relative isolate flex min-h-[23rem] flex-col justify-end overflow-hidden bg-ink text-paper sm:aspect-[4/5] sm:min-h-0"
+          >
+            <Image
+              src={photo}
+              alt={alt}
+              widths={[480, 800, 1200]}
+              sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+              class:list={[
+                "absolute inset-0 -z-10 h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]",
+                position,
+              ]}
+            />
+            <div
+              aria-hidden="true"
+              class="absolute inset-0 -z-10 bg-linear-to-t from-ink/92 from-0% via-ink/80 via-42% to-ink/0 to-78%"
+            />
+            <div class="p-7 sm:p-8">
+              <Icon class="mb-5 size-10" />
+              <h3 class="text-h3">{name}</h3>
+              <span
+                aria-hidden="true"
+                class="mt-3 mb-4 block h-0.5 w-8 bg-amber transition-[width] duration-500 ease-out group-hover:w-16"
+              />
+              <p class="text-caption text-paper">{body}</p>
+            </div>
+          </article>
         ))
       }
     </div>
