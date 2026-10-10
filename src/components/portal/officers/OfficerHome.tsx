@@ -1,14 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { Assignment, ClockEvent } from "../../../lib/portalSupabase";
 import { fmtDay, fmtShortDay, fmtTime, Loading, mapsUrl, Notice, PortalButton } from "../ui";
 import { addDays, isoDate, startOfToday, ukToInstant } from "../admin/adminData";
 import { Empty, Page, PageHeader, Panel, Stat } from "../admin/kit";
+import { IconBook, IconClipboard, IconFlag, IconKey, IconPin, IconRoute } from "../admin/icons";
 import { dutyState, hoursFor, loadClockEvents, loadWorked, respond } from "./data";
 
 /**
- * Officer home: greeting, the duty panel (the shift on now, or the next
- * accepted one — the one Electric Blue moment, with its main action), a
- * row of figures, offers awaiting a reply, and what's coming up.
+ * Officer home: greeting, reminders (documents expiring, policies to
+ * confirm, unread messages), the duty panel (the shift on now, or the
+ * next accepted one — the one Electric Blue moment, with its main
+ * action), on-duty shortcuts (patrol, log, visitors, keys, checklists,
+ * report), a row of figures, offers awaiting a reply, and what's coming
+ * up.
  */
 export default function Home({
   officerId,
@@ -16,12 +20,22 @@ export default function Home({
   assignments,
   events,
   onChanged,
+  duty,
+  onDuty,
+  reminders,
+  unread,
+  outbox,
 }: {
   officerId: string;
   firstName: string;
   assignments: Assignment[] | null;
   events: Record<string, ClockEvent[]>;
   onChanged: () => Promise<void>;
+  duty: Assignment | null;
+  onDuty: boolean;
+  reminders: string[];
+  unread: number;
+  outbox: ReactNode;
 }) {
   const [monthHours, setMonthHours] = useState<number | null>(null);
 
@@ -59,6 +73,27 @@ export default function Home({
     <>
       {header}
       <Page>
+        {(reminders.length > 0 || unread > 0) && (
+          <Panel title="For your attention" flush>
+            <ul className="divide-hairline divide-y">
+              {unread > 0 && (
+                <li>
+                  <a href="#/messages" className="text-caption text-ink hover:bg-surface-alt block px-6 py-3">
+                    {unread} message{unread === 1 ? "" : "s"} from control to read
+                  </a>
+                </li>
+              )}
+              {reminders.map((r) => (
+                <li key={r}>
+                  <a href={/polic/.test(r) ? "#/policies" : "#/documents"} className="text-caption text-ink hover:bg-surface-alt block px-6 py-3">
+                    {r}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+        )}
+
         {featured ? (
           <DutyPanel a={featured} state={dutyState(featured, events[featured.id])} events={events[featured.id]} />
         ) : (
@@ -67,6 +102,10 @@ export default function Home({
             <p className="text-caption text-stone mt-1">When the office offers you a shift, it will appear here.</p>
           </Panel>
         )}
+
+        {duty && onDuty && <Shortcuts a={duty} />}
+
+        {outbox}
 
         <div className="grid grid-cols-3 gap-px">
           <Stat label="Next 7 days" value={nextWeek} note={`shift${nextWeek === 1 ? "" : "s"}`} />
@@ -209,5 +248,27 @@ function OfferRow({ a, onChanged }: { a: Assignment; onChanged: () => Promise<vo
         </div>
       )}
     </li>
+  );
+}
+
+function Shortcuts({ a }: { a: Assignment }) {
+  const base = `#/shift/${a.id}`;
+  const items = [
+    { href: `${base}/patrol`, label: "Patrol", Icon: IconRoute },
+    { href: `${base}/log`, label: "Log entry", Icon: IconBook },
+    { href: `${base}/log`, label: "Visitors and keys", Icon: IconKey },
+    { href: `${base}/checks`, label: "Checklists", Icon: IconClipboard },
+    { href: "#/report", label: "Report incident", Icon: IconFlag },
+    { href: `${base}/site`, label: "Site info", Icon: IconPin },
+  ];
+  return (
+    <nav aria-label="On duty" className="grid grid-cols-2 gap-px sm:grid-cols-3 xl:grid-cols-6">
+      {items.map(({ href, label, Icon }) => (
+        <a key={label} href={href} className="border-hairline bg-paper text-ink hover:bg-surface-alt flex min-h-20 flex-col justify-between gap-3 border p-4">
+          <Icon width={22} height={22} />
+          <span className="text-caption">{label}</span>
+        </a>
+      ))}
+    </nav>
   );
 }

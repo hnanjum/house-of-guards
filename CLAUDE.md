@@ -516,7 +516,7 @@ stylistic preference:
   end-state with no `ScrollTrigger` registered at all, so a
   reduced-motion visitor never sees a scroll-position-driven toggle in
   any direction, exactly as before both changes.
-- **Framer Motion is scoped to exactly three React islands** —
+- **Framer Motion is scoped to exactly three React islands** (the portals use none) —
   `NavDrawer.tsx`, `ContactForm.tsx` and, as of the Careers page,
   `ApplicationForm.tsx` (PR #48; the third added on direct instruction: "same
   pattern as ContactForm.tsx, with Framer Motion" — `formFields.tsx`,
@@ -3374,7 +3374,7 @@ Full Astro documentation: https://docs.astro.build
 
 ## Portals (officers / admin / client) — CURRENT STATE, read this first
 
-Last updated 2026-10-10. Three signed-in web apps live on subdomains of
+Last updated 2026-10-10 (officer-operations build). Three signed-in web apps live on subdomains of
 the same site, alongside the public marketing site. All are LIVE and
 were tested end to end with real data (admin created a site and shift,
 an officer accepted and clocked in/out, the dashboard showed it).
@@ -3512,47 +3512,87 @@ text must not come out of its box". Concretely:
   preview before committing. Fixture IDs must be UUIDs (routes check),
   and a mock matching `id=eq.` also matches `guard_id=eq.`.
 
-### What each portal does today
+### What each portal does today (officer-operations build, 2026-10-10)
 
-- **Admin** (`src/components/portal/admin/`): Overview (on duty now,
-  shifts today, unfilled, awaiting reply; today's shifts with
-  per-officer attendance; needs attention = late / no-show / unfilled /
-  off-site or no-location clock events; latest activity; refreshes each
-  minute). Shifts (Mon–Sun week, create incl. overnight, offer to an
-  officer, remove an officer, delete unless attendance exists).
-  Attendance (Today / 7 / 30 days; on site / distance / no location;
-  phone-clock drift over 5 min; flagged filter). Officers (search,
-  invite, edit name + mobile, deactivate/reactivate). Sites (add/edit,
-  "lat, lng" pasted from Google Maps, radius, archive; site instructions
-  add/edit/delete/reorder). Clients (add, linked sites, portal users,
-  Invite user).
-- **Officers** (`src/components/portal/officers/`): Home (greeting, duty
-  panel with Clock in/out + Directions, next 7 days / hours this month /
-  offers to answer, accept/decline offers, coming up). My shifts
-  (upcoming by day; past 30 days with hours). Shift page (site panel,
-  attendance with GPS clock in/out — falls back to "clock without
-  location", recorded as such; notes; site instructions). Clock-in
-  opens 60 min before start (`CLOCK_IN_OPENS_MIN` in data.ts — an
-  assumed rule the owner can change). Timesheet (this/last week,
-  this/last month). Profile (details, edit own mobile, change password,
-  sign out).
-- **Client** (`src/components/portal/client/`): Overview (on site now,
-  shifts today, cover, hours covered in 7 days; today at your sites;
-  coming up), Schedule (week), Attendance (7/30/90 days, booked vs
-  clocked, hours, "Verified" when on site), Sites. Read-only.
+Migration `20261013000000_officer_operations.sql` (one file, three
+parts) must be applied before this code works — see supabase/README.md.
 
-### NOT built yet (the owner's original list — ask which is next)
+- **Officers** (`src/components/portal/officers/`): Home (reminders,
+  duty panel, on-duty shortcuts, offers), My shifts, Shift page with
+  tabs — Overview (site contact, clock in/out with GPS + **selfie**,
+  late/early shown, **welfare check-in** timer), **Patrol** (QR scan via
+  BarcodeDetector or the lazy-loaded `jsqr` fallback, typed-code
+  fallback; in-order check is server-side), **Log** (occurrence book:
+  notes, handovers, alarms, visitors, vehicles, key register),
+  **Checklists** (equipment/site; prompted at clock in/out), **Site
+  info** (post orders, emergency contacts tap-to-call, fire procedures,
+  attachments). Report incident (photos/video, dictation, GPS), My
+  reports, **Panic** (hold 2 s; says "call 999" first; shows when
+  control acknowledges), Messages (read receipts, must-confirm), Extra
+  shifts (request/withdraw), Timesheet (clocked vs approved), Payslips
+  (links), Documents (wallet + 60-day expiry reminders), Policies and
+  training (confirm per version), Profile, More.
+- **Offline**: `offline.ts` — every on-shift record goes through
+  `send()`; with no signal it's kept in IndexedDB (with photos) and sent
+  later with `offline=true`; the DB then uses the phone's time only if
+  it's in the past and < 24 h old. Reads use a localStorage cache.
+  `public/officers-sw.js` caches the app shell (never Supabase data);
+  `officers.webmanifest` makes it installable. Sign-out wipes the phone
+  (warns if records are unsent).
+- **Admin** (`src/components/portal/admin/`): Dashboard (5 clickable
+  counters, sites today green/amber/red, alerts feed), Control room
+  (live alerts via Realtime: acknowledge, call officer, call list,
+  escalate, resolve; client requests as tasks; on-duty welfare/patrol
+  timers), **Rota** (week by site/officer, drag-and-drop move/hand-over,
+  drafts + Publish, open shifts in Magenta, conflict banner, shift
+  drawer whose officer picker greys out non-compliant officers with the
+  reason), Attendance (+selfie view, late/early), Timesheets (per
+  officer, late/short/off-site flags, approve, edit with required
+  reason, CSV for Xero/payroll with pay rates), Incidents (filters;
+  timeline, notes internal/client-visible, assign, close, share with
+  client + release EXIF-stripped photo copies), Site logs (day report),
+  Client reports (daily summaries, patrol review notes, monthly
+  reports — nothing reaches a client until approved/released),
+  Officers (compliance filter + profile tabs: Details, Compliance,
+  Documents (opening is audit-logged), Shifts, Pay rate, History),
+  Compliance (every expiry soonest first; send reminder / mark renewed;
+  to-check queue), Messages, Policies, Sites (list with officer count;
+  tabs: Details + Leaflet geofence map, Post orders, Checkpoints + QR
+  print sheet + keys + checklists, Contacts, Shift requirements),
+  Clients (per-client sections/sharing/contact settings, Preview as
+  client), Users and roles (role change, invite admin, reset 2-step via
+  `admin-users` function, set up own TOTP), Audit log (filters, CSV).
+  A global live banner + tone + browser notification on new alerts.
+  Dark-mode toggle (sidebar / top bar) — tokens in global.css under
+  `:root[data-theme="dark"]`, contrast computed there.
+- **Client** (`src/components/portal/client/`): Site status ("Site
+  covered"/"Needs attention", service level %), Patrols (per day "8 of
+  8 completed" with checkpoints; shortfalls only with a released note),
+  Incidents (shared only), Daily summaries, Monthly report (print/Save
+  as PDF), Attendance (only if switched on), Requests (go to the control
+  room), Contact. **Reads only via the `client_*` database functions**
+  — the client branches of the old shifts/assignments/clock_events
+  policies were dropped and `client_roster()` removed. Per-client
+  switches: names as "Ahmed N." (on), GPS (off), attendance times (off).
+- **2-step verification**: PortalShell asks for a TOTP code when the
+  account has one (any portal). Admins enrol in Users and roles.
 
-Incident reports (with photos — needs Supabase Storage + a private
-bucket), shift handover notes, visitor log, vehicle log, key register,
-documents & licences (SIA / DBS / first aid with expiry reminders;
-dates of birth belong here too), offline mode (PWA + IndexedDB outbox
-for clock events/logs, keeping server_time as the record). Also open:
-custom SMTP so Supabase can send email from harleygarrison.co.uk;
-moving Supabase to the paid plan (daily backups) before real officer
-data; a privacy notice (GPS, DOB and licences are personal data — GPS
-is taken only at clock in/out, never tracked); spam protection on the
-public forms.
+### Still not built / honest limits
+
+- Alerts reach control only while an admin dashboard is open (banner,
+  tone, browser notification). Phone push / SMS to managers needs a
+  provider (e.g. Twilio) — not set up. The pg_cron job raises missed
+  check-in / patrol alerts even if the officer's phone is off.
+- Email/SMS reminders (documents, messages) need custom SMTP / SMS.
+- Multi-language support: not built (copy is English only).
+- Voice-to-text uses the browser's speech service (Chrome sends audio
+  to Google); hidden where unsupported.
+- Officers can read `site_contacts` (RLS) but the Site info tab doesn't
+  list them yet.
+- Supabase Free plan: 1 GB storage — selfies/incident video will fill
+  it; move to Pro (and daily backups) before real use.
+- Privacy notice still needed (GPS at clock/patrol/report time,
+  selfies, documents).
 
 ### Gotchas hit while building this
 

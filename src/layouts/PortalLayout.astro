@@ -9,9 +9,11 @@ import "../styles/global.css";
  */
 interface Props {
   title: string;
+  /** Installable app (officers): web manifest + home-screen icon. */
+  installable?: boolean;
 }
 
-const { title } = Astro.props;
+const { title, installable = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -22,7 +24,27 @@ const { title } = Astro.props;
     <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#2563eb" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {
+      installable && (
+        <>
+          <link rel="manifest" href="/officers.webmanifest" />
+          <link rel="apple-touch-icon" href="/officers-apple-touch.png" />
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-title" content="HG Officers" />
+        </>
+      )
+    }
     <title>{title} | Harley Garrison</title>
+    {/* Apply the remembered light/dark choice before first paint (see portal/theme.tsx). */}
+    <script is:inline>
+      (function () {
+        try {
+          var t = localStorage.getItem("hg.ui.theme");
+          if (t !== "dark") t = "light";
+          document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body class="bg-paper text-ink min-h-dvh">
     <slot />

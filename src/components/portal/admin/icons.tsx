@@ -96,3 +96,121 @@ export const IconExit = (p: P) => (
     <path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10" />
   </svg>
 );
+
+/* ---------- officer operations ---------- */
+
+/** Alarm bell (panic, alerts). */
+export const IconBell = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Z" />
+    <path d="M10 20.5a2 2 0 0 0 4 0" />
+  </svg>
+);
+
+/** A route through points (patrol). */
+export const IconRoute = (p: P) => (
+  <svg {...base} {...p}>
+    <circle cx="6" cy="18" r="2.2" />
+    <circle cx="18" cy="6" r="2.2" />
+    <path d="M8.2 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.8" />
+  </svg>
+);
+
+/** Open book (occurrence log). */
+export const IconBook = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M12 6.5C10.3 5 7.8 4.5 4 4.5v14c3.8 0 6.3.5 8 2 1.7-1.5 4.2-2 8-2v-14c-3.8 0-6.3.5-8 2Z" />
+    <path d="M12 6.5v14" />
+  </svg>
+);
+
+/** Speech bubble (messages). */
+export const IconMessage = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M4 5h16v11H9l-5 4V5Z" />
+  </svg>
+);
+
+/** Folded document (documents, policies). */
+export const IconDoc = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M6 3h8l4 4v14H6V3Z" />
+    <path d="M14 3v4h4M9 12h6M9 16h6" />
+  </svg>
+);
+
+/** Clipboard with lines (checklists — boxes, never ticks). */
+export const IconClipboard = (p: P) => (
+  <svg {...base} {...p}>
+    <rect x="5" y="4.5" width="14" height="17" />
+    <path d="M9 3h6v3H9zM8.5 11h1.5M12.5 11h3M8.5 15.5h1.5M12.5 15.5h3" />
+  </svg>
+);
+
+/** Flag on a pole (incident report). */
+export const IconFlag = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M5 21V4M5 4h11l-2 4 2 4H5" />
+  </svg>
+);
+
+export const IconMore = (p: P) => (
+  <svg {...base} {...p}>
+    <circle cx="5" cy="12" r="1.2" />
+    <circle cx="12" cy="12" r="1.2" />
+    <circle cx="19" cy="12" r="1.2" />
+  </svg>
+);
+
+export const IconMic = (p: P) => (
+  <svg {...base} {...p}>
+    <rect x="9" y="3" width="6" height="11" rx="3" />
+    <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" />
+  </svg>
+);
+
+export const IconCamera = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M3 8h4l2-3h6l2 3h4v12H3V8Z" />
+    <circle cx="12" cy="13.5" r="3.5" />
+  </svg>
+);
+
+/** QR-style corner marks (scan). */
+export const IconScan = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />
+    <path d="M8 12h8" />
+  </svg>
+);
+
+export const IconKey = (p: P) => (
+  <svg {...base} {...p}>
+    <circle cx="8" cy="15" r="4" />
+    <path d="m11 12 8-8M16 7l2.5 2.5M14 9l2 2" />
+  </svg>
+);
+
+/** Banknote (payslips). */
+export const IconNote = (p: P) => (
+  <svg {...base} {...p}>
+    <rect x="3" y="6" width="18" height="12" />
+    <circle cx="12" cy="12" r="2.5" />
+    <path d="M6.5 9.5v5M17.5 9.5v5" />
+  </svg>
+);
+
+/** Plus inside a calendar (extra shifts). */
+export const IconCalendarPlus = (p: P) => (
+  <svg {...base} {...p}>
+    <rect x="3" y="5" width="18" height="16" />
+    <path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5" />
+  </svg>
+);
+
+/** Heart-rate line (welfare check-ins). */
+export const IconPulse = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M3 12h4l2-5 4 10 2-5h6" />
+  </svg>
+);

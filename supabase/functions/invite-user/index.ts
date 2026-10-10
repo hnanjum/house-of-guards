@@ -1,6 +1,7 @@
 // Supabase Edge Function: invite-user
 //
-// Called by the admin dashboard to create an officer (or client) account
+// Called by the admin dashboard to create an officer, client-user or
+// administrator account
 // and return a one-time invite LINK the admin can send by WhatsApp/text.
 // No email is sent, so this works without custom SMTP.
 //
@@ -21,6 +22,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const PORTAL_URL: Record<string, string> = {
   guard: "https://officers.harleygarrison.co.uk/",
   client: "https://portal.harleygarrison.co.uk/",
+  admin: "https://admin.harleygarrison.co.uk/",
 };
 
 const ALLOWED_ORIGINS = new Set([
@@ -68,7 +70,7 @@ Deno.serve(async (req) => {
 
   const email = String(body.email ?? "").trim().toLowerCase();
   const fullName = String(body.full_name ?? "").trim().slice(0, 120);
-  const role = body.role === "client" ? "client" : "guard";
+  const role = body.role === "client" ? "client" : body.role === "admin" ? "admin" : "guard";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Enter a valid email address" }, 400, origin);
   if (!fullName) return json({ error: "Enter the person's full name" }, 400, origin);
   if (role === "client" && !body.client_id) return json({ error: "Choose which client this person belongs to" }, 400, origin);

@@ -6,8 +6,9 @@ import { Empty, Page, PageHeader, Panel, Stat, Status, Table, td } from "../admi
 import { hoursFor, loadClockEvents, loadWorked } from "./data";
 
 /**
- * Timesheet: shifts worked in a period with clocked times and hours. The
- * times are the server's, the same record the office and client see.
+ * Timesheet: shifts worked in a period with clocked times, clocked hours
+ * and the hours the office has approved for pay. The times are the
+ * server's, the same record the office and client see.
  */
 
 type Period = "this-week" | "last-week" | "this-month" | "last-month";
@@ -52,6 +53,8 @@ export default function Timesheet({ officerId }: { officerId: string }) {
 
   const total = data ? data.list.reduce((n, a) => n + (hoursFor(data.ev[a.id]) ?? 0), 0) : 0;
   const worked = data ? data.list.filter((a) => hoursFor(data.ev[a.id]) != null).length : 0;
+  const approved = data ? data.list.reduce((n, a) => n + (a.approved_minutes ?? 0), 0) / 60 : 0;
+  const awaiting = data ? data.list.filter((a) => hoursFor(data.ev[a.id]) != null && a.approved_minutes == null).length : 0;
   const seg = (on: boolean) => `text-caption min-h-11 px-3 sm:px-4 ${on ? "bg-ink text-paper" : "bg-paper text-ink hover:bg-surface-alt"}`;
 
   return (
@@ -71,8 +74,9 @@ export default function Timesheet({ officerId }: { officerId: string }) {
       />
       <Page>
         {error && <Notice kind="error">{error}</Notice>}
-        <div className="grid grid-cols-2 gap-px">
+        <div className="grid grid-cols-2 gap-px xl:grid-cols-3">
           <Stat feature label="Hours clocked" value={(Math.round(total * 10) / 10).toFixed(1)} note={range(period).label} />
+          <Stat label="Hours approved" value={(Math.round(approved * 10) / 10).toFixed(1)} note={awaiting ? `${awaiting} shift${awaiting === 1 ? "" : "s"} awaiting approval` : "All approved"} />
           <Stat label="Shifts completed" value={worked} note={data ? `of ${data.list.length} booked` : undefined} />
         </div>
         <Panel flush>
@@ -81,7 +85,7 @@ export default function Timesheet({ officerId }: { officerId: string }) {
           ) : data.list.length === 0 ? (
             <Empty>No shifts in this period.</Empty>
           ) : (
-            <Table head={["Date", "Site", "Booked", "In", "Out", "Hours"]}>
+            <Table head={["Date", "Site", "Booked", "In", "Out", "Hours", "Approved"]}>
               {data.list.map((a) => {
                 const ev = data.ev[a.id] ?? [];
                 const inE = ev.find((e) => e.type === "in");
@@ -98,6 +102,9 @@ export default function Timesheet({ officerId }: { officerId: string }) {
                     <td className={`${td} tabular-nums`}>{outE ? fmtTime(outE.server_time) : "—"}</td>
                     <td className={`${td} tabular-nums`}>
                       {h != null ? (Math.round(h * 100) / 100).toFixed(2) : inE ? <Status tone="warn">No clock-out</Status> : <Status tone="bad">Not worked</Status>}
+                    </td>
+                    <td className={`${td} tabular-nums`}>
+                      {a.approved_minutes != null ? (Math.round((a.approved_minutes / 60) * 100) / 100).toFixed(2) : h != null ? <Status tone="idle">Pending</Status> : "—"}
                     </td>
                   </tr>
                 );

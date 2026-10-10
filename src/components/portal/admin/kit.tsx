@@ -48,7 +48,7 @@ export function Panel({
   flush?: boolean;
 }) {
   return (
-    <section className="border-hairline bg-paper border">
+    <section className="border-hairline bg-paper min-w-0 border">
       {title && (
         <div className="border-hairline flex items-center justify-between gap-4 border-b px-6 py-4">
           <h2 className="text-h4 text-ink">{title}</h2>
