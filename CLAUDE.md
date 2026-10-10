@@ -75,7 +75,11 @@ Every change was a direct owner instruction.
   Menus: "Quick links" + "Sectors" (built from `src/data/sectors.ts`),
   left-aligned columns on desktop; on phones centred open/close
   accordions (CSS grid-rows transition).
-- **Still blue/magenta, not yet asked about**: About page tiles, sector
+- **About page** (2026-10-10): redesigned black/white/grey — editorial
+  intro + offset photo, Surface Alt "Who we are" band with three
+  credentials, serif mission/vision statements, then the homepage
+  `ServicesGrid` and `ClosingCta` reused unmodified. No blue/magenta left.
+- **Still blue/magenta, not yet asked about**: sector
   detail pages' FAQ accent line, the portals.
 - **Open items**: real phone number (01274 000 000 is a placeholder);
   info bar still says "Bradford, West Yorkshire"; registered office

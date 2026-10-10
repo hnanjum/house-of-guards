@@ -1,152 +1,44 @@
 ---
 import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Button from "../components/ui/Button.astro";
-import Divider from "../components/ui/Divider.astro";
+import ServicesGrid from "../components/home/ServicesGrid.astro";
+import ClosingCta from "../components/home/ClosingCta.astro";
 import officerPhoto from "../assets/about/officer-sia-badge.png";
-import CorporateSecurity from "../icons/services/CorporateSecurity.astro";
-import CloseProtection from "../icons/services/CloseProtection.astro";
-import CctvMonitoring from "../icons/services/CctvMonitoring.astro";
-import MannedGuarding from "../icons/services/MannedGuarding.astro";
-import ConstructionSecurity from "../icons/services/ConstructionSecurity.astro";
-import OvernightSecurity from "../icons/services/OvernightSecurity.astro";
 
 /**
- * About page — SECOND redesign pass (PR #38 built it, PR #39 gave it two
- * full-bleed colour bands, THIS pass pulls the colour back out). Direct
- * feedback on PR #39's live build: two consecutive full-bleed colour
- * sections covering the whole page is too much — colour should be a
- * sparing accent, not the background for most of the page.
+ * About page — THIRD redesign (2026-10-10, direct owner instruction: "replace
+ * the tiles with the homepage ones" and "a more premium layout"). The earlier
+ * passes (PR #38–#40) are in CLAUDE.md's history.
  *
- * BACKGROUND — both sections revert to plain Paper. The Magenta/
- * Electric-Blue full-bleed fills from PR #39 are gone entirely; text
- * reverts from Paper to Ink, fact-list/services dividers revert from
- * translucent-Paper (`/15`) to the plain `hairline` token, `.on-dark`
- * is removed from the opening section (no longer needed — Ink on Paper
- * is always safe, no new derivation required).
+ * Now black / white / grey like the rest of the public site, Amber only as a
+ * bare rule mark and on buttons. Structure:
+ *   1. Editorial intro — caption, serif headline, lead, Amber rule, tall
+ *      cropped photo with an offset Surface Alt block behind it for depth.
+ *   2. Who we are — Surface Alt band: heading left, copy right, then the three
+ *      credentials as hairline-topped columns (no icons, no numbering).
+ *   3. Mission and vision — two serif statements, each under a short Amber rule.
+ *   4. The homepage's own photo-card ServicesGrid, reused unmodified.
+ *   5. The shared ClosingCta (contact + quote form), as on the sector pages;
+ *      it replaces the old standalone "Get in touch" button.
  *
- * COLOUR IS NOT GONE, JUST NARROWED TO ONE PLACE — the services tile
- * grid below. Rather than inventing a new "small colour touch" (a
- * stray rule or badge), colour now lives ONLY inside the services
- * tiles, reusing `ServicesGrid.astro`'s own already-built, already-
- * contrast-verified per-service fill assignment (Electric Blue/
- * Magenta/`surface-alt`) wholesale — literally imports the same six
- * icon components and the same `FILL_CLASS`/`ICON_ACCENT_CLASS`
- * lookups, not a new palette decision. This satisfies both asks in one
- * move: "reuse the actual component/pattern, don't rebuild one" and
- * "colour narrowly, not as a section-wide wash" — the tiles ARE the
- * narrow colour touch, confined to card-sized fills exactly like they
- * already are on the homepage, not a section background.
- *
- * SERVICES — now a real tile grid, not a plain text column, on direct
- * instruction. This required moving Services out of the old three-
- * column Mission/Services/Vision layout — a 3-wide tile grid genuinely
- * cannot fit inside a 1/3-width column, so Mission and Vision now sit
- * as a simple two-column pair (a plain hairline `Divider`, matching
- * `StatStrip.astro`'s mechanism but the DEFAULT `hairline` tone since
- * this is Paper now, not a colour fill) and Services renders full-width
- * below them as its own block, reusing the exact same 6 services/icons
- * `ServicesGrid.astro` already uses. Fresh one-line descriptions were
- * written for each — matching that component's own tone/register, not
- * copied verbatim, so the two pages don't read as duplicated content.
- * The 3 remaining named services from the original copy that have no
- * matching icon (Retail Security, Private Property Security, Event
- * Stewarding) are folded into the closing sentence below the tile grid
- * along with the original "bespoke arrangements... 24 hours a day"
- * line — nothing from the original copy is dropped, just
- * redistributed between the tiles and the surrounding prose.
- *
- * HEADING PARITY — "Our services" now gets the exact same heading
- * treatment as "Our mission"/"Our vision" (`<h2 class="text-h3
- * text-ink">`), fixing PR #39's own inconsistency where Services had no
- * visible heading style matching its siblings.
- *
- * PHOTO — real crop applied, not the previous "show the whole uncropped
- * frame" treatment. The source is 1024×1536 (2:3); shown at its full
- * native ratio the frame included ~140px of empty signage/background
- * above the head and the officer's legs/hands below the waist — busy,
- * not a considered portrait. Checked the real pixel boundaries via
- * `sharp` before choosing a window (not guessed): hairline starts
- * ≈y=105, the jacket's own hem/waistband — a clean, natural crop
- * boundary, not an awkward mid-joint cut — sits ≈y=1170–1200. Window
- * used: top=90 (small headroom above the hair), bottom=1200 (right at
- * the jacket hem), full width (shoulders never approach either edge,
- * so no horizontal crop needed) — `aspect-[1024/1110]` (the exact
- * derived ratio, not a rounded guess) with `object-[center_21%]`
- * (21% ≈ 90⁄426, the fraction of the total vertical crop taken from the
- * top vs. bottom, so the visible window lands exactly on that
- * y=90–1200 range). This is a container/object-position choice, not a
- * pre-cropped second asset — the original file is untouched, matching
- * this project's own established convention (`Hero.astro`'s
- * `object-[16%_22%]`) of framing via CSS rather than shipping a second
- * cropped image.
- *
- * CONTENT — copy and CTA link (`/#quote-form`) otherwise unchanged from
- * PR #38/#39, aside from the services-tile descriptions noted above.
- *
- * MOTION — unchanged mechanism, still one deliberate moment: the plain
- * `scrollReveal.ts` reveal now sits on this single Paper section
- * (Mission/Vision/Services together); the opening section is static,
- * same "already in view on load" logic as before.
+ * Contrast: Ink on Paper ~19.4:1, Ink on Surface Alt ~17.8:1. Stone is used on
+ * Paper only (~4.6:1); on Surface Alt every line stays Ink, since Stone there
+ * drops to ~4.2:1. Amber is never used as text.
  */
-const SERVICE_TILES: {
-  name: string;
-  body: string;
-  Icon: typeof CorporateSecurity;
-  fill: "electric-blue" | "magenta" | "light";
-  iconAccent?: "electric-blue" | "magenta";
-}[] = [
+const CREDENTIALS = [
   {
-    name: "Corporate Security",
-    body: "Front-of-house presence and access control that reflects your own organisation's standards.",
-    Icon: CorporateSecurity,
-    fill: "light",
-    iconAccent: "electric-blue",
+    title: "SIA licensed and DBS checked",
+    body: "Every officer we deploy holds a current SIA licence and has been DBS checked.",
   },
   {
-    name: "Close Protection",
-    body: "Discreet, professional protection for individuals and high-net-worth clients.",
-    Icon: CloseProtection,
-    fill: "magenta",
+    title: "First aid trained",
+    body: "Our personnel are first aid trained, ready to help before the emergency services arrive.",
   },
   {
-    name: "CCTV Monitoring",
-    body: "Continuous camera monitoring with a fast, considered response when it matters.",
-    Icon: CctvMonitoring,
-    fill: "light",
-    iconAccent: "magenta",
-  },
-  {
-    name: "Manned Guarding",
-    body: "A visible, reassuring presence across retail, corporate and event sites.",
-    Icon: MannedGuarding,
-    fill: "electric-blue",
-  },
-  {
-    name: "Construction Site Security",
-    body: "Guarding plant, materials and part-built structures around the clock.",
-    Icon: ConstructionSecurity,
-    fill: "light",
-    iconAccent: "magenta",
-  },
-  {
-    name: "Overnight Security",
-    body: "Dedicated night cover for premises at their most vulnerable.",
-    Icon: OvernightSecurity,
-    fill: "electric-blue",
+    title: "Bespoke shift patterns",
+    body: "Cover arranged around how your site actually runs, day or night.",
   },
 ];
-
-const FILL_CLASS: Record<string, string> = {
-  "electric-blue": "on-dark bg-electric-blue text-paper",
-  magenta: "on-dark bg-magenta text-paper",
-  light: "bg-surface-alt text-ink",
-};
-
-const ICON_ACCENT_CLASS: Record<string, string> = {
-  "electric-blue": "text-electric-blue",
-  magenta: "text-magenta",
-};
 ---
 
 <BaseLayout
@@ -154,39 +46,29 @@ const ICON_ACCENT_CLASS: Record<string, string> = {
   description="Harley Garrison is a new, Bradford-based physical security company — SIA-licensed, DBS-checked officers delivering manned guarding, close protection, and CCTV monitoring across West Yorkshire."
 >
   <section class="bg-paper">
-    <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-28">
-      <h1 class="text-h1 sm:text-display text-ink max-w-3xl">About Harley Garrison</h1>
-      <p class="text-body-lg text-ink mt-4 max-w-2xl">A young company with experienced people</p>
+    <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-gutter py-20 md:px-12 md:py-28 lg:grid-cols-12 lg:gap-10">
+      <div class="lg:col-span-7 lg:pr-8">
+        <p class="text-caption text-stone">About Harley Garrison</p>
+        <h1 class="text-h1 sm:text-display text-ink mt-5 max-w-2xl">
+          A young company with experienced people
+        </h1>
+        <span aria-hidden="true" class="mt-8 block h-0.5 w-12 bg-amber"></span>
+        <p class="text-body-lg text-ink mt-8 max-w-xl">
+          Harley Garrison is a new establishment, growing steadily in both staff and
+          contracts. Professionalism is central to how we operate — and to what we
+          expect from every member of the crew.
+        </p>
+      </div>
 
-      <div class="mt-12 grid grid-cols-1 items-start gap-12 md:grid-cols-2 md:gap-16 lg:gap-20">
-        <div class="text-left">
-          <p class="text-body text-ink max-w-md">
-            Harley Garrison is a new establishment, working across the
-            sectors listed on our Services page. We are growing steadily in both staff
-            and contracts, and we continue to recruit skilled SIA licensed officers,
-            CCTV monitoring operators and stewards.
-          </p>
-          <p class="text-body text-ink mt-5 max-w-md">
-            Most of our work takes place in West Yorkshire, though some shifts run
-            further afield with transport provided. Our staff receive regular training
-            on how to sharpen their work, because professionalism is central to how we
-            operate — and to what we expect from every member of the crew.
-          </p>
-
-          <ul class="mt-8 max-w-md divide-y divide-hairline border-t border-hairline">
-            <li class="py-4 text-body text-ink">SIA licensed and DBS checked officers</li>
-            <li class="py-4 text-body text-ink">First aid trained personnel</li>
-            <li class="py-4 text-body text-ink">Bespoke shift patterns, arranged around you</li>
-          </ul>
-        </div>
-
-        <div class="aspect-[1024/1110] overflow-hidden md:max-w-sm md:justify-self-end">
+      <div class="relative lg:col-span-5">
+        <div aria-hidden="true" class="absolute -right-4 -bottom-4 hidden h-full w-full bg-surface-alt sm:block md:-right-6 md:-bottom-6"></div>
+        <div class="relative aspect-[4/5] overflow-hidden bg-surface-alt">
           <Image
             src={officerPhoto}
             alt="A Harley Garrison security officer in a branded jacket, wearing an SIA licence badge on a lanyard"
-            class="h-full w-full object-cover object-[center_21%]"
-            widths={[320, 480, 640, 768]}
-            sizes="(min-width: 768px) 24rem, 100vw"
+            class="h-full w-full object-cover object-[center_18%]"
+            widths={[400, 640, 800, 1024]}
+            sizes="(min-width: 1024px) 34vw, 100vw"
             format="webp"
             quality={82}
             loading="eager"
@@ -196,68 +78,79 @@ const ICON_ACCENT_CLASS: Record<string, string> = {
     </div>
   </section>
 
-  <section class="bg-paper" data-reveal>
+  <section class="bg-surface-alt" data-reveal>
     <div class="mx-auto max-w-7xl px-gutter py-20 md:px-12 md:py-24">
-      <div class="flex flex-col gap-0 lg:flex-row lg:items-stretch lg:gap-0">
-        <div class="flex flex-1 flex-col text-left">
-          <h2 class="text-h3 text-ink">Our mission</h2>
-          <p class="text-body text-ink mt-4 max-w-md">
-            To meet our clients' needs to perfection in a professional working
-            environment, and to recruit staff who share those values. We aim to give
-            full assurance in the safety our guards provide, and to become a leading
-            supplier of reliable close protection officers in the North.
+      <div class="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
+        <h2 class="text-h2 text-ink lg:col-span-5">Who we are</h2>
+        <div class="lg:col-span-7">
+          <p class="text-body text-ink max-w-2xl">
+            We work across retail, distribution, corporate, events, healthcare and
+            education, and we continue to recruit skilled SIA licensed officers, CCTV
+            monitoring operators and stewards.
           </p>
-        </div>
-
-        <div class="lg:hidden">
-          <Divider orientation="horizontal" class="my-8" />
-        </div>
-        <div class="hidden shrink-0 lg:flex">
-          <Divider orientation="vertical" class="mx-10" />
-        </div>
-
-        <div class="flex flex-1 flex-col text-left">
-          <h2 class="text-h3 text-ink">Our vision</h2>
-          <p class="text-body text-ink mt-4 max-w-md">
-            To offer the best quality for the right price. We invest in our people so
-            they can outperform the rest, commit to ongoing improvement in every area,
-            and build a team of experts who understand our core values and want to
-            deliver on them.
+          <p class="text-body text-ink mt-5 max-w-2xl">
+            Most of our work takes place in West Yorkshire, though some shifts run
+            further afield with transport provided. Our staff receive regular training
+            on how to sharpen their work. Alongside the services below we also provide
+            retail security, private property security and event stewarding, with
+            bespoke arrangements available and specialists operational 24 hours a day.
           </p>
-          <div class="mt-6">
-            <Button href="/#quote-form">Get in touch</Button>
-          </div>
         </div>
       </div>
 
-      <div class="mt-16">
-        <h2 class="text-h3 text-ink">Our services</h2>
-        <p class="text-body text-ink mt-4 max-w-2xl">We deliver:</p>
+      <ul class="mt-16 grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-8">
+        {
+          CREDENTIALS.map(({ title, body }) => (
+            <li class="border-t border-ink/20 pt-6">
+              <h3 class="text-h4 text-ink">{title}</h3>
+              <p class="text-caption text-ink mt-3 max-w-xs">{body}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
 
-        <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {SERVICE_TILES.map(({ name, body, Icon, fill, iconAccent }) => (
-            <div class:list={["flex flex-col items-start p-8 text-left sm:p-10", FILL_CLASS[fill]]}>
-              <Icon class:list={["mb-6 size-12", fill === "light" && iconAccent && ICON_ACCENT_CLASS[iconAccent]]} />
-              <h3 class="text-h3 mb-3">{name}</h3>
-              <p class="text-fine">{body}</p>
-            </div>
-          ))}
-        </div>
-
-        <p class="text-body text-ink mt-8 max-w-2xl">
-          We also provide retail security, private property security and event
-          stewarding. Bespoke arrangements are available, and our specialists are
-          operational 24 hours a day.
+  <section class="bg-paper" data-reveal>
+    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-16 px-gutter py-20 md:px-12 md:py-28 lg:grid-cols-2 lg:gap-20">
+      <div>
+        <span aria-hidden="true" class="block h-0.5 w-12 bg-amber"></span>
+        <h2 class="text-caption text-stone mt-6">Our mission</h2>
+        <p class="text-h3 text-ink mt-4">
+          To meet our clients' needs to perfection in a professional working
+          environment, and to recruit staff who share those values.
+        </p>
+        <p class="text-body text-stone mt-6 max-w-lg">
+          We aim to give full assurance in the safety our guards provide, and to
+          become a leading supplier of reliable close protection officers in the North.
+        </p>
+      </div>
+      <div>
+        <span aria-hidden="true" class="block h-0.5 w-12 bg-amber"></span>
+        <h2 class="text-caption text-stone mt-6">Our vision</h2>
+        <p class="text-h3 text-ink mt-4">
+          To offer the best quality for the right price, delivered by people we
+          invest in.
+        </p>
+        <p class="text-body text-stone mt-6 max-w-lg">
+          We commit to ongoing improvement in every area, and to building a team of
+          experts who understand our core values and want to deliver on them.
         </p>
       </div>
     </div>
   </section>
 
+  <ServicesGrid />
+
+  <ClosingCta />
+
   <script>
     import { initScrollReveal } from "../lib/scrollReveal";
+    import { initServicesGridReveal } from "../lib/servicesGridReveal";
 
     document.addEventListener("astro:page-load", () => {
       initScrollReveal();
+      initServicesGridReveal();
     });
   </script>
 </BaseLayout>
