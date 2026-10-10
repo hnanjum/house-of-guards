@@ -220,7 +220,7 @@ const faqSchema = hasFaqs
   </PageHero>
 
   <section class="bg-paper" data-reveal>
-    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-gutter py-20 md:px-12 md:py-28 lg:grid-cols-12 lg:gap-16">
+    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-gutter pb-20 md:px-12 md:pb-28 lg:grid-cols-12 lg:gap-16">
       <div class="text-center lg:col-span-7 lg:text-left">
         <p class="text-caption text-stone">Overview</p>
         <h2 class="text-h2 text-ink mt-4">How we protect {sector.name.toLowerCase()} sites</h2>
@@ -266,6 +266,17 @@ const faqSchema = hasFaqs
                 <p class="text-body-sm text-paper/80">{risk}</p>
               </li>
             ))}
+            {/* Owner: no empty cell. With an odd number of risks the last grid
+                cell becomes a short call to action instead of bare gap colour. */}
+            {sector.risks!.length % 2 === 1 && (
+              <li class="bg-ink flex flex-col items-center justify-center px-8 py-7 text-center md:items-start md:text-left">
+                <h3 class="text-h4">Facing any of these on your site?</h3>
+                <p class="text-body-sm text-paper/70 mt-2">We'll recommend the right cover and send a tailored quote.</p>
+                <div class="mt-5">
+                  <Button href="/contact/" size="sm">Get a Quote</Button>
+                </div>
+              </li>
+            )}
           </ul>
           {sector.approach && (
             <div data-reveal class="mt-12 text-center lg:grid lg:grid-cols-12 lg:gap-16 lg:text-left">
