@@ -1,0 +1,215 @@
+import { useEffect, useState, type ReactNode, type SyntheticEvent } from "react";
+import type { Session } from "@supabase/supabase-js";
+import { supabase, type Profile, type UserRole } from "../../lib/portalSupabase";
+import { Field, Loading, Notice, PortalButton } from "./ui";
+
+/**
+ * Auth gate shared by every portal. Handles sign-in, "forgot password",
+ * the set-a-password step that invite and reset emails land on, and the
+ * role check (an admin account opening the officers portal is turned
+ * away rather than shown an empty screen). The database enforces the
+ * same rules independently through RLS; this only shapes the UI.
+ *
+ * Sign-in screen: Electric Blue identity panel (white logo, Fraunces
+ * portal name; white on Electric Blue ~5.17:1) beside a plain Paper
+ * form. On phones the panel becomes a band above the form.
+ */
+
+type State =
+  | { kind: "loading" }
+  | { kind: "signed-out" }
+  | { kind: "blocked"; message: string }
+  | { kind: "ready"; session: Session; profile: Profile };
+
+interface Props {
+  portalName: string;
+  tagline: string;
+  role: UserRole;
+  children: (ctx: { profile: Profile; signOut: () => Promise<void> }) => ReactNode;
+}
+
+// Invite and password-reset links arrive with the token in the URL hash.
+// Read it before supabase-js consumes and clears it.
+const arrivedToSetPassword =
+  typeof window !== "undefined" && /type=(invite|recovery)/.test(window.location.hash);
+
+export default function PortalShell({ portalName, tagline, role, children }: Props) {
+  const [state, setState] = useState<State>({ kind: "loading" });
+  const [needsPassword, setNeedsPassword] = useState(arrivedToSetPassword);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function resolve(session: Session | null) {
+      if (!session) {
+        if (!cancelled) setState({ kind: "signed-out" });
+        return;
+      }
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, role, full_name, phone, active")
+        .eq("id", session.user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error || !data) {
+        setState({ kind: "blocked", message: "Your account could not be loaded. Contact the office." });
+      } else if (!data.active) {
+        setState({ kind: "blocked", message: "This account has been deactivated. Contact the office." });
+      } else if (data.role !== role) {
+        setState({ kind: "blocked", message: `This account doesn't have access to the ${portalName.toLowerCase()} portal.` });
+      } else {
+        setState({ kind: "ready", session, profile: data as Profile });
+      }
+    }
+
+    supabase.auth.getSession().then(({ data }) => resolve(data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") setNeedsPassword(true);
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") resolve(session);
+    });
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, [role, portalName]);
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setState({ kind: "signed-out" });
+  };
+
+  if (state.kind === "loading") return <Loading />;
+
+  if (state.kind === "ready" && needsPassword) {
+    return (
+      <AuthFrame portalName={portalName} tagline={tagline}>
+        <SetPassword onDone={() => setNeedsPassword(false)} />
+      </AuthFrame>
+    );
+  }
+
+  if (state.kind === "ready") return <>{children({ profile: state.profile, signOut })}</>;
+
+  return (
+    <AuthFrame portalName={portalName} tagline={tagline}>
+      {state.kind === "blocked" ? (
+        <div className="space-y-8">
+          <Notice kind="error">{state.message}</Notice>
+          <PortalButton tone="quiet" onClick={signOut}>
+            Sign out
+          </PortalButton>
+        </div>
+      ) : (
+        <SignIn />
+      )}
+    </AuthFrame>
+  );
+}
+
+function AuthFrame({ portalName, tagline, children }: { portalName: string; tagline: string; children: ReactNode }) {
+  return (
+    <div className="grid min-h-dvh lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      <div className="on-dark bg-electric-blue text-paper flex flex-col justify-between px-gutter py-10 md:px-12 lg:py-14">
+        <a href="https://harleygarrison.co.uk" aria-label="Harley Garrison website">
+          <img src="/logo/logo-white.svg" alt="Harley Garrison" width="148" height="40" className="h-9 w-auto" />
+        </a>
+        <div className="mt-14 lg:mt-0">
+          <p className="text-h1 sm:text-display">{portalName}</p>
+          <p className="text-body text-paper/85 mt-4 max-w-sm">{tagline}</p>
+        </div>
+        <p className="text-micro text-paper/70 mt-14 hidden lg:block">Authorised personnel only. Activity is recorded.</p>
+      </div>
+      <div className="flex items-center px-gutter py-14 md:px-12">
+        <div className="w-full max-w-md">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function SignIn() {
+  const [mode, setMode] = useState<"sign-in" | "forgot">("sign-in");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
+
+  async function onSubmit(e: SyntheticEvent<HTMLFormElement, SubmitEvent>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const email = String(form.get("email") ?? "").trim();
+    setBusy(true);
+    setError(null);
+    if (mode === "sign-in") {
+      const { error } = await supabase.auth.signInWithPassword({ email, password: String(form.get("password") ?? "") });
+      if (error) setError("That email and password don't match an account.");
+    } else {
+      // Same message whether or not the email exists, so accounts can't be probed.
+      await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/" });
+      setSent(true);
+    }
+    setBusy(false);
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-6" noValidate={false}>
+      <h1 className="text-h2 text-ink">{mode === "sign-in" ? "Sign in" : "Reset your password"}</h1>
+      {mode === "forgot" && (
+        <p className="text-body text-stone">Enter your work email and we'll send a link to choose a new password.</p>
+      )}
+      <Field label="Email" id="email" name="email" type="email" autoComplete="username" required />
+      {mode === "sign-in" && (
+        <Field label="Password" id="password" name="password" type="password" autoComplete="current-password" required />
+      )}
+      {error && <Notice kind="error">{error}</Notice>}
+      {sent && <Notice>If that email belongs to an account, a reset link is on its way.</Notice>}
+      <div className="flex flex-wrap items-center gap-6 pt-2">
+        <PortalButton type="submit" disabled={busy}>
+          {busy ? "Please wait" : mode === "sign-in" ? "Sign in" : "Send reset link"}
+        </PortalButton>
+        <button
+          type="button"
+          onClick={() => {
+            setMode(mode === "sign-in" ? "forgot" : "sign-in");
+            setError(null);
+            setSent(false);
+          }}
+          className="text-caption text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink"
+        >
+          {mode === "sign-in" ? "Forgot password?" : "Back to sign in"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function SetPassword({ onDone }: { onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function onSubmit(e: SyntheticEvent<HTMLFormElement, SubmitEvent>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const password = String(form.get("password") ?? "");
+    if (password.length < 12) return setError("Use at least 12 characters.");
+    if (password !== String(form.get("confirm") ?? "")) return setError("The two passwords don't match.");
+    setBusy(true);
+    setError(null);
+    const { error } = await supabase.auth.updateUser({ password });
+    setBusy(false);
+    if (error) return setError(error.message);
+    history.replaceState(null, "", window.location.pathname);
+    onDone();
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-6">
+      <h1 className="text-h2 text-ink">Choose your password</h1>
+      <p className="text-body text-stone">You'll use this with your email to sign in from now on.</p>
+      <Field label="New password" id="password" name="password" type="password" autoComplete="new-password" hint="At least 12 characters." required />
+      <Field label="Confirm password" id="confirm" name="confirm" type="password" autoComplete="new-password" required />
+      {error && <Notice kind="error">{error}</Notice>}
+      <PortalButton type="submit" disabled={busy}>
+        {busy ? "Saving" : "Save password"}
+      </PortalButton>
+    </form>
+  );
+}

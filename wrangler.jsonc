@@ -2,8 +2,14 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "house-of-guards",
   "compatibility_date": "2026-09-07",
+  // Hostname routing for the portal subdomains (see worker/index.ts).
+  // Custom domains are attached in the Cloudflare dashboard, not here,
+  // so a deploy never fails while a domain is still being connected.
+  "main": "worker/index.ts",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "404-page"
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": true
   }
 }

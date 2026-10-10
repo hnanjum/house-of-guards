@@ -1,0 +1,11 @@
+---
+import PortalLayout from "../../layouts/PortalLayout.astro";
+import OfficersApp from "../../components/portal/officers/OfficersApp.tsx";
+
+// Served at officers.harleygarrison.co.uk (see worker/index.ts). The app
+// is client-only: nothing personal is ever rendered into static HTML.
+---
+
+<PortalLayout title="Officers">
+  <OfficersApp client:only="react" />
+</PortalLayout>
