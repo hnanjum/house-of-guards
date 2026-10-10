@@ -1,24 +1,29 @@
 import { useCallback, useEffect, useState, type SyntheticEvent } from "react";
 import { Field, Loading, Notice, PortalButton } from "../ui";
 import { IconPlus } from "./icons";
-import { createClient, listClients, listSites, type Client, type SiteRow } from "./adminData";
+import { createClient, listClientUsers, listClients, listSites, type Client, type ClientUser, type SiteRow } from "./adminData";
+import InviteForm from "./InviteForm";
 import { Empty, Page, PageHeader, Panel, Table, td } from "./kit";
 
 /**
  * Clients and the sites linked to them. A site is linked to a client from
- * the site's own form. Client logins arrive with the client portal.
+ * the site's own form. "Invite user" gives someone at the client a login
+ * to the client portal (portal.harleygarrison.co.uk) for their sites only.
  */
 export default function Clients() {
   const [clients, setClients] = useState<Client[] | null>(null);
   const [sites, setSites] = useState<SiteRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [users, setUsers] = useState<ClientUser[]>([]);
+  const [inviteFor, setInviteFor] = useState<Client | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const [c, s] = await Promise.all([listClients(), listSites()]);
+      const [c, s, u] = await Promise.all([listClients(), listSites(), listClientUsers()]);
       setClients(c);
       setSites(s);
+      setUsers(u);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't load clients.");
@@ -44,13 +49,16 @@ export default function Clients() {
       <Page>
         {error && <Notice kind="error">{error}</Notice>}
         {adding && <AddClient onClose={() => setAdding(false)} onSaved={load} />}
+        {inviteFor && (
+          <InviteForm role="client" clientId={inviteFor.id} clientName={inviteFor.name} onClose={() => setInviteFor(null)} onDone={load} />
+        )}
         <Panel flush title="All clients">
           {!clients ? (
             <Loading />
           ) : clients.length === 0 ? (
             <Empty>No clients yet.</Empty>
           ) : (
-            <Table head={["Client", "Sites"]}>
+            <Table head={["Client", "Sites", "Portal users", ""]}>
               {clients.map((c) => {
                 const own = sites.filter((s) => s.client_id === c.id);
                 return (
@@ -69,6 +77,31 @@ export default function Clients() {
                           </span>
                         ))
                       )}
+                    </td>
+                    <td className={td}>
+                      {users.filter((u) => u.client_id === c.id).length === 0 ? (
+                        <span className="text-stone">None</span>
+                      ) : (
+                        <ul className="space-y-1">
+                          {users
+                            .filter((u) => u.client_id === c.id)
+                            .map((u) => (
+                              <li key={u.user_id}>
+                                {u.full_name || u.email}
+                                {!u.active && <span className="text-stone"> (deactivated)</span>}
+                              </li>
+                            ))}
+                        </ul>
+                      )}
+                    </td>
+                    <td className={`${td} text-right`}>
+                      <button
+                        type="button"
+                        onClick={() => setInviteFor(c)}
+                        className="text-caption text-ink whitespace-nowrap underline decoration-hairline underline-offset-4 hover:decoration-ink"
+                      >
+                        Invite user
+                      </button>
                     </td>
                   </tr>
                 );

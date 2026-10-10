@@ -7,9 +7,20 @@ import type { ReactNode } from "react";
  * data in Montserrat with tabular figures.
  */
 
-export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
+export function PageHeader({
+  title,
+  subtitle,
+  actions,
+  offset = true,
+}: {
+  title: string;
+  subtitle?: string;
+  actions?: ReactNode;
+  /** Leave room for the admin dashboard's fixed mobile bar (below lg). */
+  offset?: boolean;
+}) {
   return (
-    <header className="border-hairline bg-paper/95 sticky top-0 z-20 border-b backdrop-blur max-lg:top-14">
+    <header className={`border-hairline bg-paper/95 sticky top-0 z-20 border-b backdrop-blur ${offset ? "max-lg:top-14" : ""}`}>
       <div className="flex flex-wrap items-end justify-between gap-4 px-gutter py-6 md:px-10">
         <div>
           <h1 className="text-h3 sm:text-h2 text-ink">{title}</h1>

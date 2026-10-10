@@ -1,0 +1,10 @@
+---
+import PortalLayout from "../../layouts/PortalLayout.astro";
+import ClientApp from "../../components/portal/client/ClientApp.tsx";
+
+// Served at portal.harleygarrison.co.uk (see worker/index.ts). Client-only.
+---
+
+<PortalLayout title="Client portal">
+  <ClientApp client:only="react" />
+</PortalLayout>
