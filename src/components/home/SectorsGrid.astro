@@ -327,14 +327,12 @@ import { SECTORS, type SectorFill } from "../../data/sectors";
 // override that to Paper, which fails outright against Amber
 // (~2.15:1). ServicesGrid's cards can afford `.on-dark` defensively
 // because they have no focusable content at all; this panel can't.
-// Owner: black and white only. Both former colour fills now render as
-// Ink with white text (~19.4:1); the plain panels stay Surface Alt.
-// .on-dark IS needed now, unlike the old Electric Blue/Magenta note
-// above: the focus outline is offset 2px onto the panel itself, and an
-// Ink ring on an Ink panel would be invisible — Paper ring ~19.4:1.
+// Owner: every panel is now the same light grey (Surface Alt, Ink text
+// ~17.8:1) — no colour or black fills. Kept as a map so a per-sector
+// fill can return later without touching the markup.
 const PANEL_FILL_CLASS: Record<SectorFill, string> = {
-  "electric-blue": "on-dark bg-ink text-paper",
-  magenta: "on-dark bg-ink text-paper",
+  "electric-blue": "bg-surface-alt text-ink",
+  magenta: "bg-surface-alt text-ink",
 };
 
 const DEFAULT_SLUG = SECTORS[0].slug;
