@@ -184,15 +184,16 @@ export function initSectorsGridTabs(root: ParentNode = document) {
  * AUTO-ROTATE — on direct instruction from the owner, the tabs advance
  * on their own (Retail → Distribution → … → Education → Retail) every
  * few seconds while the section is on screen, using the same crossfade
- * a click does. The moment a visitor takes over — clicks or taps
- * anywhere in the section, presses a key in the tab row, or tabs focus
- * into it — rotation stops for good on that page view, leaving them in
- * full control. Hovering does NOT pause it (the owner found a resting mouse
- * made it look broken); only a real click/tap/key/focus stops it. Never runs under
+ * a click does. It stops for good on that page view ONLY when a visitor
+ * explicitly picks a tab — clicks/taps one, or uses the arrow/Home/End
+ * keys in the tab row (the keyboard equivalent of a click). Owner,
+ * 2026-10-11: touching or scrolling elsewhere in the section, hovering
+ * and focus no longer stop it. Every 2.5s (was 3.5s, owner wanted it
+ * faster; the crossfade itself takes ~0.45s). Never runs under
  * prefers-reduced-motion, off screen, or in a background browser tab
- * (WCAG 2.2.2: auto-updating content must be stoppable).
+ * (WCAG 2.2.2: clicking a tab is the stop mechanism).
  */
-const ROTATE_EVERY_MS = 3500;
+const ROTATE_EVERY_MS = 2500;
 const ROTATE_TICK_MS = 250;
 
 function initAutoRotate(root: ParentNode, tablist: HTMLElement, tabs: HTMLElement[]) {
@@ -207,9 +208,10 @@ function initAutoRotate(root: ParentNode, tablist: HTMLElement, tabs: HTMLElemen
   const stop = () => {
     stopped = true;
   };
-  section.addEventListener("pointerdown", stop);
-  section.addEventListener("focusin", stop);
-  tablist.addEventListener("keydown", stop);
+  tabs.forEach((tab) => tab.addEventListener("click", stop));
+  tablist.addEventListener("keydown", (event) => {
+    if (["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) stop();
+  });
 
   new IntersectionObserver(([entry]) => (onScreen = entry.isIntersecting), { threshold: 0.4 }).observe(section);
 

@@ -56,9 +56,10 @@ Every change was a direct owner instruction.
 - **Homepage order**: Hero → StatStrip → **SectorsGrid** (Who We Protect)
   → MissionBand → **ServicesGrid** → StandardsCarousel → ClosingCta.
 - **SectorsGrid**: all six panels Surface Alt (fill map kept, both
-  entries grey). Tabs **auto-rotate every 3.5s** while on screen; any
-  click/tap/key/focus in the section stops it for good; hover does NOT
-  pause (owner thought it was broken). Off under reduced motion.
+  entries grey). Tabs **auto-rotate every 2.5s** while on screen
+  (2026-10-11, was 3.5s); ONLY clicking/tapping a tab (or arrow/Home/End
+  keys in the tab row) stops it for good — touching/scrolling elsewhere
+  in the section, focus and hover do NOT (owner). Off under reduced motion.
   Auto-advance scrolls only the tab row (never `scrollIntoView`).
   Sector photos are now free stock photos (`src/assets/sectors/*.jpg`),
   not the AI "House of Guards" ones. Retail still has Polish signage /
