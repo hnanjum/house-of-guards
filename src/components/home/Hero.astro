@@ -1,48 +1,23 @@
 ---
 import { Image } from "astro:assets";
 import Button from "../ui/Button.astro";
-import heroOfficer from "../../assets/hero/hero-officer.png";
+import heroPhoto from "../../assets/hero/hero-cctv.jpg";
 
 /**
- * The homepage hero — full rebuild, replacing the old side-by-side
- * "framed photo + Picsum placeholder" layout entirely. Full-bleed real
- * photograph (a Harley Garrison officer in a client building lobby,
- * genuine content, not a placeholder), with the headline/subhead/CTAs
- * sitting in the photo's own right-hand negative space on desktop.
+ * The homepage hero. Full-bleed photograph with the headline, subhead
+ * and CTAs over it (a bottom band on phones, a right-hand column on
+ * desktop).
  *
- * REAL PHOTO GEOMETRY, checked not guessed — the source file is
- * 1672×941 (a 1.777:1 / 16:9-ish crop, confirmed via `sharp` metadata,
- * NOT the ~1.335:1 I'd have guessed from a scaled-down thumbnail).
- * The officer occupies roughly the left 0–55% of the frame; his face
- * sits at approximately x:20–33%, y:5–30%; the "House of Guards" print
- * on his jacket sits around y:58–65%. Everything right of ~55% is the
- * blurred, bright lobby — the intended text zone on desktop.
- *
- * `object-[16%_22%]` is ONE combined value used at every breakpoint,
- * not a per-breakpoint override — derived from `object-fit: cover`'s
- * own math (scale = max(container_w/img_w, container_h/img_h)) run
- * against real numbers, not assumed to "just work":
- *   - Narrow mobile (390×640): height-driven scale (0.680) → ZERO
- *     vertical crop, ~34% of the original width visible. Centered
- *     (50%) would land on [33%,67%] — mostly empty lobby, his face
- *     entirely cropped out. X=16% moves the window to roughly
- *     [8%,42%] — face and shoulders comfortably inside, margin on both
- *     sides even at 320px width (checked separately: [11.5%,40%]).
- *   - `lg` floor, 1024×676 (88svh of 768, clamped to the 640 floor):
- *     width-driven scale (0.718) needs a small width crop; X=16% keeps
- *     [2.4%,88%] visible — virtually the whole frame, officer and
- *     lobby both intact.
- *   - Wide desktop, 1280×704 and 1920×880 (the `max-h` ceiling): both
- *     land very close to the image's own native ratio, so cropping is
- *     minimal on EITHER axis regardless of object-position — Y matters
- *     more here (a few % top/bottom), and Y=22% keeps his head fully
- *     in frame while trimming a little off the bottom (waist/hands,
- *     never the branding text at ~60%).
- * Because mobile crops are always height-driven (X matters, Y is a
- * no-op) and desktop crops are always width-driven-or-negligible
- * (Y matters, X is mostly a no-op), one value serves both regimes —
- * confirmed by working through the arithmetic for each case above
- * rather than assuming it generalises.
+ * PHOTO (2026-10-11, owner's choice): a free Unsplash photo of two CCTV
+ * cameras on the corner of a building clad in dark metal slats
+ * (unsplash.com/photos/BW0d0IllW8E, Unsplash licence), replacing the
+ * AI-generated officer photo. 2400x1594. The left camera sits at about
+ * x:12-35%, the right one at x:60-86%, both at y:50-80%.
+ * Position 10% / 60%: on phones the crop is height-driven (about 40% of
+ * the width visible) and 10% keeps the window at roughly 6-46%, so the
+ * left camera stays whole. On desktop the crop is width-driven and only
+ * trims top and bottom; 60% keeps both cameras in frame. The right
+ * camera sits under the copy on desktop, darkened by the Ink fade.
  *
  * SECTION HEIGHT — `h-[640px] sm:h-[720px]` below `lg`, viewport-
  * relative from `lg` up: `lg:h-[88svh] lg:min-h-[640px] lg:max-h-[880px]`.
@@ -194,10 +169,10 @@ import heroOfficer from "../../assets/hero/hero-officer.png";
 
 <section class="relative isolate h-[640px] overflow-hidden sm:h-[720px] lg:h-[88svh] lg:min-h-[640px] lg:max-h-[880px]">
   <Image
-    src={heroOfficer}
-    alt="A Harley Garrison officer in a dark uniform jacket with an earpiece and ID badge, standing watch outside a glass office building at dusk"
-    class="absolute inset-0 h-full w-full object-cover object-[16%_22%]"
-    widths={[480, 768, 1024, 1440, 1672]}
+    src={heroPhoto}
+    alt="Two CCTV cameras mounted on the corner of a building clad in dark metal slats"
+    class="absolute inset-0 h-full w-full object-cover object-[10%_60%]"
+    widths={[480, 768, 1024, 1440, 1920, 2400]}
     sizes="100vw"
     format="webp"
     quality={82}
