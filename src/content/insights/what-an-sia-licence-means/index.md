@@ -4,7 +4,7 @@ description: Every security officer you hire in the UK should hold a valid SIA l
 date: 2026-10-13
 category: Compliance
 cover: pexels-sheff-production-380090272-14611803.jpg
-coverAlt: A Harley Garrison security officer in a branded black jacket, shirt and tie, standing at the entrance of an office building at dusk
+coverAlt: A Harley Garrison security officer in a branded black jacket, shirt and tie, standing at the entrance of an office building at dusk,
 draft: false
 ---
 
