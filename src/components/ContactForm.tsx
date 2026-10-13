@@ -300,6 +300,14 @@ export default function ContactForm() {
         {status === "submitting" ? "Sending…" : "Submit enquiry"}
       </motion.button>
 
+      <p className="text-micro text-ink/70 mt-3">
+        We use your details only to respond to your enquiry. See our{" "}
+        <a href="/privacy/" className="text-ink underline underline-offset-2 hover:text-ink/70">
+          privacy notice
+        </a>
+        .
+      </p>
+
       <AnimatePresence mode="wait">
         {status === "success" && (
           <motion.p
