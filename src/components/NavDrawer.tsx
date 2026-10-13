@@ -184,8 +184,8 @@ export default function NavDrawer() {
                   Get a Quote
                 </a>
                 <div className="text-caption text-paper/70 mt-6 flex flex-col gap-2 sm:flex-row sm:gap-8">
-                  <a href="tel:+441274000000" className="hover:text-paper transition-colors duration-200">
-                    01274 000 000
+                  <a href="tel:+447414492363" className="hover:text-paper transition-colors duration-200">
+                    07414 492363
                   </a>
                   <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-paper transition-colors duration-200">
                     {CONTACT_EMAIL}
