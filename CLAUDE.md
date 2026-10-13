@@ -160,7 +160,7 @@ Every change was a direct owner instruction.
   (AI, owner-supplied, HARLEY GARRISON on jackets; About shows a real
   "ONE BISHOPSGATE LONDON" sign, flagged to owner); phone is now
   07414 492363 (tel:+447414492363) everywhere incl. sector schema;
-  /privacy/ privacy + cookie notice (no cookie banner: public site sets
+  /privacy/ privacy + cookie notice (unsuccessful enquiries/applications deleted after 2 weeks) (no cookie banner: public site sets
   no cookies/analytics), linked under both forms and in the footer.
 - **Open items**: register with the ICO (owner NOT registered yet; add
   the number to /privacy/ once done); registered office 742 Great Horton
