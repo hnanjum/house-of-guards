@@ -9,8 +9,7 @@
  * untouched by that PR on purpose, to keep it scoped to the new page.
  * Pointing them at this file is a safe follow-up.
  *
- * No phone number lives here: the `01274 000 000` figure in those three
- * files is a known, unconfirmed placeholder, and putting it in a shared
- * source would make it easier to spread, not easier to fix.
+ * The phone number (07414 492363, confirmed by the owner 2026-10-13)
+ * is still written out in each file that shows it, not kept here.
  */
 export const CONTACT_EMAIL = "info@harleygarrison.co.uk";

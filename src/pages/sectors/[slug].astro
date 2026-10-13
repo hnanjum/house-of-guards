@@ -67,13 +67,9 @@ import { SECTORS, type Sector } from "../../data/sectors";
  *     existing `sector.blurb`), a `provider`, and an `areaServed` list
  *     (West Yorkshire, Manchester, Birmingham — see the `areaServed`
  *     constant's own comment below for the full, twice-corrected history
- *     of this field). Deliberately does NOT include a
- *     `telephone` — the phone number in `Header.astro`/`Footer.astro`/
- *     `ClosingCta.astro` (01274 000 000) is a known, already-flagged
- *     placeholder (see `ClosingCta.astro`'s own PR #31 history), and
- *     shipping a fake number into indexed structured data is a real risk,
- *     not a formatting nicety — worth fixing once the real number
- *     exists, not before.
+ *     of this field). `telephone` added 2026-10-13 once the owner
+ *     gave the real number (07414 492363); it was left out until then
+ *     because the old number was a placeholder.
  *   - `FAQPage`, conditional on `sector.faqs` — mirrors the accordion
  *     content exactly (`mainEntity`/`Question`/`acceptedAnswer`). Live on
  *     all six pages as of PR #46, now that every sector has real FAQ
@@ -140,6 +136,7 @@ const serviceSchema = {
   provider: {
     "@type": "LocalBusiness",
     name: "Harley Garrison",
+    telephone: "+44 7414 492363",
     address: {
       "@type": "PostalAddress",
       addressLocality: "Bradford",
