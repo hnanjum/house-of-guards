@@ -3,7 +3,7 @@ title: What an SIA licence means when you hire security in the UK
 description: Every security officer you hire in the UK should hold a valid SIA licence. Here is what the licence covers, what it proves, and how to check one in under a minute.
 date: 2026-10-13
 category: Compliance
-cover: cover.jpg
+cover: pexels-sheff-production-380090272-14611803.jpg
 coverAlt: A Harley Garrison security officer in a branded black jacket, shirt and tie, standing at the entrance of an office building at dusk
 draft: false
 ---
