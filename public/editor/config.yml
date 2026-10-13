@@ -1,0 +1,87 @@
+# Insights editor (Sveltia CMS) — https://harleygarrison.co.uk/editor/
+# Field names must match src/content.config.ts.
+
+backend:
+  name: github
+  repo: hnanjum/house-of-guards
+  branch: main
+  base_url: https://harleygarrison.co.uk
+  auth_endpoint: api/cms-auth/auth
+  commit_messages:
+    create: "Insights: publish “{{slug}}”"
+    update: "Insights: update “{{slug}}”"
+    delete: "Insights: delete “{{slug}}”"
+    uploadMedia: "Insights: upload {{path}}"
+    deleteMedia: "Insights: delete {{path}}"
+
+site_url: https://harleygarrison.co.uk
+display_url: https://harleygarrison.co.uk/insights/
+logo_url: /icon-192.png
+
+# Photos are saved next to each article so the site can optimise them.
+media_folder: src/assets/insights
+public_folder: ""
+
+slug:
+  encoding: ascii
+  clean_accents: true
+  sanitize_replacement: "-"
+
+collections:
+  - name: insights
+    label: Insights
+    label_singular: Article
+    description: Articles shown at harleygarrison.co.uk/insights/. Changes go live about 2 minutes after you publish.
+    folder: src/content/insights
+    path: "{{slug}}/index"
+    extension: md
+    format: frontmatter
+    media_folder: ""
+    public_folder: ""
+    create: true
+    delete: true
+    slug: "{{title}}"
+    summary: "{{title}} · {{date}}"
+    sortable_fields:
+      default:
+        field: date
+        direction: descending
+      fields: [date, title, category]
+    preview_path: "insights/{{slug}}/"
+    fields:
+      - label: Title
+        name: title
+        widget: string
+        hint: Clear and specific, ideally under 65 characters. This is the heading people see in Google.
+      - label: Summary
+        name: description
+        widget: text
+        hint: One or two sentences (about 150 characters). Shown under the title in Google and on the Insights page.
+      - label: Publish date
+        name: date
+        widget: datetime
+        format: YYYY-MM-DD
+        time_format: false
+        default: "{{now}}"
+      - label: Category
+        name: category
+        widget: select
+        options: ["Security advice", "Sector guides", "Compliance", "Company news"]
+        default: Security advice
+      - label: Cover photo
+        name: cover
+        widget: image
+        hint: Landscape photo, at least 1600px wide. Avoid photos showing other companies' names or logos.
+      - label: Cover photo description
+        name: coverAlt
+        widget: string
+        hint: Describe the photo for people who can't see it, e.g. "A security officer checking a visitor's pass at an office reception".
+      - label: Draft (hide from the website)
+        name: draft
+        widget: boolean
+        default: false
+        required: false
+      - label: Article
+        name: body
+        widget: markdown
+        hint: Use "Heading 2" for section titles. Link to /contact/ near the end so readers can ask for a quote.

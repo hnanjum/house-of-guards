@@ -2,5 +2,6 @@ User-agent: *
 Disallow: /officers/
 Disallow: /admin/
 Disallow: /client/
+Disallow: /editor/
 
 Sitemap: https://harleygarrison.co.uk/sitemap.xml

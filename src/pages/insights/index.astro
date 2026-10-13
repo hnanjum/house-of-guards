@@ -1,0 +1,85 @@
+---
+import { Image } from "astro:assets";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/page/PageHero.astro";
+import QuoteBand from "../../components/page/QuoteBand.astro";
+import InsightCard from "../../components/insights/InsightCard.astro";
+import { getInsights, formatDate, readingMinutes } from "../../lib/insights";
+
+/**
+ * Insights index (the blog). Newest article as a large feature, the rest
+ * in a three-column grid (no borders/shadows; the feature gives the page
+ * its hierarchy). Articles live in src/content/insights/ and are written
+ * in the /editor/ (Sveltia CMS). Centred on phones, left from lg up.
+ */
+const posts = await getInsights();
+const [featured, ...rest] = posts;
+---
+
+<BaseLayout
+  title="Insights"
+  description="Practical security advice from Harley Garrison: SIA licensing, site security checklists and how to choose the right cover for your business in West Yorkshire and beyond."
+>
+  <PageHero
+    eyebrow="Insights"
+    title="Security insights and guidance"
+    lead="Practical advice on protecting your people, premises and assets, from licensing and compliance to choosing the right cover for your site."
+  />
+
+  <section class="bg-paper">
+    <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12 md:py-24">
+      {
+        !featured && (
+          <p class="text-body-sm text-stone text-center">New articles are on the way. Please check back soon.</p>
+        )
+      }
+
+      {
+        featured && (
+          <article class="group relative grid grid-cols-1 items-center gap-8 text-center lg:grid-cols-12 lg:gap-12 lg:text-left">
+            <div class="aspect-[3/2] overflow-hidden bg-surface-alt lg:col-span-7">
+              <Image
+                src={featured.data.cover}
+                alt={featured.data.coverAlt}
+                widths={[640, 960, 1280, 1600]}
+                sizes="(min-width: 1024px) 58vw, 100vw"
+                loading="eager"
+                class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              />
+            </div>
+            <div class="lg:col-span-5">
+              <p class="text-caption text-stone">Latest · {featured.data.category}</p>
+              <h2 class="text-h2 text-ink mt-3">
+                <a
+                  href={`/insights/${featured.id}/`}
+                  class="after:absolute after:inset-0 group-hover:underline decoration-ink/30 underline-offset-4"
+                >
+                  {featured.data.title}
+                </a>
+              </h2>
+              <span class="bg-amber mx-auto mt-6 block h-0.5 w-12 lg:mx-0" aria-hidden="true" />
+              <p class="text-body-sm text-stone mx-auto mt-6 max-w-xl lg:mx-0">{featured.data.description}</p>
+              <p class="text-caption text-ink mt-6">
+                <time datetime={featured.data.date.toISOString()}>{formatDate(featured.data.date)}</time> ·{" "}
+                {readingMinutes(featured.body)} min read
+              </p>
+            </div>
+          </article>
+        )
+      }
+
+      {
+        rest.length > 0 && (
+          <div class="border-hairline mt-16 border-t pt-16 md:mt-24 md:pt-20">
+            <h2 class="text-h3 text-ink text-center lg:text-left">More insights</h2>
+            <div class="mt-10 grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+              {rest.map((post) => <InsightCard post={post} />)}
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <QuoteBand />
+</BaseLayout>
