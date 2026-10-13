@@ -162,6 +162,21 @@ Every change was a direct owner instruction.
   07414 492363 (tel:+447414492363) everywhere incl. sector schema;
   /privacy/ privacy + cookie notice (unsuccessful enquiries/applications deleted after 2 weeks) (no cookie banner: public site sets
   no cookies/analytics), linked under both forms and in the footer.
+- **INSIGHTS (blog), 2026-10-13, PR #101**: /insights/ + /insights/<slug>/;
+  articles = src/content/insights/<slug>/index.md + cover.jpg (schema in
+  src/content.config.ts, helpers src/lib/insights.ts, card
+  src/components/insights/InsightCard.astro). Owner writes posts in
+  /editor/ (Sveltia CMS 0.223.0, config public/editor/config.yml — keep
+  fields in sync with the schema); Publish commits to GitHub main and
+  Workers Builds deploys. GitHub OAuth in worker/cmsAuth.ts needs Worker
+  secrets GITHUB_CLIENT_ID + GITHUB_CLIENT_SECRET (OAuth App callback
+  https://harleygarrison.co.uk/api/cms-auth/callback); until then
+  /api/cms-auth/* returns 503 and "Sign in using access token" works.
+  BaseLayout now emits Open Graph tags (image/ogType props, head slot).
+  Menu name "Insights" (owner). Three starter articles written by Claude.
+  Favicon: HG monogram (favicon.ico/-32.png, apple-touch-icon, icon-192/512
+  padded, site.webmanifest), PR #100. og-image.jpg / profile-800.png still
+  to come from the owner.
 - **Open items**: register with the ICO (owner NOT registered yet; add
   the number to /privacy/ once done); registered office 742 Great Horton
   Road is on /privacy/ but not yet in the footer/info bar; staff privacy
