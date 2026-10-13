@@ -3,6 +3,7 @@ import NavLink from "./ui/NavLink.astro";
 import Divider from "./ui/Divider.astro";
 import Phone from "../icons/Phone.astro";
 import Email from "../icons/Email.astro";
+import Location from "../icons/Location.astro";
 import Chevron from "../icons/Chevron.astro";
 import { SECTORS } from "../data/sectors";
 
@@ -14,9 +15,9 @@ import { SECTORS } from "../data/sectors";
  *
  * `on-dark` swaps the focus ring to white (see global.css).
  *
- * NOTE: phone number and email below are clearly-marked placeholders
- * (repeated zeros / a generic domain pattern), not real contact
- * details — swap both for the real ones before launch.
+ * Contact column: registered office (742 Great Horton Road, confirmed by
+ * the owner 2026-10-13; company law requires it on the website), the
+ * real phone number and info@. Headed "Contact" to match the menus.
  */
 const year = new Date().getFullYear();
 
@@ -97,10 +98,18 @@ const MENUS: { id: string; title: string; links: [string, string][] }[] = [
       </div>
 
       <div class="text-center md:text-left">
-        <p class="text-micro text-paper/70">Bradford, West Yorkshire</p>
+        <p class="text-caption text-paper/70 mb-4">Contact</p>
+        <address class="flex items-start justify-center gap-2 text-caption text-paper not-italic md:justify-start">
+          <Location class="mt-0.5 size-4 shrink-0" />
+          <span class="text-left">
+            742 Great Horton Road<br />
+            Bradford BD7&nbsp;4EE
+            <span class="text-micro text-paper/70 mt-1 block">Registered office</span>
+          </span>
+        </address>
         <a
           href="tel:+447414492363"
-          class="mt-4 flex items-center justify-center gap-2 text-caption text-paper transition-colors md:justify-start duration-200 ease-out hover:text-paper/70"
+          class="mt-5 flex items-center justify-center gap-2 text-caption text-paper transition-colors md:justify-start duration-200 ease-out hover:text-paper/70"
         >
           <Phone class="size-4 shrink-0" />
           07414 492363
@@ -117,13 +126,14 @@ const MENUS: { id: string; title: string; links: [string, string][] }[] = [
 
     <Divider tone="paper" class="mt-16" />
 
-    <div class="flex flex-col items-center gap-2 pt-8 text-center sm:flex-row sm:justify-between sm:text-left">
-      <p class="text-micro text-paper/70">
+    <div class="flex flex-col items-center gap-3 pt-8 text-center lg:flex-row lg:items-start lg:justify-between lg:gap-8 lg:text-left">
+      <p class="text-micro text-paper/70 lg:shrink-0">
         &copy; {year} Harley Garrison. All rights reserved. ·{" "}
         <a href="/privacy/" class="hover:text-paper underline underline-offset-2 transition-colors duration-200">Privacy and Cookies</a>
       </p>
-      <p class="text-micro text-paper/70">
-        Harley Garrison Ltd · Registered in England and Wales · Company Number 17508784
+      <p class="text-micro text-paper/70 lg:text-right">
+        <span class="block">Harley Garrison Ltd · Registered in England and Wales · Company Number 17508784</span>
+        <span class="mt-1 block">Registered office: 742 Great Horton Road, Bradford, BD7&nbsp;4EE</span>
       </p>
     </div>
   </div>
