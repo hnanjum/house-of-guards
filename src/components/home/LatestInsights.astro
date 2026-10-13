@@ -1,0 +1,105 @@
+---
+import { Image } from "astro:assets";
+import Button from "../ui/Button.astro";
+import { getInsights, formatDate, readingMinutes } from "../../lib/insights";
+
+/**
+ * Homepage "Latest insights" (owner, 2026-10-13: articles below the quote
+ * form). Surface Alt band between ClosingCta (Paper) and the Ink footer.
+ * Editorial layout: newest article as a large feature (left on lg), the
+ * next (up to) three as compact photo + title rows (right on lg, below on phones),
+ * then "View all insights". Heading block centred on phones (mobile
+ * centring rule); the compact rows are two-column so stay left-aligned.
+ * Hidden entirely when there are no published articles.
+ * Uses the generic [data-reveal] fade, already initialised by index.astro.
+ */
+const [featured, ...others] = await getInsights();
+const compact = others.slice(0, 3);
+const meta = (date: Date, body?: string) => `${formatDate(date)} · ${readingMinutes(body)} min read`;
+---
+
+{
+  featured && (
+    <section class="bg-surface-alt" aria-labelledby="latest-insights-heading">
+      <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12 md:py-24">
+        <div data-reveal class="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-end sm:justify-between sm:text-left">
+          <div>
+            <h2 id="latest-insights-heading" class="text-h2 text-ink">Latest insights</h2>
+            <span class="bg-amber mx-auto mt-5 block h-0.5 w-12 sm:mx-0" aria-hidden="true" />
+            <p class="text-body-sm text-stone mx-auto mt-5 max-w-lg sm:mx-0">
+              Practical security advice for businesses, from licensing and compliance to protecting your site.
+            </p>
+          </div>
+          <div class="hidden shrink-0 sm:block">
+            <Button href="/insights/" size="sm">View all insights</Button>
+          </div>
+        </div>
+
+        <div data-reveal class="mt-10 grid grid-cols-1 gap-10 md:mt-14 lg:grid-cols-12 lg:gap-12">
+          <article class="group relative bg-paper lg:col-span-7">
+            <div class="aspect-[3/2] overflow-hidden">
+              <Image
+                src={featured.data.cover}
+                alt={featured.data.coverAlt}
+                widths={[480, 768, 1024]}
+                sizes="(min-width: 1024px) 700px, 100vw"
+                class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              />
+            </div>
+            <div class="p-6 text-center sm:p-8 sm:text-left">
+              <p class="text-caption text-stone">{featured.data.category}</p>
+              <h3 class="text-h3 text-ink mt-2">
+                <a
+                  href={`/insights/${featured.id}/`}
+                  class="after:absolute after:inset-0 group-hover:underline decoration-ink/30 underline-offset-4"
+                >
+                  {featured.data.title}
+                </a>
+              </h3>
+              <p class="text-body-sm text-stone mt-3">{featured.data.description}</p>
+              <p class="text-caption text-ink mt-5">{meta(featured.data.date, featured.body)}</p>
+            </div>
+          </article>
+
+          {
+            compact.length > 0 && (
+              <ul class="divide-hairline flex flex-col divide-y lg:col-span-5">
+                {compact.map((post) => (
+                  <li class="py-6 first:pt-0 last:pb-0">
+                    <article class="group relative grid grid-cols-[7.5rem_1fr] items-start gap-5 sm:grid-cols-[11rem_1fr]">
+                      <div class="aspect-square overflow-hidden sm:aspect-[4/3]">
+                        <Image
+                          src={post.data.cover}
+                          alt=""
+                          widths={[240, 400]}
+                          sizes="(min-width: 640px) 176px, 120px"
+                          class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                        />
+                      </div>
+                      <div>
+                        <p class="text-caption text-stone">{post.data.category}</p>
+                        <h3 class="text-h4 text-ink mt-1">
+                          <a
+                            href={`/insights/${post.id}/`}
+                            class="after:absolute after:inset-0 group-hover:underline decoration-ink/30 underline-offset-4"
+                          >
+                            {post.data.title}
+                          </a>
+                        </h3>
+                        <p class="text-caption text-stone mt-2">{meta(post.data.date, post.body)}</p>
+                      </div>
+                    </article>
+                  </li>
+                ))}
+              </ul>
+            )
+          }
+        </div>
+
+        <div class="mt-10 text-center sm:hidden">
+          <Button href="/insights/" size="sm">View all insights</Button>
+        </div>
+      </div>
+    </section>
+  )
+}
