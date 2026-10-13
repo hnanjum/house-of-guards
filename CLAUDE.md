@@ -155,15 +155,22 @@ Every change was a direct owner instruction.
   office — owner has NOT yet confirmed it is the Companies House
   registered office. Not on the website yet.
 - **Still blue/magenta, not yet asked about**: the portals only.
-- **Open items**: real phone number (01274 000 000 is a placeholder,
-  sitewide and in the email/card); confirm registered office and add it
-  to the site footer (legally required) and info bar; MissionBand team
-  photo and About photo still show "HOUSE OF GUARDS"; privacy policy page
-  (forms collect personal data) + check ICO fee; Get a Quote page hero is
+- **Done 2026-10-11/13**: hero photo = free Unsplash CCTV photo (hero-cctv.jpg,
+  also Careers); MissionBand = team-briefing.png, About = officer-entrance.png
+  (AI, owner-supplied, HARLEY GARRISON on jackets; About shows a real
+  "ONE BISHOPSGATE LONDON" sign, flagged to owner); phone is now
+  07414 492363 (tel:+447414492363) everywhere incl. sector schema;
+  /privacy/ privacy + cookie notice (no cookie banner: public site sets
+  no cookies/analytics), linked under both forms and in the footer.
+- **Open items**: register with the ICO (owner NOT registered yet; add
+  the number to /privacy/ once done); registered office 742 Great Horton
+  Road is on /privacy/ but not yet in the footer/info bar; staff privacy
+  notice for the portals (GPS, selfies, documents); Get a Quote page hero is
   still the Ink masthead (owner not asked); offered but not started —
   Gmail signature, readable form-email subjects, Turnstile, auto-reply to
   enquirers, Supabase invite emails via Resend SMTP, Google Business
-  Profile, OG/LocalBusiness tags, Cloudflare Web Analytics.
+  Profile, OG/LocalBusiness tags, Cloudflare Web Analytics (would need a
+  consent banner + /privacy/ update first).
 - **Testing note**: the Browser pane is usually hidden, so rAF,
   IntersectionObserver, scrolling and repaints are frozen there. For
   motion checks, serve `dist/` with a scratch server that injects a shim
