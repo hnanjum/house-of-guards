@@ -1,9 +1,9 @@
 ---
-title: "Construction site security: a practical checklist"
+title: 'Construction site security: a practical checklist'
 description: Theft of tools, plant and materials costs UK construction millions every year. Use this checklist to find the gaps on your site before someone else does.
 date: 2026-10-13
 category: Sector guides
-cover: cover.jpg
+cover: wasif-ali-fBtNXtM4o3k-unsplash.jpg
 coverAlt: Construction workers in hard hats and high-visibility vests standing on a concrete deck beside a large reinforced slab ready for pouring
 draft: false
 ---
