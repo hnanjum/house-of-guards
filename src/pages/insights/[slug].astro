@@ -1,0 +1,175 @@
+---
+import { Image, getImage } from "astro:assets";
+import { render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import QuoteBand from "../../components/page/QuoteBand.astro";
+import InsightCard from "../../components/insights/InsightCard.astro";
+import { getInsights, formatDate, readingMinutes, type Insight } from "../../lib/insights";
+
+/**
+ * One Insights article. Header (meta, serif title, summary, Amber rule)
+ * centred in a reading column, wide cover photo, the article body in a
+ * ~70-character column, then up to three related articles (same
+ * category first) and the QuoteBand. Body text stays left-aligned on
+ * phones too: long-form reading is hard when centred.
+ *
+ * SEO: Article + BreadcrumbList JSON-LD, og:type article, a 1200px
+ * share image built from the cover.
+ */
+export async function getStaticPaths() {
+  const posts = await getInsights();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post, all: posts } }));
+}
+
+interface Props {
+  post: Insight;
+  all: Insight[];
+}
+
+const { post, all } = Astro.props;
+const { title, description, date, updated, category, cover, coverAlt } = post.data;
+const { Content } = await render(post);
+const minutes = readingMinutes(post.body);
+
+const others = all.filter((p) => p.id !== post.id);
+const related = [...others.filter((p) => p.data.category === category), ...others.filter((p) => p.data.category !== category)].slice(0, 3);
+
+const share = await getImage({ src: cover, width: 1200, height: 630, fit: "cover", format: "jpg" });
+const url = new URL(`/insights/${post.id}/`, Astro.site).toString();
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: title,
+    description,
+    image: new URL(share.src, Astro.site).toString(),
+    datePublished: date.toISOString(),
+    dateModified: (updated ?? date).toISOString(),
+    articleSection: category,
+    mainEntityOfPage: url,
+    author: { "@type": "Organization", name: "Harley Garrison", url: Astro.site?.toString() },
+    publisher: {
+      "@type": "Organization",
+      name: "Harley Garrison",
+      logo: { "@type": "ImageObject", url: new URL("/icon-512.png", Astro.site).toString() },
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", Astro.site).toString() },
+      { "@type": "ListItem", position: 2, name: "Insights", item: new URL("/insights/", Astro.site).toString() },
+      { "@type": "ListItem", position: 3, name: title, item: url },
+    ],
+  },
+];
+---
+
+<BaseLayout title={title} description={description} image={share.src} ogType="article">
+  <Fragment slot="head">
+    <meta property="article:published_time" content={date.toISOString()} />
+    <meta property="article:section" content={category} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
+
+  <article>
+    <header class="bg-paper">
+      <div class="mx-auto max-w-3xl px-gutter pt-14 text-center md:px-12 md:pt-20">
+        <a href="/insights/" class="text-caption text-stone hover:text-ink underline decoration-hairline underline-offset-4 transition-colors duration-200">
+          All insights
+        </a>
+        <p class="text-caption text-stone mt-8">
+          {category} · <time datetime={date.toISOString()}>{formatDate(date)}</time> · {minutes} min read
+        </p>
+        <h1 class="text-h1 text-ink mt-4">{title}</h1>
+        <span class="bg-amber mx-auto mt-8 block h-0.5 w-12" aria-hidden="true"></span>
+        <p class="text-body-lg text-stone mx-auto mt-8 max-w-2xl">{description}</p>
+      </div>
+
+      <div class="mx-auto mt-12 max-w-5xl px-gutter md:mt-16 md:px-12">
+        <div class="aspect-[3/2] overflow-hidden bg-surface-alt md:aspect-[16/9]">
+          <Image
+            src={cover}
+            alt={coverAlt}
+            widths={[640, 960, 1280, 1600]}
+            sizes="(min-width: 1024px) 1024px, 100vw"
+            loading="eager"
+            fetchpriority="high"
+            class="h-full w-full object-cover object-[center_25%]"
+          />
+        </div>
+      </div>
+    </header>
+
+    <div class="insight-body text-body-sm text-ink mx-auto max-w-3xl px-gutter py-14 md:px-12 md:py-20">
+      <Content />
+      <p class="border-hairline text-caption text-stone mt-14 border-t pt-6">
+        Published by Harley Garrison{updated && <> · Updated <time datetime={updated.toISOString()}>{formatDate(updated)}</time></>}
+      </p>
+    </div>
+  </article>
+
+  {
+    related.length > 0 && (
+      <section class="bg-surface-alt">
+        <div class="mx-auto max-w-7xl px-gutter py-16 md:px-12 md:py-24">
+          <h2 class="text-h3 text-ink text-center lg:text-left">More insights</h2>
+          <div class="mt-10 grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+            {related.map((p) => <InsightCard post={p} size="sm" />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <QuoteBand />
+</BaseLayout>
+
+<style>
+  @reference "../../styles/global.css";
+
+  /* Markdown body. :global because rendered markdown carries no scope. */
+  .insight-body :global(h2) {
+    @apply text-h3 text-ink mt-12;
+  }
+  .insight-body :global(h3) {
+    @apply text-h4 text-ink mt-8;
+  }
+  .insight-body :global(> :first-child) {
+    margin-top: 0;
+  }
+  .insight-body :global(p),
+  .insight-body :global(ul),
+  .insight-body :global(ol),
+  .insight-body :global(blockquote) {
+    @apply mt-5;
+  }
+  .insight-body :global(ul) {
+    @apply list-disc pl-5;
+  }
+  .insight-body :global(ol) {
+    @apply list-decimal pl-5;
+  }
+  .insight-body :global(li + li) {
+    @apply mt-2;
+  }
+  .insight-body :global(li::marker) {
+    @apply text-stone;
+  }
+  .insight-body :global(strong) {
+    @apply font-semibold;
+  }
+  .insight-body :global(a) {
+    @apply underline decoration-ink/40 underline-offset-4 hover:decoration-ink;
+  }
+  .insight-body :global(blockquote) {
+    @apply border-amber text-body-lg border-l-2 pl-6;
+  }
+  .insight-body :global(img) {
+    @apply mt-8 h-auto w-full;
+  }
+  .insight-body :global(hr) {
+    @apply border-hairline my-12;
+  }
+</style>

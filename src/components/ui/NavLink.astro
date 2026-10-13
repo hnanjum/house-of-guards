@@ -51,7 +51,7 @@ const { href, tone = "ink", class: className, size = "md" } = Astro.props;
 
 const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 const linkPath = href.replace(/\/$/, "") || "/";
-const isActive = currentPath === linkPath;
+const isActive = currentPath === linkPath || (linkPath !== "/" && currentPath.startsWith(linkPath + "/"));
 
 const toneClasses = {
   ink: isActive ? "text-ink border-amber" : "text-ink border-transparent hover:border-amber",

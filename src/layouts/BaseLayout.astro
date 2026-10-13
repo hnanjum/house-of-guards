@@ -7,12 +7,20 @@ import "../styles/global.css";
 interface Props {
   title: string;
   description?: string;
+  /** Root-relative or absolute URL of a share-preview image (articles). */
+  image?: string;
+  /** "article" on Insights posts; "website" everywhere else. */
+  ogType?: "website" | "article";
 }
 
 const {
   title,
   description = "Harley Garrison — SIA-licensed manned guarding, close protection, CCTV monitoring, and mobile patrols for corporate and high-net-worth clients, based in Bradford, West Yorkshire.",
+  image,
+  ogType = "website",
 } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = image ? new URL(image, Astro.site).toString() : undefined;
 ---
 
 <!doctype html>
@@ -26,7 +34,15 @@ const {
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#0d0d0d" />
     <meta name="description" content={description} />
-    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:site_name" content="Harley Garrison" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
+    <slot name="head" />
     <link rel="sitemap" href="/sitemap.xml" />
     <title>{title} | Harley Garrison</title>
     <ClientRouter />

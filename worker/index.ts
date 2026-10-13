@@ -1,4 +1,5 @@
 import { handleForm, isFormPath, type FormEnv } from "./forms";
+import { handleCmsAuth, isCmsAuthPath, type CmsAuthEnv } from "./cmsAuth";
 /**
  * Cloudflare Worker in front of the static site. It only decides WHICH
  * static files a hostname may see; every response still comes from the
@@ -20,7 +21,7 @@ import { handleForm, isFormPath, type FormEnv } from "./forms";
  * no indexing, and no caching of HTML (pages show personal data).
  */
 
-interface Env extends FormEnv {
+interface Env extends FormEnv, CmsAuthEnv {
   ASSETS: { fetch(request: Request): Promise<Response> };
 }
 
@@ -102,6 +103,8 @@ export default {
 
     // Website form endpoints (marketing hosts only).
     if (!decision.portal && isFormPath(decision.pathname)) return handleForm(request, env, decision.pathname);
+    // Insights editor GitHub sign-in (marketing hosts only).
+    if (!decision.portal && isCmsAuthPath(decision.pathname)) return handleCmsAuth(request, env, decision.pathname);
 
     const target = new URL(request.url);
     target.pathname = decision.pathname;
