@@ -4,7 +4,7 @@ description: Theft of tools, plant and materials costs UK construction millions 
 date: 2026-10-13
 category: Sector guides
 cover: wasif-ali-fBtNXtM4o3k-unsplash.jpg
-coverAlt: Construction workers in hard hats and high-visibility vests standing on a concrete deck beside a large reinforced slab ready for pouring
+coverAlt: Two construction workers in yellow hard hats and orange high-visibility vests tying steel reinforcement bars on a building site
 draft: false
 ---
 
