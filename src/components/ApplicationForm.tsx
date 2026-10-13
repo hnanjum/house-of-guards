@@ -1,5 +1,6 @@
 import { useState, type ReactNode, type SyntheticEvent } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import Turnstile from "./Turnstile";
 import { CONTACT_EMAIL } from "../data/contact";
 import {
   FieldShell,
@@ -37,10 +38,8 @@ import {
  * client code; an endpoint URL is not a secret, but any API key must
  * never go here (it would live in the Worker behind the endpoint).
  *
- * NO SPAM PROTECTION — `ContactForm.tsx` has none either. Before an
- * endpoint is switched on, one is needed (a honeypot field is not enough
- * on its own for a public jobs form; Cloudflare Turnstile is the natural
- * fit on this stack). Flagged rather than half-built here.
+ * SPAM — a honeypot field plus Cloudflare Turnstile (./Turnstile.tsx,
+ * verified in worker/forms.ts), shared with ContactForm.tsx.
  *
  * VALIDATION — native `required`/`type="email"` bubbles are turned off
  * (`noValidate`) so every message, the error styling and the focus
@@ -120,6 +119,7 @@ export default function ApplicationForm() {
   const [attempted, setAttempted] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [sendError, setSendError] = useState<ReactNode>(null);
+  const [turnstileReset, setTurnstileReset] = useState(0);
   const shouldReduceMotion = useReducedMotion();
 
   const errorCount = Object.values(errors).filter(Boolean).length;
@@ -186,6 +186,9 @@ export default function ApplicationForm() {
           email <a href={`mailto:${CONTACT_EMAIL}`} className={linkClass}>{CONTACT_EMAIL}</a> instead.
         </>,
       );
+    } finally {
+      // Spam-check tokens are single-use.
+      setTurnstileReset((n) => n + 1);
     }
   };
 
@@ -275,7 +278,7 @@ export default function ApplicationForm() {
             name="position"
             label="Position applying for"
             placeholder="Please pick a position"
-            options={POSITION_OPTIONS}
+            options={POSITION_OPTIONS.map((o) => ({ ...o, value: o.label }))}
             required
             error={errors.position}
           />
@@ -286,7 +289,7 @@ export default function ApplicationForm() {
             name="siaBadge"
             label="Do you hold a valid SIA badge?"
             placeholder="Please choose an answer"
-            options={SIA_OPTIONS}
+            options={SIA_OPTIONS.map((o) => ({ ...o, value: o.label }))}
             required
             error={errors.siaBadge}
           />
@@ -298,6 +301,8 @@ export default function ApplicationForm() {
           </div>
         </FieldShell>
       </motion.div>
+
+      <Turnstile resetKey={turnstileReset} />
 
       <p className="text-caption text-stone mt-5">
         We use your details only to process your application and delete them after 6 months if
