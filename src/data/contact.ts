@@ -13,3 +13,11 @@
  * is still written out in each file that shows it, not kept here.
  */
 export const CONTACT_EMAIL = "info@harleygarrison.co.uk";
+
+/**
+ * Cloudflare Turnstile site key (public by design) for the website forms.
+ * Empty = spam check off. The matching secret lives only in the Worker
+ * secret TURNSTILE_SECRET_KEY. Deploy the site key BEFORE adding the
+ * secret, or every submission is rejected.
+ */
+export const TURNSTILE_SITE_KEY = "";

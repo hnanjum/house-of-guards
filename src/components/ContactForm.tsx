@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import Turnstile from "./Turnstile";
 import {
   ChevronDown,
   FieldShell,
@@ -200,6 +201,7 @@ const SERVICE_OPTIONS: ServiceOption[] = [
 
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const [turnstileReset, setTurnstileReset] = useState(0);
   const shouldReduceMotion = useReducedMotion();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -222,6 +224,9 @@ export default function ContactForm() {
       form.reset();
     } catch {
       setStatus("error");
+    } finally {
+      // Spam-check tokens are single-use.
+      setTurnstileReset((n) => n + 1);
     }
   };
 
@@ -272,7 +277,7 @@ export default function ContactForm() {
                   Please pick a service
                 </option>
                 {SERVICE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
+                  <option key={option.value} value={option.label}>
                     {option.label}
                   </option>
                 ))}
@@ -288,6 +293,8 @@ export default function ContactForm() {
           </div>
         </FieldShell>
       </motion.div>
+
+      <Turnstile resetKey={turnstileReset} />
 
       <motion.button
         type="submit"
