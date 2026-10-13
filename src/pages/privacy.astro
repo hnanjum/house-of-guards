@@ -1,0 +1,213 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHero from "../components/page/PageHero.astro";
+
+/**
+ * Privacy and cookie notice (owner, 2026-10-13: "our forms are taking
+ * personal info"). Facts confirmed by the owner in chat: registered office
+ * 742 Great Horton Road, Bradford, BD7 4EE; not yet registered with the
+ * ICO (so no registration number is shown — add it here once registered);
+ * unsuccessful enquiries and applications kept 6 months.
+ *
+ * Cookies: checked 2026-10-13 — the public site sets no cookies and loads
+ * no analytics or advertising scripts, so no consent banner is needed.
+ * The portals keep a sign-in session and a display preference in browser
+ * storage, which is strictly necessary. If analytics are ever added, this
+ * page AND a consent banner must change first.
+ *
+ * Body text is left-aligned on phones too (an exception to the mobile
+ * centring rule): long legal text is hard to read centred.
+ */
+
+const UPDATED = "13 October 2026";
+const sections = [
+  { id: "who", title: "Who we are" },
+  { id: "collect", title: "What we collect" },
+  { id: "use", title: "How and why we use it" },
+  { id: "share", title: "Who we share it with" },
+  { id: "keep", title: "How long we keep it" },
+  { id: "rights", title: "Your rights" },
+  { id: "cookies", title: "Cookies" },
+  { id: "contact", title: "Contact and complaints" },
+];
+---
+
+<BaseLayout
+  title="Privacy and Cookies"
+  description="How Harley Garrison collects, uses and protects the personal information you share through our website, and how we use cookies."
+>
+  <PageHero
+    eyebrow="Privacy and cookies"
+    title="Your information, handled with care"
+    lead="This notice explains what personal information we collect through this website, why we collect it, how long we keep it and the choices you have."
+  />
+
+  <section class="bg-paper">
+    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-gutter py-16 md:px-12 md:py-24 lg:grid-cols-12">
+      <nav aria-label="On this page" class="lg:col-span-3">
+        <div class="bg-surface-alt p-6 lg:sticky lg:top-28">
+          <p class="text-caption text-ink">On this page</p>
+          <ul class="mt-4 space-y-2">
+            {sections.map(({ id, title }) => (
+              <li>
+                <a href={`#${id}`} class="text-caption text-stone hover:text-ink transition-colors duration-200">
+                  {title}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p class="text-micro text-stone mt-6">Last updated {UPDATED}</p>
+        </div>
+      </nav>
+
+      <div class="privacy-body text-body-sm text-ink max-w-3xl lg:col-span-9">
+        <h2 class="text-h3 text-ink" id="who">Who we are</h2>
+        <p>
+          This website is run by Harley Garrison Ltd, a company registered in England and Wales
+          (company number 17508784). Our registered office is 742 Great Horton Road, Bradford,
+          BD7 4EE. We are the "controller" of the personal information described here, which means we
+          decide how it is used and are responsible for looking after it.
+        </p>
+
+        <h2 class="text-h3 text-ink" id="collect">What we collect</h2>
+        <p>We only collect what you choose to send us.</p>
+        <h3 class="text-h4 text-ink">When you ask for a quote</h3>
+        <ul>
+          <li>Your first and last name</li>
+          <li>Your business name (optional)</li>
+          <li>Your email address and phone number</li>
+          <li>The service you need and any details you give about your requirement</li>
+        </ul>
+        <h3 class="text-h4 text-ink">When you apply for a job</h3>
+        <ul>
+          <li>Your full name, email address and phone number</li>
+          <li>Where you are based and the position you are applying for</li>
+          <li>Your SIA licence details</li>
+          <li>Any experience you choose to tell us about</li>
+        </ul>
+        <p>
+          We do not ask for sensitive information (such as health, ethnicity or criminal records)
+          through this website. Please do not include it in free-text boxes. If you call or email us,
+          we keep a record of that conversation in the same way.
+        </p>
+
+        <h2 class="text-h3 text-ink" id="use">How and why we use it</h2>
+        <ul>
+          <li>
+            <strong>Quote enquiries</strong> — to reply to you, prepare a quote and, if you go ahead,
+            set up our service. Our lawful basis is taking steps at your request before entering a
+            contract, and our legitimate interest in responding to business enquiries.
+          </li>
+          <li>
+            <strong>Job applications</strong> — to assess your application, contact you about it and
+            check your SIA licence against the public SIA register. Our lawful basis is taking steps
+            at your request before entering an employment contract, and our legitimate interest in
+            recruiting suitable, licensed officers.
+          </li>
+        </ul>
+        <p>
+          We do not sell your information, use it for automated decision-making, or add you to
+          marketing lists from these forms.
+        </p>
+
+        <h2 class="text-h3 text-ink" id="share">Who we share it with</h2>
+        <p>
+          We do not share your information with anyone for their own purposes. We use a small number
+          of trusted service providers who handle it only on our instructions:
+        </p>
+        <ul>
+          <li>Cloudflare — hosts this website and routes our email</li>
+          <li>Resend — delivers form submissions to our inbox</li>
+          <li>Google — provides the mailbox where we read and answer your messages</li>
+        </ul>
+        <p>
+          Some of these providers may process information outside the UK, including in the United
+          States. Where they do, the transfer is protected by safeguards recognised under UK law,
+          such as the UK–US data bridge or the UK International Data Transfer Addendum. We may also
+          share information where the law requires it, for example with the police or the Security
+          Industry Authority.
+        </p>
+
+        <h2 class="text-h3 text-ink" id="keep">How long we keep it</h2>
+        <ul>
+          <li>Quote enquiries that do not lead to a contract — 6 months, then deleted.</li>
+          <li>Job applications from people we do not hire — 6 months, then deleted.</li>
+          <li>
+            If you become a client or join our team, your information moves to our client or staff
+            records and is kept for as long as we need it for that relationship and our legal and
+            accounting obligations.
+          </li>
+        </ul>
+
+        <h2 class="text-h3 text-ink" id="rights">Your rights</h2>
+        <p>Under UK data protection law you have the right to:</p>
+        <ul>
+          <li>ask for a copy of the information we hold about you</li>
+          <li>ask us to correct anything that is wrong or incomplete</li>
+          <li>ask us to delete your information</li>
+          <li>object to, or ask us to restrict, how we use it</li>
+          <li>ask us to transfer it to you or another organisation</li>
+        </ul>
+        <p>
+          To use any of these rights, email us at the address below. It is free, and we will reply
+          within one month.
+        </p>
+
+        <h2 class="text-h3 text-ink" id="cookies">Cookies</h2>
+        <p>
+          Cookies are small files a website stores in your browser. This website does not use
+          cookies, and it does not use analytics, advertising or tracking tools, so there is nothing
+          for you to accept or switch off.
+        </p>
+        <p>
+          The secure sign-in areas for our officers and clients store a small amount of information
+          in your browser to keep you signed in and to remember your display preference. These are
+          strictly necessary for those areas to work and are never used to track you. If we ever add
+          cookies that are not strictly necessary, we will update this notice and ask for your
+          consent first.
+        </p>
+
+        <h2 class="text-h3 text-ink" id="contact">Contact and complaints</h2>
+        <p>
+          For any question about your information, email
+          <a href="mailto:info@harleygarrison.co.uk">info@harleygarrison.co.uk</a>, call
+          <a href="tel:+447414492363">07414 492363</a>, or write to Harley Garrison Ltd,
+          742 Great Horton Road, Bradford, BD7 4EE.
+        </p>
+        <p>
+          If you are unhappy with how we have handled your information, please tell us first so we can
+          put it right. You also have the right to complain to the Information Commissioner's Office
+          at <a href="https://ico.org.uk/make-a-complaint/" rel="noopener">ico.org.uk</a> or on 0303 123 1113.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .privacy-body h2 {
+    margin-top: 3rem;
+    scroll-margin-top: 7rem;
+  }
+  .privacy-body h2:first-child {
+    margin-top: 0;
+  }
+  .privacy-body h3 {
+    margin-top: 1.5rem;
+  }
+  .privacy-body p,
+  .privacy-body ul {
+    margin-top: 1rem;
+  }
+  .privacy-body ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+  .privacy-body li + li {
+    margin-top: 0.5rem;
+  }
+  .privacy-body a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

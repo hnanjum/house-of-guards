@@ -300,7 +300,12 @@ export default function ApplicationForm() {
       </motion.div>
 
       <p className="text-caption text-stone mt-5">
-        By applying you agree we may store and use your details to process your application.
+        We use your details only to process your application and delete them after 6 months if
+        you are not hired. See our{" "}
+        <a href="/privacy/" className="text-ink underline underline-offset-2 hover:text-ink/70">
+          privacy notice
+        </a>
+        .
       </p>
 
       <motion.button
