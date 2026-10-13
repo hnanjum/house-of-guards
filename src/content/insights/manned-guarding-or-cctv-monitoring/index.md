@@ -4,7 +4,7 @@ description: Officers on site and cameras watched remotely do different jobs. He
 date: 2026-10-13
 category: Security advice
 cover: elasticcomputefarm-cctv-1144371.jpg
-coverAlt: A CCTV operator seen from behind, sitting at a desk in front of a wall of monitors showing camera feeds and control screens
+coverAlt: Two white CCTV cameras mounted on a steel bracket on the corner of a brick building against a blue sky
 draft: false
 ---
 
