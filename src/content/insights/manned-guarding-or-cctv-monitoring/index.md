@@ -1,9 +1,9 @@
 ---
-title: "Manned guarding or CCTV monitoring? Choosing the right cover"
+title: Manned guarding or CCTV monitoring? Choosing the right cover
 description: Officers on site and cameras watched remotely do different jobs. Here is how to decide which your premises need, and when a mix of both makes sense.
 date: 2026-10-13
 category: Security advice
-cover: cover.jpg
+cover: elasticcomputefarm-cctv-1144371.jpg
 coverAlt: A CCTV operator seen from behind, sitting at a desk in front of a wall of monitors showing camera feeds and control screens
 draft: false
 ---
